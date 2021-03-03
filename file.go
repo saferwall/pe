@@ -119,9 +119,6 @@ func (pe *File) Parse() error {
 
 	// Parse COFF symbol table.
 	err = pe.ParseCOFFSymbolTable()
-	if err != nil {
-		return err
-	}
 
 	// Parse the Section Header.
 	err = pe.ParseSectionHeader()

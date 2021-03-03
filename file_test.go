@@ -13,28 +13,28 @@ import (
 
 func getAbsoluteFilePath(testfile string) string {
 	_, p, _, _ := runtime.Caller(0)
-	return path.Join(filepath.Dir(p), "..", "..", testfile)
+	return path.Join(filepath.Dir(p), testfile)
 }
 
 var tridtests = []struct {
 	in  string
 	out error
 }{
-	{getAbsoluteFilePath("test/multiav/clean/putty.exe"), nil},
+	{getAbsoluteFilePath("test/putty"), nil},
 }
 
 func TestParse(t *testing.T) {
 	for _, tt := range tridtests {
 		t.Run(tt.in, func(t *testing.T) {
 			filePath := tt.in
-			mype, err := New(filePath, nil)
+			pe, err := New(filePath, nil)
 			if err != nil {
 				t.Errorf("TestParse(%s) failed, reason: %v", tt.in, err)
 				return
 			}
 
-			got := mype.Parse()
-			if err != nil {
+			got := pe.Parse()
+			if got != nil {
 				t.Errorf("TestParse(%s) got %v, want %v", tt.in, got, tt.out)
 			}
 		})
