@@ -4,6 +4,10 @@
 
 package pe
 
+import (
+	"encoding/binary"
+)
+
 // COM+ Header entry point flags.
 const (
 	// The image file contains IL code only, with no embedded native unmanaged
@@ -158,8 +162,6 @@ type ImageCORVTableFixup struct {
 type MetadataHeader struct {
 
 	// The storage signature, which must be 4-byte aligned:
-	// ====================================================
-
 	// ”Magic” signature for physical metadata, currently 0x424A5342, or, read
 	// as characters, BSJB—the initials of four “founding fathers” Brian Harry,
 	// Susa Radke-Sproull, Jason Zander, and Bill Evans, who started the
@@ -183,7 +185,7 @@ type MetadataHeader struct {
 
 	// The storage header follows the storage signature, aligned on a 4-byte
 	// boundary.
-	// ====================================================================
+	//
 
 	// Reserved; set to 0.
 	Flags uint8
@@ -196,7 +198,7 @@ type MetadataHeader struct {
 
 // MetadataStreamHeader represents a Metadata Stream Header Structure.
 type MetadataStreamHeader struct {
-	// Offset Offset in the file for this stream.
+	// Offset in the file for this stream.
 	Offset uint32
 
 	// Size of the stream in bytes.
@@ -209,12 +211,66 @@ type MetadataStreamHeader struct {
 	Name string
 }
 
+// MetadataTableStreamHeader represents the Metadata Table Stream Header Structure.
+type MetadataTableStreamHeader struct {
+	// Reserved; set to 0.
+	Reserved uint32
+
+	// Major version of the table schema (1 for v1.0 and v1.1; 2 for v2.0 or later).
+	MajorVersion uint8
+
+	// Minor version of the table schema (0 for all versions).
+	MinorVersion uint8
+
+	// Binary flags indicate the offset sizes to be used within the heaps.
+	// 4-byte unsigned integer offset is indicated by:
+	// - 0x01 for a string heap, 0x02 for a GUID heap, and 0x04 for a blob heap.
+	// If a flag is not set, the respective heap offset is a 2-byte unsigned integer.
+	// A #- stream can also have special flags set:
+	// - flag 0x20, indicating that the stream contains only changes made
+	// during an edit-and-continue session, and;
+	// - flag 0x80, indicating that the  metadata might contain items marked as
+	// deleted.
+	Heaps uint8
+
+	// it width of the maximal record index to all tables of the metadata;
+	// calculated at run time (during the metadata stream initialization).
+	Rid uint8
+
+	// Bit vector of present tables, each bit representing one table (1 if
+	// present).
+	MaskValid uint64
+
+	// Bit vector of sorted tables, each bit representing a respective table (1
+	// if sorted)
+	Sorted uint64
+}
+
 // CLRData embeds the Common Language Runtime Header structure as well as the
 // Metadata header structure.
 type CLRData struct {
 	CLRHeader             *ImageCOR20Header
 	MetadataHeader        *MetadataHeader
 	MetadataStreamHeaders []*MetadataStreamHeader
+}
+
+func (pe *File) parseMetadataStream(metadataDirAddr, off, size uint32) error {
+
+	if size == 0 {
+		return nil
+	}
+
+	// The .Offset indicated by the stream header is an RVA relative to the
+	// metadataDirectoryAddress in the CLRHeader.
+	fileOffset := pe.getOffsetFromRva(metadataDirAddr + off)
+	mdTableStreamHdr := MetadataTableStreamHeader{}
+	mdTableStreamHdrSize := uint32(binary.Size(mdTableStreamHdr))
+	err := pe.structUnpack(&mdTableStreamHdr, fileOffset, mdTableStreamHdrSize)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (pe *File) parseMetadataHeader(rva, size uint32, clr *CLRData) error {
@@ -257,6 +313,8 @@ func (pe *File) parseMetadataHeader(rva, size uint32, clr *CLRData) error {
 	// A “stream” is to the metadata what a “section” is to the assembly. The
 	// NumberOfStreams property indicates how many StreamHeaders to read.
 	offset += 4
+	mdStreamHdrOff := uint32(0)
+	mdStreamHdrSize := uint32(0)
 	for i := uint16(0); i < mh.Streams; i++ {
 		sh := MetadataStreamHeader{}
 		if sh.Offset, err = pe.ReadUint32(offset); err != nil {
@@ -283,9 +341,21 @@ func (pe *File) parseMetadataHeader(rva, size uint32, clr *CLRData) error {
 			}
 		}
 
+		// The streams #~ and #- are mutually exclusive; that is, the metadata
+		// structure of the module is either optimized or unoptimized; it
+		// cannot be both at the same time or be something in between.
+		if sh.Name == "#~" || sh.Name == "#-" {
+			mdStreamHdrOff = sh.Offset
+			mdStreamHdrSize = sh.Size
+		}
+
 		clr.MetadataStreamHeaders = append(clr.MetadataStreamHeaders, &sh)
 
 	}
+
+	// Get the Metadata Table Stream
+	pe.parseMetadataStream(rva, mdStreamHdrOff, mdStreamHdrSize)
+
 	return nil
 }
 
