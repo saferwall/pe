@@ -64,6 +64,205 @@ const (
 	CORVTableCallMostDerived = 0x10
 )
 
+// Metadata Tables constants.
+const (
+	// The current module descriptor.
+	Module = 0
+	// Class reference descriptors.
+	TypeRef = 1
+	// Class or interface definition descriptors.
+	TypeDef = 2
+	// A class-to-fields lookup table, which does not exist in optimized
+	// metadata (#~ stream).
+	FieldPtr = 3
+	// Field definition descriptors.
+	Field = 4
+	// A class-to-methods lookup table, which does not exist in
+	// optimized metadata (#~ stream).
+	MethodPtr = 5
+	// Method definition descriptors.
+	Method = 6
+	// A method-to-parameters lookup table, which does not exist in optimized
+	// metadata (#~ stream).
+	ParamPtr = 7
+	// Parameter definition descriptors.
+	Param = 8
+	// Interface implementation descriptors.
+	InterfaceImpl = 9
+	// Member (field or method) reference descriptors.
+	MemberRef = 10
+	// Constant value descriptors that map the default values stored in the
+	// #Blob stream to respective fields, parameters, and properties.
+	Constant = 11
+	// Custom attribute descriptors.
+	CustomAttribute = 12
+	// Field or parameter marshaling descriptors for managed/unmanaged
+	// interoperations.
+	FieldMarshal = 13
+	// Security descriptors.
+	DeclSecurity = 14
+	// Class layout descriptors that hold information about how the loader
+	// should lay out respective classes.
+	ClassLayout = 15
+	// Field layout descriptors that specify the offset or ordinal of
+	// individual fields.
+	FieldLayout = 16
+	// Stand-alone signature descriptors. Signatures per se are used in two
+	// capacities: as composite signatures of local variables of methods and as
+	// parameters of the call indirect (calli) IL instruction.
+	StandAloneSig = 17
+	// A class-to-events mapping table. This is not an intermediate lookup
+	// table, and it does exist in optimized metadata.
+	EventMap = 18
+	// An event map–to–events lookup table, which does not exist in optimized
+	// metadata (#~ stream).
+	EventPtr = 19
+	// Event descriptors.
+	Event = 20
+	// A class-to-properties mapping table. This is not an intermediate lookup
+	// table, and it does exist in optimized metadata.
+	PropertyMap = 21
+	// A property map–to–properties lookup table, which does not exist in
+	// optimized metadata (#~ stream).
+	PropertyPtr = 22
+	// Property descriptors.
+	Property = 23
+	// Method semantics descriptors that hold information about which method is
+	// associated with a specific property or event and in what capacity.
+	MethodSemantics = 24
+	// Method implementation descriptors.
+	MethodImpl = 25
+	// Module reference descriptors.
+	ModuleRef = 26
+	// Type specification descriptors.
+	TypeSpec = 27
+	// Implementation map descriptors used for the platform invocation
+	// (P/Invoke) type of managed/unmanaged code interoperation.
+	ImplMap = 28
+	// Field-to-data mapping descriptors.
+	FieldRVA = 29
+	// Edit-and-continue log descriptors that hold information about what
+	// changes have been made to specific metadata items during in-memory
+	// editing. This table does not exist in optimized metadata (#~ stream)
+	ENCLog = 30
+	// Edit-and-continue mapping descriptors. This table does not exist in
+	// optimized metadata (#~ stream).
+	ENCMap = 31
+	// The current assembly descriptor, which should appear only in the prime
+	// module metadata.
+	Assembly = 32
+	// This table is unused.
+	AssemblyProcessor = 33
+	// This table is unused.
+	AssemblyOS = 34
+	// Assembly reference descriptors.
+	AssemblyRef = 35
+	// This table is unused.
+	AssemblyRefProcessor = 36
+	// This table is unused.
+	AssemblyRefOS = 37
+	// File descriptors that contain information about other files in the
+	// current assembly.
+	FileMD = 38
+	// Exported type descriptors that contain information about public classes
+	// exported by the current assembly, which are declared in other modules of
+	// the assembly. Only the prime module of the assembly should carry this
+	// table.
+	ExportedType = 39
+	// Managed resource descriptors.
+	ManifestResource = 40
+	// Nested class descriptors that provide mapping of nested classes to their
+	// respective enclosing classes.
+	NestedClass = 41
+	//  Type parameter descriptors for generic (parameterized) classes and
+	// methods.
+	GenericParam = 42
+	// Generic method instantiation descriptors.
+	MethodSpec = 43
+	// Descriptors of constraints specified for type parameters of generic
+	// classes and methods
+	GenericParamConstraint = 44
+)
+
+// Heaps Streams Bit Positions.
+const (
+	StringStream = 0
+	GUIDStream   = 1
+	BlobStream   = 2
+)
+
+// MetadataTableIndextToString returns the string representation of the metadata
+// table index.
+func MetadataTableIndextToString(k int) string {
+	metadataTablesMap := map[int]string{
+		Module:                 "Module",
+		TypeRef:                "TypeRef",
+		TypeDef:                "TypeDef",
+		FieldPtr:               "FieldPtr",
+		Field:                  "Field",
+		MethodPtr:              "MethodPtr",
+		Method:                 "Method",
+		ParamPtr:               "ParamPtr",
+		Param:                  "Param",
+		InterfaceImpl:          "InterfaceImpl",
+		MemberRef:              "MemberRef",
+		Constant:               "Constant",
+		CustomAttribute:        "CustomAttribute",
+		FieldMarshal:           "FieldMarshal",
+		DeclSecurity:           "DeclSecurity",
+		ClassLayout:            "ClassLayout",
+		FieldLayout:            "FieldLayout",
+		StandAloneSig:          "StandAloneSig",
+		EventMap:               "EventMap",
+		EventPtr:               "EventPtr",
+		Event:                  "Event",
+		PropertyMap:            "PropertyMap",
+		PropertyPtr:            "PropertyPtr",
+		Property:               "Property",
+		MethodSemantics:        "MethodSemantics",
+		MethodImpl:             "MethodImpl",
+		ModuleRef:              "ModuleRef",
+		TypeSpec:               "TypeSpec",
+		ImplMap:                "ImplMap",
+		FieldRVA:               "FieldRVA",
+		ENCLog:                 "ENCLog",
+		ENCMap:                 "ENCMap",
+		Assembly:               "Assembly",
+		AssemblyProcessor:      "AssemblyProcessor",
+		AssemblyOS:             "AssemblyOS",
+		AssemblyRef:            "AssemblyRef",
+		AssemblyRefProcessor:   "AssemblyRefProcessor",
+		AssemblyRefOS:          "AssemblyRefOS",
+		FileMD:                 "File",
+		ExportedType:           "ExportedType",
+		ManifestResource:       "ManifestResource",
+		NestedClass:            "NestedClass",
+		GenericParam:           "GenericParam",
+		MethodSpec:             "MethodSpec",
+		GenericParamConstraint: "GenericParamConstraint",
+	}
+
+	if value, ok := metadataTablesMap[k]; ok {
+		return value
+	}
+	return ""
+}
+
+// GetStreamSize returns the size of indexes to read into a particular heap.
+func GetStreamSize(Heaps uint8, BitPosition int) int {
+	// The `Heaps` field is a bit vector that encodes how wide indexes into the
+	// various heaps are:
+	// - If bit 0 is set, indexes into the "#String" heap are 4 bytes wide;
+	// - if bit 1 is set, indexes into the "#GUID" heap are 4 bytes wide;
+	// - if bit 2 is set, indexes into the "#Blob" heap are 4 bytes wide.
+	if IsBitSet(uint64(Heaps), BitPosition) {
+		return 4
+	}
+	// Conversely, if the HeapSizes bit for a particular heap is not set,
+	// indexes into that heap are 2 bytes wide.
+	return 2
+}
+
 // ImageDataDirectory represents the  directory format.
 type ImageDataDirectory struct {
 
@@ -246,73 +445,148 @@ type MetadataTableStreamHeader struct {
 	Sorted uint64
 }
 
+// MetadataTable represents the content of a particular table in the metadata.
+// The metadata schema defines 45 tables.
+type MetadataTable struct {
+	// The name of the table.
+	Name string
+
+	// Number of columns in the table
+	CountCols uint8
+
+	// Size of a record in the table/
+	SizeRecord uint16
+
+	// Every table has a different layout, defined in the ECMA-335 spec.
+	// Content asbtract the type each table is pointing to.
+	Content interface{}
+}
+
+// ModuleTableRow represents the `Module` metadata table contains a single
+// record that provides the identification of the current module. The column
+// structure of the table is as follows:
+type ModuleTableRow struct {
+	// Used only at run time, in edit-and-continue mode.
+	Generation uint16
+
+	// (offset in the #Strings stream) The module name, which is the same as
+	// the name of the executable file with its extension but without a path.
+	// The length should not exceed 512 bytes in UTF-8 encoding, counting the
+	// zero terminator.
+	Name uint32
+
+	// (offset in the #GUID stream) A globally unique identifier, assigned to the module as it is generated.
+	Mvid uint32
+
+	// (offset in the #GUID stream): Used only at run time, in
+	// edit-and-continue mode.
+	EncID uint32
+
+	// (offset in the #GUID stream): Used only at run time, in edit-and-continue mode.
+	EncBaseID uint32
+}
+
 // CLRData embeds the Common Language Runtime Header structure as well as the
 // Metadata header structure.
 type CLRData struct {
-	CLRHeader             *ImageCOR20Header
-	MetadataHeader        *MetadataHeader
-	MetadataStreamHeaders []*MetadataStreamHeader
+	CLRHeader                  *ImageCOR20Header          `json:"clr_header,omitempty"`
+	MetadataHeader             *MetadataHeader            `json:"metadata_header,omitempty"`
+	MetadataStreamHeaders      []*MetadataStreamHeader    `json:"metadata_stream_headers,omitempty"`
+	MetadataStreams            map[string][]byte          `json:"-"`
+	MetadataTablesStreamHeader *MetadataTableStreamHeader `json:"metadata_tables_stream_header,omitempty"`
+	MetadataTables             map[int]MetadataTable      `json:"metadata_tables,omitempty"`
 }
 
-func (pe *File) parseMetadataStream(metadataDirAddr, off, size uint32) error {
+func (pe *File) readFromMetadataStream() {
 
-	if size == 0 {
-		return nil
-	}
+}
 
-	// The .Offset indicated by the stream header is an RVA relative to the
-	// metadataDirectoryAddress in the CLRHeader.
-	fileOffset := pe.getOffsetFromRva(metadataDirAddr + off)
+func (pe *File) parseMetadataStream(off, size uint32) (MetadataTableStreamHeader, error) {
+
 	mdTableStreamHdr := MetadataTableStreamHeader{}
-	mdTableStreamHdrSize := uint32(binary.Size(mdTableStreamHdr))
-	err := pe.structUnpack(&mdTableStreamHdr, fileOffset, mdTableStreamHdrSize)
-	if err != nil {
-		return err
+	if size == 0 {
+		return mdTableStreamHdr, nil
 	}
 
-	return nil
+	mdTableStreamHdrSize := uint32(binary.Size(mdTableStreamHdr))
+	err := pe.structUnpack(&mdTableStreamHdr, off, mdTableStreamHdrSize)
+	if err != nil {
+		return mdTableStreamHdr, err
+	}
+
+	return mdTableStreamHdr, nil
 }
 
-func (pe *File) parseMetadataHeader(rva, size uint32, clr *CLRData) error {
+func (pe *File) parseMetadataHeader(offset, size uint32) (MetadataHeader, error) {
 	var err error
 	mh := MetadataHeader{}
 
-	offset := pe.getOffsetFromRva(rva)
 	if mh.Signature, err = pe.ReadUint32(offset); err != nil {
-		return err
+		return mh, err
 	}
 	if mh.MajorVersion, err = pe.ReadUint16(offset + 4); err != nil {
-		return err
+		return mh, err
 	}
 	if mh.MinorVersion, err = pe.ReadUint16(offset + 6); err != nil {
-		return err
+		return mh, err
 	}
 	if mh.ExtraData, err = pe.ReadUint32(offset + 8); err != nil {
-		return err
+		return mh, err
 	}
 	if mh.VersionString, err = pe.ReadUint32(offset + 12); err != nil {
-		return err
+		return mh, err
 	}
 	mh.Version, err = pe.getStringAtOffset(offset+16, mh.VersionString)
 	if err != nil {
-		return err
+		return mh, err
 	}
 
 	offset += 16 + mh.VersionString
 	if mh.Flags, err = pe.ReadUint8(offset); err != nil {
-		return err
+		return mh, err
 	}
 
 	if mh.Streams, err = pe.ReadUint16(offset + 2); err != nil {
+		return mh, err
+	}
+
+	return mh, err
+}
+
+// The 15th directory entry of the PE header contains the RVA and size of the
+// runtime header in the image file. The runtime header, which contains all of
+// the runtime-specific data entries and other information, should reside in a
+// read-only section of the image file. The IL assembler puts the common
+// language runtime header in the .text section.
+func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
+
+	clr := CLRData{}
+	clrHeader := ImageCOR20Header{}
+	pe.CLR = &clr
+
+	offset := pe.getOffsetFromRva(rva)
+	err := pe.structUnpack(&clrHeader, offset, size)
+	if err != nil {
 		return err
 	}
 
+	clr.CLRHeader = &clrHeader
+	if clrHeader.MetaData.VirtualAddress == 0 || clrHeader.MetaData.Size == 0 {
+		return nil
+	}
+
+	offset = pe.getOffsetFromRva(clrHeader.MetaData.VirtualAddress)
+	mh, err := pe.parseMetadataHeader(offset, clrHeader.MetaData.Size)
+	if err != nil {
+		return err
+	}
 	clr.MetadataHeader = &mh
+	clr.MetadataStreams = make(map[string][]byte)
+	offset += 16 + mh.VersionString + 4
 
 	// Immediately following the MetadataHeader is a series of Stream Headers.
 	// A “stream” is to the metadata what a “section” is to the assembly. The
 	// NumberOfStreams property indicates how many StreamHeaders to read.
-	offset += 4
 	mdStreamHdrOff := uint32(0)
 	mdStreamHdrSize := uint32(0)
 	for i := uint16(0); i < mh.Streams; i++ {
@@ -349,37 +623,46 @@ func (pe *File) parseMetadataHeader(rva, size uint32, clr *CLRData) error {
 			mdStreamHdrSize = sh.Size
 		}
 
+		// Save the stream into a map <string> []byte.
+		rva = clrHeader.MetaData.VirtualAddress + sh.Offset
+		start := pe.getOffsetFromRva(rva)
+		clr.MetadataStreams[sh.Name] = pe.data[start:start + sh.Size]
 		clr.MetadataStreamHeaders = append(clr.MetadataStreamHeaders, &sh)
-
 	}
 
-	// Get the Metadata Table Stream
-	pe.parseMetadataStream(rva, mdStreamHdrOff, mdStreamHdrSize)
-
-	return nil
-}
-
-// The 15th directory entry of the PE header contains the RVA and size of the
-// runtime header in the image file. The runtime header, which contains all of
-// the runtime-specific data entries and other information, should reside in a
-// read-only section of the image file. The IL assembler puts the common
-// language runtime header in the .text section.
-func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
-
-	clr := CLRData{}
-
-	clrHeader := ImageCOR20Header{}
-	offset := pe.getOffsetFromRva(rva)
-	err := pe.structUnpack(&clrHeader, offset, size)
+	// Get the Metadata Table Stream.
+	if mdStreamHdrSize == 0 {
+		return nil
+	}
+	// The .Offset indicated by the stream header is an RVA relative to the
+	// metadataDirectoryAddress in the CLRHeader.
+	rva = clrHeader.MetaData.VirtualAddress + mdStreamHdrOff
+	offset = pe.getOffsetFromRva(rva)
+	mdTableStreamHdr, err := pe.parseMetadataStream(offset, mdStreamHdrSize)
 	if err != nil {
-		return err
+		return nil
 	}
-	clr.CLRHeader = &clrHeader
-	if clrHeader.MetaData.VirtualAddress != 0 && clrHeader.MetaData.Size != 0 {
-		pe.parseMetadataHeader(clrHeader.MetaData.VirtualAddress,
-			clrHeader.MetaData.Size, &clr)
+	clr.MetadataTablesStreamHeader = &mdTableStreamHdr
+
+	// This header is followed by a sequence of 4-byte unsigned integers
+	// indicating the number of records in each table marked 1 in the MaskValid
+	// bit vector.
+	tablesCount := 0
+	offset += uint32(binary.Size(mdTableStreamHdr))
+	clr.MetadataTables = make(map[int]MetadataTable)
+	for i := 0; i < GenericParamConstraint; i++ {
+		if IsBitSet(mdTableStreamHdr.MaskValid, i) {
+			mdTable := MetadataTable{}
+			mdTable.Name = MetadataTableIndextToString(i)
+			mdTable.CountCols, err = pe.ReadUint8(offset)
+			if err != nil {
+				break
+			}
+			tablesCount++
+			offset += 4
+			clr.MetadataTables[i] = mdTable
+		}
 	}
 
-	pe.CLR = &clr
 	return nil
 }

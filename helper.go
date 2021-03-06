@@ -667,3 +667,9 @@ func (pe *File) ReadBytesAtOffset(offset, size uint32) ([]byte, error) {
 
 	return pe.data[offset : offset+size], nil
 }
+
+// IsBitSet returns true when a bit on a particular position is set.
+func IsBitSet(n uint64, pos int) bool {
+	val := n & (1 << pos)
+    return (val > 0)
+}
