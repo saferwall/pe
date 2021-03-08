@@ -248,14 +248,16 @@ func MetadataTableIndextToString(k int) string {
 	return ""
 }
 
-// GetStreamSize returns the size of indexes to read into a particular heap.
-func GetStreamSize(Heaps uint8, BitPosition int) int {
+// GetMetadataStreamIndexSize returns the size of indexes to read into a
+// particular heap.
+func (pe *File) GetMetadataStreamIndexSize(BitPosition int) int {
 	// The `Heaps` field is a bit vector that encodes how wide indexes into the
 	// various heaps are:
 	// - If bit 0 is set, indexes into the "#String" heap are 4 bytes wide;
 	// - if bit 1 is set, indexes into the "#GUID" heap are 4 bytes wide;
 	// - if bit 2 is set, indexes into the "#Blob" heap are 4 bytes wide.
-	if IsBitSet(uint64(Heaps), BitPosition) {
+	heaps := pe.CLR.MetadataTablesStreamHeader.Heaps
+	if IsBitSet(uint64(heaps), BitPosition) {
 		return 4
 	}
 	// Conversely, if the HeapSizes bit for a particular heap is not set,
@@ -494,11 +496,46 @@ type CLRData struct {
 	MetadataStreamHeaders      []*MetadataStreamHeader    `json:"metadata_stream_headers,omitempty"`
 	MetadataStreams            map[string][]byte          `json:"-"`
 	MetadataTablesStreamHeader *MetadataTableStreamHeader `json:"metadata_tables_stream_header,omitempty"`
-	MetadataTables             map[int]MetadataTable      `json:"metadata_tables,omitempty"`
+	MetadataTables             map[int]*MetadataTable     `json:"metadata_tables,omitempty"`
+	StringStreamIndexSize      int                        `json:"-"`
+	GUIDStreamIndexSize        int                        `json:"-"`
+	BlobStreamIndexSize        int                        `json:"-"`
 }
 
-func (pe *File) readFromMetadataStream() {
+func (pe *File) readFromMetadataSteam(Stream int, off uint32, out *uint32) (uint32, error) {
+	var indexSize int
+	switch Stream {
+	case StringStream:
+		indexSize = pe.CLR.StringStreamIndexSize
+		break
+	case GUIDStream:
+		indexSize = pe.CLR.GUIDStreamIndexSize
+		break
+	case BlobStream:
+		indexSize = pe.CLR.BlobStreamIndexSize
+		break
+	}
 
+	var data uint32
+	var err error
+	switch indexSize {
+	case 2:
+		d, err := pe.ReadUint16(off)
+		if err != nil {
+			return 0, err
+		}
+		data = uint32(d)
+		break
+	case 4:
+		data, err = pe.ReadUint32(off)
+		if err != nil {
+			return 0, err
+		}
+
+	}
+
+	*out = data
+	return uint32(indexSize), nil
 }
 
 func (pe *File) parseMetadataStream(off, size uint32) (MetadataTableStreamHeader, error) {
@@ -551,6 +588,38 @@ func (pe *File) parseMetadataHeader(offset, size uint32) (MetadataHeader, error)
 	}
 
 	return mh, err
+}
+
+func (pe *File) parseMetadataModuleTable(moduleTable *MetadataTable, off uint32) error {
+	var err error
+	var indexSize uint32
+	modTableRow := ModuleTableRow{}
+	if modTableRow.Generation, err = pe.ReadUint16(off); err != nil {
+		return err
+	}
+	off += 2
+
+	if indexSize, err = pe.readFromMetadataSteam(StringStream, off, &modTableRow.Name); err != nil {
+		return err
+	}
+	off += indexSize
+
+	if indexSize, err = pe.readFromMetadataSteam(GUIDStream, off, &modTableRow.Mvid); err != nil {
+		return err
+	}
+	off += indexSize
+	if indexSize, err = pe.readFromMetadataSteam(GUIDStream, off, &modTableRow.EncID); err != nil {
+		return err
+	}
+	off += indexSize
+
+	if indexSize, err = pe.readFromMetadataSteam(GUIDStream, off, &modTableRow.EncBaseID); err != nil {
+		return err
+	}
+
+	moduleTable.Content = modTableRow
+	return nil
+
 }
 
 // The 15th directory entry of the PE header contains the RVA and size of the
@@ -626,7 +695,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 		// Save the stream into a map <string> []byte.
 		rva = clrHeader.MetaData.VirtualAddress + sh.Offset
 		start := pe.getOffsetFromRva(rva)
-		clr.MetadataStreams[sh.Name] = pe.data[start:start + sh.Size]
+		clr.MetadataStreams[sh.Name] = pe.data[start : start+sh.Size]
 		clr.MetadataStreamHeaders = append(clr.MetadataStreamHeaders, &sh)
 	}
 
@@ -644,12 +713,17 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	}
 	clr.MetadataTablesStreamHeader = &mdTableStreamHdr
 
+	// Get the size of indexes of #String", "#GUID" and "#Blob" streams.
+	clr.StringStreamIndexSize = pe.GetMetadataStreamIndexSize(StringStream)
+	clr.GUIDStreamIndexSize = pe.GetMetadataStreamIndexSize(GUIDStream)
+	clr.BlobStreamIndexSize = pe.GetMetadataStreamIndexSize(BlobStream)
+
 	// This header is followed by a sequence of 4-byte unsigned integers
 	// indicating the number of records in each table marked 1 in the MaskValid
 	// bit vector.
 	tablesCount := 0
 	offset += uint32(binary.Size(mdTableStreamHdr))
-	clr.MetadataTables = make(map[int]MetadataTable)
+	clr.MetadataTables = make(map[int]*MetadataTable)
 	for i := 0; i < GenericParamConstraint; i++ {
 		if IsBitSet(mdTableStreamHdr.MaskValid, i) {
 			mdTable := MetadataTable{}
@@ -660,7 +734,17 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 			}
 			tablesCount++
 			offset += 4
-			clr.MetadataTables[i] = mdTable
+			clr.MetadataTables[i] = &mdTable
+		}
+	}
+
+	// Parse the metadata tables.
+	for tableIdx, table := range clr.MetadataTables {
+		switch tableIdx {
+		case Module:
+			if err = pe.parseMetadataModuleTable(table, offset); err != nil {
+				return err
+			}
 		}
 	}
 

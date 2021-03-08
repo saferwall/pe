@@ -271,10 +271,10 @@ func (pe *File) getStringAtRVA(rva, maxLen uint32) string {
 		if end > pe.size {
 			end = pe.size
 		}
-		s := pe.getStringFromData(0, pe.data[rva:end])
+		s := pe.GetStringFromData(0, pe.data[rva:end])
 		return string(s)
 	}
-	s := pe.getStringFromData(0, section.Data(rva, maxLen, pe))
+	s := pe.GetStringFromData(0, section.Data(rva, maxLen, pe))
 	return string(s)
 }
 
@@ -301,8 +301,8 @@ func (pe *File) readASCIIStringAtOffset(offset, maxLength uint32) (uint32, strin
 	return i, str
 }
 
-// getStringFromData returns ASCII string from within the data.
-func (pe *File) getStringFromData(offset uint32, data []byte) []byte {
+// GetStringFromData returns ASCII string from within the data.
+func (pe *File) GetStringFromData(offset uint32, data []byte) []byte {
 
 	dataSize := uint32(len(data))
 	if dataSize == 0 {
@@ -333,7 +333,8 @@ func (pe *File) getStringAtOffset(offset, size uint32) (string, error) {
 	return strings.Replace(str, "\x00", "", -1), nil
 }
 
-// getData returns the data given an RVA regardless of the section where it lies on.
+// getData returns the data given an RVA regardless of the section where it 
+// lies on.
 func (pe *File) getData(rva, length uint32) ([]byte, error) {
 
 	// Given a RVA and the size of the chunk to retrieve, this method
@@ -629,6 +630,7 @@ func (pe *File) ReadUint8(offset uint32) (uint8, error) {
 	b := pe.data[offset : offset+1][0]
 	return uint8(b), nil
 }
+
 
 func (pe *File) structUnpack(iface interface{}, offset, size uint32) (err error) {
 	// Boundary check

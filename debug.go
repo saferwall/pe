@@ -404,7 +404,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 						break
 					}
 
-					pogoEntry.Name = string(pe.getStringFromData(0, pe.data[offset+8:offset+8+32]))
+					pogoEntry.Name = string(pe.GetStringFromData(0, pe.data[offset+8:offset+8+32]))
 
 					pogo.Entries = append(pogo.Entries, pogoEntry)
 					c += 8 + uint32(len(pogoEntry.Name)) + 4
