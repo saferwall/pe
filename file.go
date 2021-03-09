@@ -55,7 +55,7 @@ type Options struct {
 	SectionEntropy bool
 }
 
-// New instaniates a file instance with options.
+// New instaniates a file instance with options given a file name.
 func New(name string, opts *Options) (*File, error) {
 
 	f, err := os.Open(name)
@@ -79,6 +79,20 @@ func New(name string, opts *Options) (*File, error) {
 	file.data = data
 	file.size = uint32(len(file.data))
 	file.f = f
+	return &file, nil
+}
+
+// NewBytes instaniates a file instance with options given a memory buffer.
+func NewBytes(data []byte, opts *Options) (*File, error) {
+
+	file := File{}
+	if opts != nil {
+		file.opts = opts
+	} else {
+		file.opts = &Options{}
+	}
+	file.data = data
+	file.size = uint32(len(file.data))
 	return &file, nil
 }
 
