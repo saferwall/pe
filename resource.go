@@ -144,6 +144,9 @@ type ResourceDataEntry struct {
 }
 
 // makeIntResource mimics the MAKEINTRESOURCE macro.
+// go-vet : tagged as misues of unsafe.Pointer (
+// go test -gcflags=all=-d=checkptr
+// fatal error: checkptr: pointer arithmetic computed bad pointer value)
 func makeIntResource(id uintptr) *uint16 {
 	return (*uint16)(unsafe.Pointer(id))
 }
