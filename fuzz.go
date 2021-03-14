@@ -1,5 +1,3 @@
-// +build gofuzz
-
 package pe
 
 func Fuzz(data []byte) int {

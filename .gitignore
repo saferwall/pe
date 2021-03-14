@@ -17,3 +17,7 @@
 # Code editors configs
 .vscode/
 .idea/
+
+# Go fuzz artefact
+crashers/
+suppressions/

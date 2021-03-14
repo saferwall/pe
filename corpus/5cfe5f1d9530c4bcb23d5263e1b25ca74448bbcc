@@ -1,0 +1,4 @@
+@echo off
+echo normal.exe:& normal.exe
+echo compiled.exe:& compiled.exe
+echo truncsectbl.exe:&
