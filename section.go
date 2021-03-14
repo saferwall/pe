@@ -443,9 +443,13 @@ func (section *Section) Data(start, length uint32, pe *File) []byte {
 		section.Header.PointerToRawData+section.Header.SizeOfRawData > offset {
 		end = section.Header.PointerToRawData + section.Header.SizeOfRawData
 	}
-
 	if end > pe.size {
 		end = pe.size
+	}
+
+	// In some rare cases offset might be higher than end.
+	if offset > end {
+		end = offset
 	}
 
 	return pe.data[offset:end]
