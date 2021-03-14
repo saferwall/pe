@@ -62,10 +62,15 @@ func main() {
     }
 ```
 
-## Todo:
+## TODO:
 
 - imports MS-styled names demangling
 - PE: VB5 and VB6 typical structures: project info, DLLCall-imports, referenced modules, object table
+
+## Fuzz Testing
+
+To validate the parser we use the [go-fuzz](https://github.com/dvyukov/go-fuzz) and a corpus of known malformed and tricky
+PE files from [corkami](https://github.com/corkami/pocs/tree/master/PE).
 
 # References
 

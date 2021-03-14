@@ -20,7 +20,7 @@ var tridtests = []struct {
 	in  string
 	out error
 }{
-	{getAbsoluteFilePath("test/putty"), nil},
+	{getAbsoluteFilePath("corpus/putty"), nil},
 }
 
 func TestParse(t *testing.T) {
