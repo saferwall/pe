@@ -349,6 +349,12 @@ type DataDirectory struct {
 // beginning of the file.
 func (pe *File) ParseNTHeader() (err error) {
 	ntHeaderOffset := pe.DosHeader.AddressOfNewEXEHeader
+	// LittleEndian.Uint32 will panic if input doesn't have enough bytes (index out of range)
+	// in the case where pe.data[ntHeaderOffset:] is less than 4 bytes
+	signatureBytes := pe.data[ntHeaderOffset:]
+	if len(signatureBytes) < 4 {
+		return ErrInvalidNTHeaderOffset
+	}
 	signature := binary.LittleEndian.Uint32(pe.data[ntHeaderOffset:])
 
 	// Probe for PE signature.
@@ -439,11 +445,17 @@ func (pe *File) ParseNTHeader() (err error) {
 		pe.Anomalies = append(pe.Anomalies, AnoImageBaseOverflow)
 	}
 
-	// The msdn states that SizeOfImage must be a multiple of the section
-	// alignment. This is not true though. Adding it as anomaly.
-	if (pe.Is32 && oh32.SizeOfImage%oh32.SectionAlignment != 0) ||
-		(pe.Is64 && oh64.SizeOfImage%oh64.SectionAlignment != 0) {
-		pe.Anomalies = append(pe.Anomalies, AnoInvalidSizeOfImage)
+	// Check that SectionAlignment is not 0
+	if (pe.Is32 && oh32.SectionAlignment == 0) || (pe.Is64 && oh64.SectionAlignment == 0) {
+		pe.Anomalies = append(pe.Anomalies, ErrInvalidSectionAlignment)
+	} else {
+		// The msdn states that SizeOfImage must be a multiple of the section
+		// alignment. This is not true though. Adding it as anomaly.
+		if (pe.Is32 && oh32.SizeOfImage%oh32.SectionAlignment != 0) ||
+			(pe.Is64 && oh64.SizeOfImage%oh64.SectionAlignment != 0) {
+			pe.Anomalies = append(pe.Anomalies, AnoInvalidSizeOfImage)
+		}
+
 	}
 
 	return nil
