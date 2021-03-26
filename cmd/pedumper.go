@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -49,7 +50,10 @@ func isDirectory(path string) bool {
 func parsePE(filename string, cmd *cobra.Command) {
 	log.Printf("Processing filename %s", filename)
 
-	pe, err := peparser.New(filename, &peparser.Options{})
+	data, _ := ioutil.ReadFile(filename)
+	pe, err := peparser.NewBytes(data, &peparser.Options{})
+
+	// pe, err := peparser.New(filename, &peparser.Options{})
 	if err != nil {
 		log.Printf("Error while opening file: %s, reason: %s", filename, err)
 		return
@@ -84,6 +88,16 @@ func parsePE(filename string, cmd *cobra.Command) {
 	if wantCLR {
 		dotnetMetadata, _ := json.Marshal(pe.CLR)
 		fmt.Println(prettyPrint(dotnetMetadata))
+
+		if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {
+			if modTable.Content != nil {
+				modTableRow := modTable.Content.(peparser.ModuleTableRow)
+				modName := pe.GetStringFromData(modTableRow.Name, pe.CLR.MetadataStreams["#Strings"])
+				moduleName := string(modName)
+				log.Println(moduleName)
+			}
+		}
+
 	}
 
 	wantAll, _ := cmd.Flags().GetBool("all")
