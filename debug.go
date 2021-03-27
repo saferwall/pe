@@ -54,7 +54,7 @@ const (
 	// Visual C++ features (/GS counts /sdl counts and guardN counts)
 	ImageDebugTypeVCFeature = 12
 
-	// Profile Guided Optimization
+	// Pogo aka PGO aka Profile Guided Optimization.
 	ImageDebugTypePOGO = 13
 
 	// Incremental Link Time Code Generation (iLTCG)
@@ -93,14 +93,19 @@ const (
 )
 
 const (
-	// mage is CET compatible.
+	// ImageDllCharacteristicsExCETCompat indicates that the image is CET
+	// compatible.
 	ImageDllCharacteristicsExCETCompat = 0x0001
 )
 
 const (
-	POGOTypePGU  = 0x50475500
+	// POGOTypePGU represents a signature for an undocumented PGO sub type.
+	POGOTypePGU = 0x50475500
+	// POGzOTypePGI represents a signature for an undocumented PGO sub type.
 	POGzOTypePGI = 0x50474900
-	POGOTypePGO  = 0x50474F00
+	// POGOTypePGO represents a signature for an undocumented PGO sub type.
+	POGOTypePGO = 0x50474F00
+	// POGOTypeLTCG represents a signature for an undocumented PGO sub type.
 	POGOTypeLTCG = 0x4c544347
 )
 
@@ -236,6 +241,7 @@ type ImagePGOItem struct {
 	Name string
 }
 
+// POGO structure that information related to the Profile Guided Optimization.
 type POGO struct {
 	Signature uint32 // _IMAGE_POGO_INFO
 	Entries   []ImagePGOItem

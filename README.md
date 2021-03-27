@@ -1,4 +1,4 @@
-# Portable Executable Parser [![GoDoc](http://godoc.org/github.com/saferwall/pe?status.svg)](https://pkg.go.dev/github.com/saferwall/pe) [![Report Card](https://goreportcard.com/badge/github.com/saferwall/pe)](https://goreportcard.com/report/github.com/saferwall/pe) [![codecov](https://codecov.io/gh/saferwall/pe/branch/main/graph/badge.svg?token=W7WTOUZLRY)](https://codecov.io/gh/saferwall/pe)
+# Portable Executable Parser [![GoDoc](http://godoc.org/github.com/saferwall/pe?status.svg)](https://pkg.go.dev/github.com/saferwall/pe) [![Report Card](https://goreportcard.com/badge/github.com/saferwall/pe)](https://goreportcard.com/report/github.com/saferwall/pe) [![codecov](https://codecov.io/gh/saferwall/pe/branch/main/graph/badge.svg?token=W7WTOUZLRY)](https://codecov.io/gh/saferwall/pe) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/saferwall/pe/Build%20&%20Test)
 
 
 **pe parser** is a go package for parsing the [portable executable](https://docs.microsoft.com/en-us/windows/win32/debug/pe-format) file format. This package was designed with malware analysis in mind, and being resistent to PE malformations.
