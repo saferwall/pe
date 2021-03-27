@@ -25,6 +25,7 @@ var (
 	ntHeader    bool
 	directories bool
 	sections    bool
+	resources   bool
 	clr         bool
 )
 
@@ -82,6 +83,12 @@ func parsePE(filename string, cmd *cobra.Command) {
 	if wantSections {
 		sectionsHeaders, _ := json.Marshal(pe.Sections)
 		fmt.Println(prettyPrint(sectionsHeaders))
+	}
+
+	wantResources, _ := cmd.Flags().GetBool("resources")
+	if wantResources {
+		rsrc, _ := json.Marshal(pe.Resources)
+		fmt.Println(prettyPrint(rsrc))
 	}
 
 	wantCLR, _ := cmd.Flags().GetBool("clr")
@@ -173,6 +180,7 @@ func main() {
 	dumpCmd.Flags().BoolVarP(&ntHeader, "ntheader", "", false, "Dump NT header")
 	dumpCmd.Flags().BoolVarP(&directories, "directories", "", false, "Dump data directories")
 	dumpCmd.Flags().BoolVarP(&sections, "sections", "", false, "Dump section headers")
+	dumpCmd.Flags().BoolVarP(&resources, "resources", "", false, "Dump resources")
 	dumpCmd.Flags().BoolVarP(&clr, "clr", "", false, "Dump .NET metadata")
 	dumpCmd.Flags().BoolVarP(&all, "all", "", false, "Dump everything")
 

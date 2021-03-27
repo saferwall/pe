@@ -37,6 +37,11 @@ var (
 	ErrInvalidElfanewValue = errors.New(
 		"Invalid e_lfanew value. Probably not a PE file")
 
+	// ErrInvalidNtHeaderOffset is returned when the NT Header offset is beyond
+	// the image file.
+	ErrInvalidNtHeaderOffset = errors.New(
+		"Invalid NT Header Offset. NT Header Signature not found")
+
 	// ErrImageOS2SignatureFound is returned when signature is for a NE file.
 	ErrImageOS2SignatureFound = errors.New(
 		"Not a valid PE signature. Probably a NE file")
@@ -333,7 +338,7 @@ func (pe *File) getStringAtOffset(offset, size uint32) (string, error) {
 	return strings.Replace(str, "\x00", "", -1), nil
 }
 
-// getData returns the data given an RVA regardless of the section where it 
+// getData returns the data given an RVA regardless of the section where it
 // lies on.
 func (pe *File) getData(rva, length uint32) ([]byte, error) {
 
@@ -631,7 +636,6 @@ func (pe *File) ReadUint8(offset uint32) (uint8, error) {
 	return uint8(b), nil
 }
 
-
 func (pe *File) structUnpack(iface interface{}, offset, size uint32) (err error) {
 	// Boundary check
 	totalSize := offset + size
@@ -673,5 +677,5 @@ func (pe *File) ReadBytesAtOffset(offset, size uint32) ([]byte, error) {
 // IsBitSet returns true when a bit on a particular position is set.
 func IsBitSet(n uint64, pos int) bool {
 	val := n & (1 << pos)
-    return (val > 0)
+	return (val > 0)
 }

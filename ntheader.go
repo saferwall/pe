@@ -349,7 +349,11 @@ type DataDirectory struct {
 // beginning of the file.
 func (pe *File) ParseNTHeader() (err error) {
 	ntHeaderOffset := pe.DosHeader.AddressOfNewEXEHeader
-	signature := binary.LittleEndian.Uint32(pe.data[ntHeaderOffset:])
+
+	signature, err := pe.ReadUint32(ntHeaderOffset) 
+	if err != nil { 
+		return ErrInvalidNtHeaderOffset
+	}
 
 	// Probe for PE signature.
 	if signature&0xFFFF == ImageOS2Signature {

@@ -7,7 +7,6 @@ package pe
 import (
 	"encoding/binary"
 	"log"
-	"unsafe"
 )
 
 const (
@@ -18,29 +17,29 @@ var (
 	depth = 0
 )
 
-// Predefined Resource Types
+// Predefined Resource Types.
 var (
-	RTCursor       = makeIntResource(1)
-	RTBitmap       = makeIntResource(2)
-	RTIcon         = makeIntResource(3)
-	RTMenu         = makeIntResource(4)
-	RTDialog       = makeIntResource(5)
-	RTString       = makeIntResource(6)
-	RTFontdir      = makeIntResource(7)
-	RTFont         = makeIntResource(8)
-	RTAccelerator  = makeIntResource(9)
-	RTRCdata       = makeIntResource(10)
-	RTMessagetable = makeIntResource(11)
-	RTGroupCursor  = makeIntResource(12)
-	RTGroupIcon    = makeIntResource(14)
-	RTVersion      = makeIntResource(16)
-	RTDlgInclude   = makeIntResource(17)
-	RTPlugPlay     = makeIntResource(19)
-	RTVxd          = makeIntResource(20)
-	RTAniCursor    = makeIntResource(21)
-	RTAniIcon      = makeIntResource(22)
-	RTHtml         = makeIntResource(23)
-	RTManifest     = makeIntResource(24)
+	RTCursor       = 1
+	RTBitmap       = 2
+	RTIcon         = 3
+	RTMenu         = 4
+	RTDialog       = 5
+	RTString       = 6
+	RTFontdir      = 7
+	RTFont         = 8
+	RTAccelerator  = 9
+	RTRCdata       = 10
+	RTMessagetable = 11
+	RTGroupCursor  = 12
+	RTGroupIcon    = 14
+	RTVersion      = 16
+	RTDlgInclude   = 17
+	RTPlugPlay     = 19
+	RTVxd          = 20
+	RTAniCursor    = 21
+	RTAniIcon      = 22
+	RTHtml         = 23
+	RTManifest     = 24
 )
 
 // ImageResourceDirectory represents the IMAGE_RESOURCE_DIRECTORY.
@@ -141,11 +140,6 @@ type ResourceDataEntry struct {
 	// Primary language ID
 	Lang    uint32
 	Sublang uint32 // Sublanguage ID
-}
-
-// makeIntResource mimics the MAKEINTRESOURCE macro.
-func makeIntResource(id uintptr) *uint16 {
-	return (*uint16)(unsafe.Pointer(id))
 }
 
 func (pe *File) parseResourceDataEntry(rva uint32) *ImageResourceDataEntry {
