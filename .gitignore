@@ -12,12 +12,14 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # Code editors configs
-.vscode/
 .idea/
 
 # Go fuzz artefact
 crashers/
 suppressions/
+
+# Log files
+*.log
