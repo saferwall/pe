@@ -18,7 +18,7 @@ type File struct {
 	DosHeader    ImageDosHeader              `json:",omitempty"`
 	RichHeader   *RichHeader                 `json:",omitempty"`
 	NtHeader     ImageNtHeader               `json:",omitempty"`
-	COFF         COFF                        `json:",omitempty"`
+	COFF         *COFF                        `json:",omitempty"`
 	Sections     []Section                   `json:",omitempty"`
 	Imports      []Import                    `json:",omitempty"`
 	Export       *Export                     `json:",omitempty"`

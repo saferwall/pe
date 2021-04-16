@@ -272,6 +272,8 @@ func (pe *File) ParseCOFFSymbolTable() error {
 		}
 		offset += size
 	}
+
+	pe.COFF = &COFF{}
 	pe.COFF.SymbolTable = symbols
 
 	// Get the COFF string table.

@@ -92,10 +92,9 @@ func parsePE(filename string, cmd *cobra.Command) {
 	}
 
 	wantCLR, _ := cmd.Flags().GetBool("clr")
-	if wantCLR {
+	if wantCLR && pe.CLR != nil {
 		dotnetMetadata, _ := json.Marshal(pe.CLR)
 		fmt.Println(prettyPrint(dotnetMetadata))
-
 		if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {
 			if modTable.Content != nil {
 				modTableRow := modTable.Content.(peparser.ModuleTableRow)
@@ -115,6 +114,16 @@ func parsePE(filename string, cmd *cobra.Command) {
 		fmt.Println(prettyPrint(dosHeader))
 		fmt.Println(prettyPrint(ntHeader))
 		fmt.Println(prettyPrint(sectionsHeaders))
+	}
+
+	if pe.IsEXE() {
+		log.Print("File is Exe")
+	}
+	if pe.IsDLL() {
+		log.Print("File is DLL")
+	}
+	if pe.IsDriver() {
+		log.Print("File is Driver")
 	}
 }
 
@@ -157,7 +166,7 @@ func main() {
 		Short: "Print version number",
 		Long:  "Print version number",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Print("You are using version 0.0.1")
+			fmt.Print("You are using version 1.0.4")
 		},
 	}
 
