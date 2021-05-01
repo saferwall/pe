@@ -7,6 +7,8 @@
 - [Features](#features)
 - [Installing](#installing)
 - [Using the library](#using-the-library)
+    - [Access the PE header](#pe-header)
+    - [Iterating over sections](#iterating-over-sections)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
@@ -61,14 +63,62 @@ func main() {
     filename := "C:\\Binaries\\notepad.exe"
     pe, err := peparser.New(filename, nil)
 	if err != nil {
-		log.Fatalf("Error while opening file: %s, reason: %s", filename, err)
+		log.Fatalf("Error while opening file: %s, reason: %v", filename, err)
     }
     
     err = pe.Parse()
     if err != nil {
-        log.Fatalf("Error while opening file: %s, reason: %s", filename, err)
+        log.Fatalf("Error while parsing file: %s, reason: %v", filename, err)
     }
 ```
+
+Start by instantiating a pe object by called the `New()` method, which takes the file path to the file to be parsed and some optional options.
+
+Afterwards, a call to the `Parse()` method will give you access to all the different part of the PE format, directly accessible to be used. Here is the definition of the struct:
+
+```go
+type File struct {
+	DosHeader    ImageDosHeader              `json:",omitempty"`
+	RichHeader   *RichHeader                 `json:",omitempty"`
+	NtHeader     ImageNtHeader               `json:",omitempty"`
+	COFF         *COFF                        `json:",omitempty"`
+	Sections     []Section                   `json:",omitempty"`
+	Imports      []Import                    `json:",omitempty"`
+	Export       *Export                     `json:",omitempty"`
+	Debugs       []DebugEntry                `json:",omitempty"`
+	Relocations  []Relocation                `json:",omitempty"`
+	Resources    *ResourceDirectory          `json:",omitempty"`
+	TLS          *TLSDirectory               `json:",omitempty"`
+	LoadConfig   *LoadConfig                 `json:",omitempty"`
+	Exceptions   []Exception                 `json:",omitempty"`
+	Certificates *Certificate                `json:",omitempty"`
+	DelayImports []DelayImport               `json:",omitempty"`
+	BoundImports []BoundImportDescriptorData `json:",omitempty"`
+	GlobalPtr    uint32                      `json:",omitempty"`
+	CLR          *CLRData                    `json:",omitempty"`
+	IAT          []IATEntry                  `json:",omitempty"`
+	Header       []byte
+	data         mmap.MMap
+	closer       io.Closer
+	Is64         bool
+	Is32         bool
+	Anomalies    []string `json:",omitempty"`
+	size         uint32
+	f            *os.File
+	opts         *Options
+}
+```
+
+### PE Header
+
+As mentionned before, all members of the struct are directly (no getters/setters) accessible, additionally, the fields types has been preserved as the spec defines them, that means if you need to show the prettified version of an `int` type, you have to call the corresponding function.
+
+```go
+    fmt.Print("Magic is: %d", pe.DosHeader.Magic)
+    fmt.Print("Signature is: %d", pe.NtHeader.Signature)
+    fmt.Print("Machine is: %d, Meaning: %s", pe.NtHeader.FileHeader.Machine, pe.PrettyMachineType())
+```
+
 
 ## Roadmap
 
@@ -86,3 +136,4 @@ To validate the parser we use the [go-fuzz](https://github.com/dvyukov/go-fuzz) 
 - [An In-Depth Look into the Win32 Portable Executable File Format - Part 2 by Matt Pietrek](http://www.delphibasics.info/home/delphibasicsarticles/anin-depthlookintothewin32portableexecutablefileformat-part2)
 - [Portable Executable File Format](https://blog.kowalczyk.info/articles/pefileformat.html)
 - [PE Format MSDN spec](https://docs.microsoft.com/en-us/windows/win32/debug/pe-format)
+- https://www.ntcore.com/files/dotnetformat.htm
