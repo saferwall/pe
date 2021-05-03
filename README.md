@@ -114,11 +114,47 @@ type File struct {
 As mentionned before, all members of the struct are directly (no getters/setters) accessible, additionally, the fields types has been preserved as the spec defines them, that means if you need to show the prettified version of an `int` type, you have to call the corresponding function.
 
 ```go
-    fmt.Print("Magic is: %d", pe.DosHeader.Magic)
-    fmt.Print("Signature is: %d", pe.NtHeader.Signature)
-    fmt.Print("Machine is: %d, Meaning: %s", pe.NtHeader.FileHeader.Machine, pe.PrettyMachineType())
+	fmt.Printf("Magic is: %x\n", pe.DosHeader.Magic)
+    fmt.Printf("Signature is: %x\n", pe.NtHeader.Signature)
+	fmt.Printf("Machine is: %x, Meaning: %s\n", pe.NtHeader.FileHeader.Machine, pe.PrettyMachineType())
 ```
 
+Output:
+
+```
+Magic is: 5a4d
+Signature is: 4550
+Machine is: 8664, Meaning: x64
+```
+
+### Iterating over sections
+
+```go
+for _, sec := range pe.Sections {
+    fmt.Printf("Section Name : %s\n", sec.NameString())
+    fmt.Printf("Section VirtualSize : %x\n", sec.Header.VirtualSize)
+    fmt.Printf("Section Flags : %x, Meaning: %v\n\n",
+        sec.Header.Characteristics, sec.PrettySectionFlags())
+}
+```
+
+Output:
+
+```
+Section Name : .text
+Section VirtualSize : 2ea58
+Section Flags : 60500060, Meaning: [Align8Bytes Readable Align16Bytes Executable Contains Code Initialized Data Align1Bytes]
+
+Section Name : .data
+Section VirtualSize : 58
+Section Flags : c0500040, Meaning: [Readable Initialized Data Writable Align1Bytes Align16Bytes Align8Bytes]
+
+Section Name : .rdata
+Section VirtualSize : 18d0
+Section Flags : 40600040, Meaning: [Align2Bytes Align8Bytes Readable Initialized Data Align32Bytes]
+
+...
+```
 
 ## Roadmap
 
