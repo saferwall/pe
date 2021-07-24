@@ -110,7 +110,8 @@ func (pe *File) Authentihash() []byte {
 	// the checksum address, as specified in Optional Header Windows-Specific
 	// Fields.
 	start := uint32(0)
-	optionalHeaderOffset := pe.DosHeader.AddressOfNewEXEHeader + uint32(binary.Size(pe.NtHeader))
+	fileHdrSize := uint32(binary.Size(pe.NtHeader.FileHeader))
+	optionalHeaderOffset := pe.DosHeader.AddressOfNewEXEHeader + 4 + fileHdrSize
 	checksumOffset := optionalHeaderOffset + 64
 	h.Write(pe.data[start:checksumOffset])
 
@@ -144,8 +145,7 @@ func (pe *File) Authentihash() []byte {
 
 	// Hash everything from the end of the Certificate Table entry to the end of
 	// image header, including Section Table (headers).
-	endPeHeader := uint32(len(pe.Header))
-	h.Write(pe.data[start:endPeHeader])
+	h.Write(pe.data[start:sizeOfHeaders])
 
 	// Create a counter called SUM_OF_BYTES_HASHED, which is not part of the
 	// signature. Set this counter to the SizeOfHeaders field, as specified in
