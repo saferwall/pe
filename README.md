@@ -114,9 +114,9 @@ type File struct {
 As mentionned before, all members of the struct are directly (no getters/setters) accessible, additionally, the fields types has been preserved as the spec defines them, that means if you need to show the prettified version of an `int` type, you have to call the corresponding function.
 
 ```go
-	fmt.Printf("Magic is: %x\n", pe.DosHeader.Magic)
-    fmt.Printf("Signature is: %x\n", pe.NtHeader.Signature)
-	fmt.Printf("Machine is: %x, Meaning: %s\n", pe.NtHeader.FileHeader.Machine, pe.PrettyMachineType())
+fmt.Printf("Magic is: %x\n", pe.DosHeader.Magic)
+fmt.Printf("Signature is: %x\n", pe.NtHeader.Signature)
+fmt.Printf("Machine is: %x, Meaning: %s\n", pe.NtHeader.FileHeader.Machine, pe.PrettyMachineType())
 ```
 
 Output:
