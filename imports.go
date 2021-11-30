@@ -272,7 +272,7 @@ func (pe *File) getImportTable32(rva uint32, maxLen uint32,
 		thunk := ImageThunkData32{}
 		err := pe.structUnpack(&thunk, offset, size)
 		if err != nil {
-			// log.Printf("Error parsing the import table. " +
+			// DebugLogger.Printf("Error parsing the import table. " +
 			// 	"Invalid data at RVA: 0x%x", rva)
 			return []*ThunkData32{}, nil
 		}
@@ -287,7 +287,7 @@ func (pe *File) getImportTable32(rva uint32, maxLen uint32,
 		// Seen in PE with SHA256:
 		// 5945bb6f0ac879ddf61b1c284f3b8d20c06b228e75ae4f571fa87f5b9512902c
 		if thunk.AddressOfData >= startRVA && thunk.AddressOfData <= rva {
-			log.Printf("Error parsing the import table. "+
+			DebugLogger.Printf("Error parsing the import table. "+
 				"AddressOfData overlaps with THUNK_DATA for THUNK at: "+
 				"RVA 0x%x", rva)
 			break
@@ -397,7 +397,7 @@ func (pe *File) getImportTable64(rva uint32, maxLen uint32,
 		thunk := ImageThunkData64{}
 		err := pe.structUnpack(&thunk, offset, size)
 		if err != nil {
-			// log.Printf("Error parsing the import table. " +
+			// DebugLogger.Printf("Error parsing the import table. " +
 			// 	"Invalid data at RVA: 0x%x", rva)
 			return []*ThunkData64{}, nil
 		}
@@ -413,7 +413,7 @@ func (pe *File) getImportTable64(rva uint32, maxLen uint32,
 		// 5945bb6f0ac879ddf61b1c284f3b8d20c06b228e75ae4f571fa87f5b9512902c
 		if thunk.AddressOfData >= uint64(startRVA) &&
 			thunk.AddressOfData <= uint64(rva) {
-			log.Printf("Error parsing the import table. "+
+			DebugLogger.Printf("Error parsing the import table. "+
 				"AddressOfData overlaps with THUNK_DATA for THUNK at: "+
 				"RVA 0x%x", rva)
 			break

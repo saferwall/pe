@@ -7,7 +7,6 @@ package pe
 import (
 	"bytes"
 	"encoding/binary"
-	"log"
 )
 
 const (
@@ -100,7 +99,7 @@ func (pe *File) parseBoundImportDirectory(rva, size uint32) (err error) {
 		}
 
 		if section == nil {
-			log.Printf("RVA of IMAGE_BOUND_IMPORT_DESCRIPTOR points to an invalid address: 0x%x", rva)
+			DebugLogger.Printf("RVA of IMAGE_BOUND_IMPORT_DESCRIPTOR points to an invalid address: 0x%x", rva)
 			return nil
 		}
 

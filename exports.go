@@ -247,7 +247,7 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 	}
 
 	if parsingFailed {
-		fmt.Printf("RVA AddressOfNames in the export directory points to an "+
+		DebugLogger.Printf("RVA AddressOfNames in the export directory points to an "+
 			"invalid address: 0x%x\n", exportDir.AddressOfNames)
 	}
 

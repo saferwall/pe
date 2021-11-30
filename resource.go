@@ -211,7 +211,7 @@ func (pe *File) doParseResourceDirectory(rva, size, baseRVA, level uint32,
 
 	// Set a hard limit on the maximum reasonable number of entries.
 	if numberOfEntries > maxAllowedEntries {
-		log.Printf(`Error parsing the resources directory. 
+		DebugLogger.Printf(`Error parsing the resources directory.
 		 The directory contains %d entries`, numberOfEntries)
 		return ResourceDirectory{}, nil
 	}

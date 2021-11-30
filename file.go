@@ -6,11 +6,11 @@ package pe
 
 import (
 	"errors"
-	"fmt"
 	"io"
+	"log"
 	"os"
 
-	mmap "github.com/edsrzf/mmap-go"
+	"github.com/edsrzf/mmap-go"
 )
 
 // A File represents an open PE file.
@@ -229,7 +229,7 @@ func (pe *File) ParseDataDirectories() error {
 				//  keep parsing data directories even though some entries fails.
 				defer func() {
 					if e := recover(); e != nil {
-						fmt.Printf("Unhandled Exception when trying to parse data directory %s, reason: %v\n",
+						DebugLogger.Printf("Unhandled Exception when trying to parse data directory %s, reason: %v\n",
 							pe.PrettyDataDirectory(entryIndex), e)
 						foundErr = true
 					}
@@ -237,7 +237,7 @@ func (pe *File) ParseDataDirectories() error {
 
 				err := funcMaps[entryIndex](va, size)
 				if err != nil {
-					fmt.Printf("Failed to parse data directory %s, reason: %v\n",
+					DebugLogger.Printf("Failed to parse data directory %s, reason: %v\n",
 						pe.PrettyDataDirectory(entryIndex), err)
 					foundErr = true
 				}
@@ -250,3 +250,5 @@ func (pe *File) ParseDataDirectories() error {
 	}
 	return nil
 }
+
+var DebugLogger *log.Logger = log.New(os.Stderr, "", log.Ldate | log.Ltime)
