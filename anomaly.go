@@ -81,6 +81,9 @@ var (
 	// AnoNumberOfRvaAndSizes is reported when NumberOfRvaAndSizes is different
 	// than 16.
 	AnoNumberOfRvaAndSizes = `Optional header NumberOfRvaAndSizes != 16`
+
+	// AnoNumberOfRvaAndSizes is reported when number of COFF symbols is absurdly high.
+	AnoCOFFSymbolsCount = `COFF symbols count is absurdly high`
 )
 
 // GetAnomalies reportes anomalies found in a PE binary.
@@ -199,4 +202,11 @@ func (pe *File) GetAnomalies() error {
 	}
 
 	return nil
+}
+
+// addAnomaly appends the given anomaly to the list of anomalies.
+func (pe *File) addAnomaly(anomaly string) {
+	if !stringInSlice(anomaly, pe.Anomalies) {
+		pe.Anomalies = append(pe.Anomalies, anomaly)
+	}
 }
