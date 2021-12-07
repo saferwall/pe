@@ -29,6 +29,11 @@ jobs:
           go env -w GOFLAGS=-mod=mod
           go build -v ./...
 
+      - name: Extract test data
+        run: |
+          cd test
+          7z x "*.7z" -pinfected
+
       - name: Test With Coverage
         run: go test -race -coverprofile=coverage -covermode=atomic
 

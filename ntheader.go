@@ -350,8 +350,8 @@ type DataDirectory struct {
 func (pe *File) ParseNTHeader() (err error) {
 	ntHeaderOffset := pe.DosHeader.AddressOfNewEXEHeader
 
-	signature, err := pe.ReadUint32(ntHeaderOffset) 
-	if err != nil { 
+	signature, err := pe.ReadUint32(ntHeaderOffset)
+	if err != nil {
 		return ErrInvalidNtHeaderOffset
 	}
 
