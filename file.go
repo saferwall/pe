@@ -7,7 +7,6 @@ package pe
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 
 	mmap "github.com/edsrzf/mmap-go"
@@ -36,7 +35,6 @@ type File struct {
 	IAT          []IATEntry                  `json:",omitempty"`
 	Header       []byte
 	data         mmap.MMap
-	closer       io.Closer
 	Is64         bool
 	Is32         bool
 	Anomalies    []string `json:",omitempty"`
@@ -48,11 +46,15 @@ type File struct {
 // Options for Parsing
 type Options struct {
 
-	// Parse only the header, do not parse data directories, by default (false).
+	// Parse only the PE header.
+	// do not parse data directories, by default (false).
 	Fast bool
 
 	// Includes section entropy.
 	SectionEntropy bool
+
+	// Maximum COFF symbols to parse.
+	MaxCOFFSymbolsCount uint64
 }
 
 // New instaniates a file instance with options given a file name.
@@ -76,6 +78,11 @@ func New(name string, opts *Options) (*File, error) {
 	} else {
 		file.opts = &Options{}
 	}
+
+	if file.opts.MaxCOFFSymbolsCount == 0 {
+		file.opts.MaxCOFFSymbolsCount = MaxDefaultCOFFSymbolsCount
+	}
+
 	file.data = data
 	file.size = uint32(len(file.data))
 	file.f = f
@@ -132,12 +139,17 @@ func (pe *File) Parse() error {
 	}
 
 	// Parse COFF symbol table.
-	err = pe.ParseCOFFSymbolTable()
+	pe.ParseCOFFSymbolTable()
 
 	// Parse the Section Header.
 	err = pe.ParseSectionHeader()
 	if err != nil {
 		return err
+	}
+
+	// In fast mode, do not parse data directories.
+	if pe.opts.Fast {
+		return nil
 	}
 
 	// Parse the Data Directory entries.
@@ -173,11 +185,6 @@ func (pe *File) PrettyDataDirectory(entry int) string {
 // array of 16 structures. Each array entry has a predefined meaning for what
 // it refers to.
 func (pe *File) ParseDataDirectories() error {
-
-	// In fast mode, do not parse data directories.
-	if pe.opts.Fast {
-		return nil
-	}
 
 	foundErr := false
 	oh32 := ImageOptionalHeader32{}

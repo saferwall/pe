@@ -9,6 +9,9 @@ import (
 	"encoding/binary"
 	"errors"
 	"log"
+	"path"
+	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -542,7 +545,7 @@ func (pe *File) Checksum() uint32 {
 
 	// Get the Checksum offset.
 	optionalHeaderOffset := pe.DosHeader.AddressOfNewEXEHeader + 4 +
-	uint32(binary.Size(pe.NtHeader.FileHeader))
+		uint32(binary.Size(pe.NtHeader.FileHeader))
 
 	// `CheckSum` field position in optional PE headers is always 64 for PE and PE+.
 	checksumOffset := optionalHeaderOffset + 64
@@ -552,11 +555,11 @@ func (pe *File) Checksum() uint32 {
 	dataLen := pe.size
 	if remainder > 0 {
 		dataLen = pe.size + (4 - remainder)
-		paddedBytes := make([]byte, 4 - remainder)
+		paddedBytes := make([]byte, 4-remainder)
 		pe.data = append(pe.data, paddedBytes...)
 	}
 
-	for i := uint32(0); i < dataLen; i+=4 {
+	for i := uint32(0); i < dataLen; i += 4 {
 		// Skip the checksum field.
 		if i == checksumOffset {
 			continue
@@ -566,7 +569,7 @@ func (pe *File) Checksum() uint32 {
 		currentDword = binary.LittleEndian.Uint32(pe.data[i:])
 
 		// Calculate checksum.
-		checksum = (checksum & 0xffffffff) + uint64(currentDword) + (checksum>>32)
+		checksum = (checksum & 0xffffffff) + uint64(currentDword) + (checksum >> 32)
 		if checksum > max {
 			checksum = (checksum & 0xffffffff) + (checksum >> 32)
 		}
@@ -661,4 +664,9 @@ func (pe *File) ReadBytesAtOffset(offset, size uint32) ([]byte, error) {
 func IsBitSet(n uint64, pos int) bool {
 	val := n & (1 << pos)
 	return (val > 0)
+}
+
+func getAbsoluteFilePath(testfile string) string {
+	_, p, _, _ := runtime.Caller(0)
+	return path.Join(filepath.Dir(p), testfile)
 }
