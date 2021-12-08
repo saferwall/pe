@@ -19,6 +19,10 @@ const (
 	// Example:  0000e876c5b712b6b7b3ce97f757ddd918fb3dbdc5a3938e850716fbd841309f
 	MaxDefaultCOFFSymbolsCount = 0x10000
 
+	// MaxCOFFSymStrLength represents the maximum string length of a COFF symbol
+	// to read.
+	MaxCOFFSymStrLength = 0x50
+
 	//
 	// Type Representation
 	//
@@ -238,12 +242,13 @@ type COFFSymbol struct {
 	Value uint32
 
 	// The signed integer that identifies the section, using a one-based index
-	// into the section table. Some values have special meaning, as defined in section 5.4.2, "Section Number Values."
+	// into the section table. Some values have special meaning.
+	// See "Section Number Values."
 	SectionNumber int16
 
 	// A number that represents type. Microsoft tools set this field to
-	// 0x20 (function) or 0x0 (not a function).
-	// For more information, see Type Representation.
+	// 0x20 (function) or 0x0 (not a function). For more information,
+	// see Type Representation.
 	Type uint16
 
 	// An enumerated value that represents storage class.
@@ -284,10 +289,15 @@ func (pe *File) ParseCOFFSymbolTable() error {
 		return errCOFFSymbolsTooHigh
 	}
 
-	size := uint32(binary.Size(COFFSymbol{}))
+	// The location of the symbol table is indicated in the COFF header.
 	offset := pe.NtHeader.FileHeader.PointerToSymbolTable
+
+	// The symbol table is an array of records, each 18 bytes long.
+	size := uint32(binary.Size(COFFSymbol{}))
 	symbols := make([]COFFSymbol, symCount)
 
+	// Each record is either a standard or auxiliary symbol-table record.
+	// A standard record defines a symbol or name and has the COFFSymbol STRUCT format.
 	for i := uint32(0); i < symCount; i++ {
 		err := pe.structUnpack(&symbols[i], offset, size)
 		if err != nil {
@@ -329,12 +339,12 @@ func (pe *File) COFFStringTable() error {
 	// of a symbol.
 	size := uint32(binary.Size(COFFSymbol{}))
 	offset := pointerToSymbolTable + (size * symCount)
-	pe.COFF.StringTableOffset = offset
 
 	// At the beginning of the COFF string table are 4 bytes that contain the
 	// total size (in bytes) of the rest of the string table. This size
 	// includes the size field itself, so that the value in this location would
 	// be 4 if no strings were present.
+	pe.COFF.StringTableOffset = offset
 	strTableSize, err := pe.ReadUint32(offset)
 	if err != nil {
 		return err
@@ -347,11 +357,11 @@ func (pe *File) COFFStringTable() error {
 	// Following the size are null-terminated strings that are pointed to by
 	// symbols in the COFF symbol table. We create a map to map offset to
 	// string.
-	end := offset + strTableSize
-	for offset <= end {
-		len, str := pe.readASCIIStringAtOffset(offset, 0x30)
+	end := offset + strTableSize - 4
+	for offset < end {
+		len, str := pe.readASCIIStringAtOffset(offset, MaxCOFFSymStrLength)
 		if len == 0 {
-			break
+			continue
 		}
 		m[offset] = str
 		offset += len + 1
@@ -362,13 +372,14 @@ func (pe *File) COFFStringTable() error {
 	return nil
 }
 
-// String returns represenation of the symbol name.
+// String returns the representation of the symbol name.
 func (symbol *COFFSymbol) String(pe *File) (string, error) {
-	// contain the name itself, if it is not more than 8 bytes long, or the
-	// ShortName field gives an offset into the string table. To determine
-	// whether the name itself or an offset is given, test the first 4
-	// bytes for equality to zero.
 	var short, long uint32
+
+	// The ShortName field in a symbol table consists of 8 bytes
+	// that contain the name itself, if it is not more than 8
+	// bytes long, or the ShortName field gives an offset into
+	// the string table.
 	highDw := bytes.NewBuffer(symbol.Name[4:])
 	lowDw := bytes.NewBuffer(symbol.Name[:4])
 	errl := binary.Read(lowDw, binary.LittleEndian, &short)
@@ -377,7 +388,8 @@ func (symbol *COFFSymbol) String(pe *File) (string, error) {
 		return "", errCOFFSymbolOutOfBounds
 	}
 
-	// if 0, use LongName.
+	// To determine whether the name itself or an offset is given,
+	// test the first 4 bytes for equality to zero.
 	if short != 0 {
 		name := strings.Replace(string(symbol.Name[:]), "\x00", "", -1)
 		return name, nil
