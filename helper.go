@@ -31,48 +31,47 @@ var (
 
 	// ErrInvalidPESize is returned when the file size is less that the smallest
 	// PE file size possible.ErrImageOS2SignatureFound
-	ErrInvalidPESize = errors.New("Not a PE file, smaller than tiny PE")
+	ErrInvalidPESize = errors.New("not a PE file, smaller than tiny PE")
 
 	// ErrDOSMagicNotFound is returned when file is potentially a ZM executable.
 	ErrDOSMagicNotFound = errors.New("DOS Header magic not found")
 
 	// ErrInvalidElfanewValue is returned when e_lfanew is larger than file size.
-	ErrInvalidElfanewValue = errors.New(
-		"Invalid e_lfanew value. Probably not a PE file")
+	ErrInvalidElfanewValue = errors.New("invalid e_lfanew value. Probably not a PE file")
 
 	// ErrInvalidNtHeaderOffset is returned when the NT Header offset is beyond
 	// the image file.
 	ErrInvalidNtHeaderOffset = errors.New(
-		"Invalid NT Header Offset. NT Header Signature not found")
+		"invalid NT Header Offset. NT Header Signature not found")
 
 	// ErrImageOS2SignatureFound is returned when signature is for a NE file.
 	ErrImageOS2SignatureFound = errors.New(
-		"Not a valid PE signature. Probably a NE file")
+		"not a valid PE signature. Probably a NE file")
 
 	// ErrImageOS2LESignatureFound is returned when signature is for a LE file.
 	ErrImageOS2LESignatureFound = errors.New(
-		"Not a valid PE signature. Probably an LE file")
+		"not a valid PE signature. Probably an LE file")
 
 	// ErrImageVXDSignatureFound is returned when signature is for a LX file.
 	ErrImageVXDSignatureFound = errors.New(
-		"Not a valid PE signature. Probably an LX file")
+		"not a valid PE signature. Probably an LX file")
 
 	// ErrImageTESignatureFound is returned when signature is for a TE file.
 	ErrImageTESignatureFound = errors.New(
-		"Not a valid PE signature. Probably a TE file")
+		"not a valid PE signature. Probably a TE file")
 
 	// ErrImageNtSignatureNotFound is returned when PE magic signature is not found.
 	ErrImageNtSignatureNotFound = errors.New(
-		"Not a valid PE signature. Magic not found")
+		"not a valid PE signature. Magic not found")
 
 	// ErrImageNtOptionalHeaderMagicNotFound is returned when optional header
 	// magic is different from PE32/PE32+.
 	ErrImageNtOptionalHeaderMagicNotFound = errors.New(
-		"Not a valid PE signature. Optional Header magic not found")
+		"not a valid PE signature. Optional Header magic not found")
 
 	// ErrImageBaseNotAligned is reported when the image base is not aligned to 64K.
 	ErrImageBaseNotAligned = errors.New(
-		"Corrupt PE file. Image base not aligned to 64 K")
+		"corrupt PE file. Image base not aligned to 64 K")
 
 	// AnoImageBaseOverflow is reported when the image base + SizeOfImage is
 	// larger than 80000000h/FFFF080000000000h in PE32/P32+.
@@ -80,7 +79,7 @@ var (
 
 	// ErrInvalidSectionFileAlignment is reported when section alignment is less than a
 	// PAGE_SIZE and section alignement != file alignment.
-	ErrInvalidSectionFileAlignment = errors.New("Corrupt PE file. Section " +
+	ErrInvalidSectionFileAlignment = errors.New("corrupt PE file. Section " +
 		"alignment is less than a PAGE_SIZE and section alignement != file alignment")
 
 	// AnoInvalidSizeOfImage is reported when SizeOfImage is not multiple of
@@ -90,7 +89,7 @@ var (
 
 	// ErrOutsideBoundary is reported when attempting to read an address beyond
 	// file image limits.
-	ErrOutsideBoundary = errors.New("Reading data outside boundary")
+	ErrOutsideBoundary = errors.New("reading data outside boundary")
 )
 
 // Max returns the larger of x or y.
@@ -514,10 +513,7 @@ func (pe *File) IsDriver() bool {
 
 // IsDLL returns true if the PE file is a standard DLL.
 func (pe *File) IsDLL() bool {
-	if pe.NtHeader.FileHeader.Characteristics&ImageFileDLL != 0 {
-		return true
-	}
-	return false
+	return pe.NtHeader.FileHeader.Characteristics&ImageFileDLL != 0
 }
 
 // IsEXE returns true if the PE file is a standard executable.

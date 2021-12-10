@@ -507,13 +507,10 @@ func (pe *File) readFromMetadataSteam(Stream int, off uint32, out *uint32) (uint
 	switch Stream {
 	case StringStream:
 		indexSize = pe.CLR.StringStreamIndexSize
-		break
 	case GUIDStream:
 		indexSize = pe.CLR.GUIDStreamIndexSize
-		break
 	case BlobStream:
 		indexSize = pe.CLR.BlobStreamIndexSize
-		break
 	}
 
 	var data uint32
@@ -525,7 +522,6 @@ func (pe *File) readFromMetadataSteam(Stream int, off uint32, out *uint32) (uint
 			return 0, err
 		}
 		data = uint32(d)
-		break
 	case 4:
 		data, err = pe.ReadUint32(off)
 		if err != nil {

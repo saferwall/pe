@@ -44,7 +44,7 @@ var (
 
 	// ErrDamagedImportTable is reported when the IAT and ILT table length is 0.
 	ErrDamagedImportTable = errors.New(
-		"Damaged Import Table information. ILT and/or IAT appear to be broken")
+		"damaged Import Table information. ILT and/or IAT appear to be broken")
 )
 
 // ImageImportDescriptor describes the remainder of the import information.
@@ -579,7 +579,7 @@ func (pe *File) parseImports32(importDesc interface{}, maxLen uint32) (
 		if imp.Name == "*invalid*" {
 			if numInvalid > 1000 && numInvalid == idx {
 				return []*ImportFunction{}, errors.New(
-					`Too many invalid names, aborting parsing`)
+					`too many invalid names, aborting parsing`)
 			}
 			numInvalid++
 			continue
@@ -713,7 +713,7 @@ func (pe *File) parseImports64(importDesc interface{}, maxLen uint32) ([]*Import
 		if imp.Name == "*invalid*" {
 			if numInvalid > 1000 && numInvalid == idx {
 				return []*ImportFunction{}, errors.New(
-					`Too many invalid names, aborting parsing`)
+					`too many invalid names, aborting parsing`)
 			}
 			numInvalid++
 			continue
@@ -756,7 +756,7 @@ func md5hash(text string) string {
 // Generating the MD5 hash of the ordered list
 func (pe *File) ImpHash() (string, error) {
 	if len(pe.Imports) == 0 {
-		return "", errors.New("No imports found")
+		return "", errors.New("no imports found")
 	}
 
 	extensions := []string{"ocx", "sys", "dll"}

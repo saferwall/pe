@@ -429,25 +429,17 @@ func (pe *File) ParseNTHeader() (err error) {
 	}
 
 	// ImageBase should be multiple of 10000h.
-	if pe.Is64 && oh64.ImageBase%0x10000 != 0 {
-		return ErrImageBaseNotAligned
-	}
-	if pe.Is32 && oh32.ImageBase%0x10000 != 0 {
+	if (pe.Is64 && oh64.ImageBase%0x10000 != 0) || (
+		pe.Is32 && oh32.ImageBase%0x10000 != 0) {
 		return ErrImageBaseNotAligned
 	}
 
 	// ImageBase can be any value as long as:
 	// ImageBase + SizeOfImage < 80000000h for PE32.
-	if (pe.Is32 && oh32.ImageBase+oh32.SizeOfImage >= 0x80000000) || (pe.Is64 &&
-		oh64.ImageBase+uint64(oh64.SizeOfImage) >= 0xffff080000000000) {
+	// ImageBase + SizeOfImage < 0xffff080000000000 for PE32+.
+	if (pe.Is32 && oh32.ImageBase+oh32.SizeOfImage >= 0x80000000) || (
+		pe.Is64 && oh64.ImageBase+uint64(oh64.SizeOfImage) >= 0xffff080000000000) {
 		pe.Anomalies = append(pe.Anomalies, AnoImageBaseOverflow)
-	}
-
-	// The msdn states that SizeOfImage must be a multiple of the section
-	// alignment. This is not true though. Adding it as anomaly.
-	if (pe.Is32 && oh32.SizeOfImage%oh32.SectionAlignment != 0) ||
-		(pe.Is64 && oh64.SizeOfImage%oh64.SectionAlignment != 0) {
-		pe.Anomalies = append(pe.Anomalies, AnoInvalidSizeOfImage)
 	}
 
 	return nil

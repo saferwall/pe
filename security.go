@@ -50,7 +50,7 @@ const (
 
 var (
 	errSecurityDataDirOutOfBands = errors.New(
-		`Boundary checks failed in security data directory`)
+		`boundary checks failed in security data directory`)
 )
 
 // Certificate directory.

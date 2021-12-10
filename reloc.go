@@ -11,11 +11,11 @@ import (
 
 var (
 	// ErrInvalidBaseRelocVA is reposed when base reloc lies outside of the image.
-	ErrInvalidBaseRelocVA = errors.New("Invalid relocation information." +
+	ErrInvalidBaseRelocVA = errors.New("invalid relocation information." +
 		" Base Relocation VirtualAddress is outside of PE Image")
 
 	// ErrInvalidBasicRelocSizeOfBloc is reposed when base reloc is too large.
-	ErrInvalidBasicRelocSizeOfBloc = errors.New("Invalid relocation " +
+	ErrInvalidBasicRelocSizeOfBloc = errors.New("invalid relocation " +
 		"information. Base Relocation SizeOfBlock too large")
 )
 

@@ -104,7 +104,7 @@ func NewBytes(data []byte, opts *Options) (*File, error) {
 }
 
 // Close closes the File.
-func (pe *File) Close() error {
+ func (pe *File) Close() error {
 	var err error
 	if pe.f != nil {
 		err = pe.f.Close()

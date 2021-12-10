@@ -213,10 +213,14 @@ const (
 )
 
 var (
-	errCOFFTableNotPresent   = errors.New("PE image does not countains a COFF symbol table")
-	errNoCOFFStringInTable   = errors.New("PE image got a PointerToSymbolTable but no string in the COFF string table")
-	errCOFFSymbolOutOfBounds = errors.New("COFF symbol offset out of bounds")
-	errCOFFSymbolsTooHigh    = errors.New("COFF symbols count is absurdly high")
+	errCOFFTableNotPresent = errors.New(
+		"PE image does not countains a COFF symbol table")
+	errNoCOFFStringInTable = errors.New(
+		"PE image got a PointerToSymbolTable but no string in the COFF string table")
+	errCOFFSymbolOutOfBounds = errors.New(
+		"COFF symbol offset out of bounds")
+	errCOFFSymbolsTooHigh = errors.New(
+		"COFF symbols count is absurdly high")
 )
 
 // COFFSymbol represents an entry in the COFF symbol table, which it is an
@@ -361,7 +365,7 @@ func (pe *File) COFFStringTable() error {
 	for offset < end {
 		len, str := pe.readASCIIStringAtOffset(offset, MaxCOFFSymStrLength)
 		if len == 0 {
-			continue
+			break
 		}
 		m[offset] = str
 		offset += len + 1

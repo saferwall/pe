@@ -13,10 +13,6 @@ const (
 	maxAllowedEntries = 0x1000
 )
 
-var (
-	depth = 0
-)
-
 // Predefined Resource Types.
 var (
 	RTCursor       = 1
