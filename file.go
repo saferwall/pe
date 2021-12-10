@@ -104,12 +104,11 @@ func NewBytes(data []byte, opts *Options) (*File, error) {
 }
 
 // Close closes the File.
- func (pe *File) Close() error {
-	var err error
+func (pe *File) Close() error {
 	if pe.f != nil {
-		err = pe.f.Close()
+		return pe.f.Close()
 	}
-	return err
+	return nil
 }
 
 // Parse performs the file parsing for a PE binary.

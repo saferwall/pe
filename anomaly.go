@@ -175,6 +175,13 @@ func (pe *File) GetAnomalies() error {
 		pe.Anomalies = append(pe.Anomalies, AnoImageBaseNull)
 	}
 
+	// The msdn states that SizeOfImage must be a multiple of the section
+	// alignment. This is not a requirement though. Adding it as anomaly.
+	// Todo: raise an anomaly when SectionAlignment is NULL ?
+	if oh.SectionAlignment != 0 && oh.SizeOfImage%oh.SectionAlignment != 0 {
+		pe.Anomalies = append(pe.Anomalies, AnoInvalidSizeOfImage)
+	}
+
 	// For DLLs, MajorSubsystemVersion is ignored until Windows 8. It can have
 	// any value. Under Windows 8, it needs a standard value (3.10 < 6.30).
 	if oh.MajorSubsystemVersion < 3 || oh.MajorSubsystemVersion > 6 {
