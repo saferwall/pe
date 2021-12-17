@@ -298,10 +298,12 @@ func (pe *File) readUnicodeStringAtRVA(rva uint32, maxLength uint32) string {
 func (pe *File) readASCIIStringAtOffset(offset, maxLength uint32) (uint32, string) {
 	str := ""
 	i := uint32(0)
+
 	for i = 0; i < maxLength; i++ {
-		if i > pe.size || pe.data[offset+i] == 0 {
+		if offset + i >= pe.size || pe.data[offset+i] == 0 { 
 			break
 		}
+
 		str += string(pe.data[offset+i])
 	}
 	return i, str
@@ -591,7 +593,7 @@ func (pe *File) ReadUint64(offset uint32) (uint64, error) {
 
 // ReadUint32 read a uint32 from a buffer.
 func (pe *File) ReadUint32(offset uint32) (uint32, error) {
-	if offset+4 > pe.size {
+	if offset > pe.size  - 4 {
 		return 0, ErrOutsideBoundary
 	}
 
@@ -600,7 +602,7 @@ func (pe *File) ReadUint32(offset uint32) (uint32, error) {
 
 // ReadUint16 read a uint16 from a buffer.
 func (pe *File) ReadUint16(offset uint32) (uint16, error) {
-	if offset+2 > pe.size {
+	if offset > pe.size - 2 {
 		return 0, ErrOutsideBoundary
 	}
 
