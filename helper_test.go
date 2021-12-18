@@ -14,8 +14,8 @@ func TestIsEXE(t *testing.T) {
 		in  string
 		out bool
 	}{
-		{getAbsoluteFilePath("test/liblzo2-2"), false},
-		{getAbsoluteFilePath("test/putty"), true},
+		{getAbsoluteFilePath("test/liblzo2-2.dll"), false},
+		{getAbsoluteFilePath("test/putty.exe"), true},
 	}
 
 	for _, tt := range tests {
@@ -46,8 +46,8 @@ func TestIsDLL(t *testing.T) {
 		in  string
 		out bool
 	}{
-		{getAbsoluteFilePath("test/liblzo2-2"), true},
-		{getAbsoluteFilePath("test/putty"), false},
+		{getAbsoluteFilePath("test/liblzo2-2.dll"), true},
+		{getAbsoluteFilePath("test/putty.exe"), false},
 	}
 
 	for _, tt := range tests {
@@ -78,8 +78,8 @@ func TestIsDriver(t *testing.T) {
 		in  string
 		out bool
 	}{
-		{getAbsoluteFilePath("test/liblzo2-2"), false},
-		{getAbsoluteFilePath("test/WdBoot"), true},
+		{getAbsoluteFilePath("test/liblzo2-2.dll"), false},
+		{getAbsoluteFilePath("test/WdBoot.sys"), true},
 	}
 
 	for _, tt := range tests {

@@ -15,7 +15,7 @@ func TestAuthentihash(t *testing.T) {
 		in  string
 		out string
 	}{
-		{getAbsoluteFilePath("test/putty"),
+		{getAbsoluteFilePath("test/putty.exe"),
 			"8be7d65593b0fff2e8b29004640261b8a0d4fcc651a14cd0b8b702b7928f8ee0"},
 	}
 
@@ -23,19 +23,17 @@ func TestAuthentihash(t *testing.T) {
 		t.Run(tt.in, func(t *testing.T) {
 			file, err := New(tt.in, nil)
 			if err != nil {
-				t.Errorf("TestAuthentihash(%s) failed, reason: %v", tt.in, err)
-				return
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
 			}
 			err = file.Parse()
 			if err != nil {
-				t.Errorf("TestAuthentihash(%s) failed, reason: %v", tt.in, err)
-				return
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
 			}
 
 			hash := file.Authentihash()
 			got := fmt.Sprintf("%x", hash)
 			if string(got) != tt.out {
-				t.Errorf("TestAuthentihash(%s) got %v, want %v", tt.in, got, tt.out)
+				t.Errorf("Authentihash(%s) got %v, want %v", tt.in, got, tt.out)
 			}
 
 		})

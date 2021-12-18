@@ -333,14 +333,13 @@ type Exception struct {
 func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) {
 
 	unwindCode := UnwindCode{}
+	advanceBy := 0
 
 	// Read the unwince code at offset (2 bytes)
 	uc, err := pe.ReadUint16(offset)
 	if err != nil {
-		return unwindCode, 0
+		return unwindCode, advanceBy
 	}
-
-	advanceBy := 0
 
 	unwindCode.CodeOffset = uint8(uc & 0xff)
 	unwindCode.UnwindOp = uint8(uc & 0xf00 >> 8)
@@ -394,10 +393,8 @@ func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) 
 	case UwOpSetFpRegLarge:
 		unwindCode.Operand = "Register=" + OpInfoRegisters[unwindCode.OpInfo]
 		advanceBy += 2
-
 	case UwOpPushMachFrame:
 		advanceBy++
-
 	case UwOpEpilog:
 		if version == 2 {
 			unwindCode.Operand = "Flags=" + strconv.Itoa(int(unwindCode.OpInfo)) + ", Size=" + strconv.Itoa(int(unwindCode.CodeOffset))
@@ -405,7 +402,6 @@ func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) 
 		advanceBy += 2
 	case UwOpSpareCode:
 		advanceBy += 3
-
 	default:
 		advanceBy++ // so we can get out of the loop
 		log.Printf("Wrong unwind opcode %d", unwindCode.UnwindOp)
@@ -448,6 +444,9 @@ func (pe *File) parseUnwinInfo(unwindInfo uint32) UnwindInfo {
 	for i < int(ui.CountOfCodes) {
 		ucOffset := offset + 2*uint32(i)
 		unwindCode, advanceBy := pe.parseUnwindCode(ucOffset, ui.Version)
+		if advanceBy == 0 {
+			return ui
+		}
 		ui.UnwindCodes = append(ui.UnwindCodes, unwindCode)
 		i += advanceBy
 	}
