@@ -12,8 +12,7 @@ import (
 // Anomalies found in a PE
 var (
 
-	// AnoPEHeaderOverlapDOSHeader is reported when the PE headers overlaps with
-	// the DOS header.
+	// AnoPEHeaderOverlapDOSHeader is reported when the PE headers overlaps with the DOS header.
 	AnoPEHeaderOverlapDOSHeader = "PE Header overlaps with DOS header"
 
 	// AnoPETimeStampNull is reported when the file header timestamp is 0.
@@ -34,27 +33,24 @@ var (
 
 	// AnoUncommonSizeOfOptionalHeader32 is reported when size of optional
 	// header for PE32 is larger than 0xE0.
-	AnoUncommonSizeOfOptionalHeader32 = `Size of optional header is larger than
-	 0xE0 (PE32)`
+	AnoUncommonSizeOfOptionalHeader32 = "Size of optional header is larger than 0xE0 (PE32)"
 
 	// AnoUncommonSizeOfOptionalHeader64 is reported when size of optional
 	// header for PE32+ is larger than 0xF0.
-	AnoUncommonSizeOfOptionalHeader64 = `Size of optional header is larger than
-	 0xF0 (PE32+)`
+	AnoUncommonSizeOfOptionalHeader64 = "Size of optional header is larger than 0xF0 (PE32+)"
 
 	// AnoAddressOfEntryPointNull is reported when address of entry point is 0.
-	AnoAddressOfEntryPointNull = "Address of entry point is 0."
+	AnoAddressOfEntryPointNull = "Address of entry point is 0"
 
 	// AnoAddressOfEPLessSizeOfHeaders is reported when address of entry point
 	// is smaller than size of headers, the file cannot run under Windows.
-	AnoAddressOfEPLessSizeOfHeaders = `Address of entry point is smaller than 
-		size of headers, the file cannot run under Windows 8`
+	AnoAddressOfEPLessSizeOfHeaders = "Address of entry point is smaller than size of headers, " +
+		"the file cannot run under Windows 8"
 
-	// AnoImageBaseNull is reported when the image base is null
+	// AnoImageBaseNull is reported when the image base is null.
 	AnoImageBaseNull = "Image base is 0"
 
-	// AnoDanSMagicOffset is reported when the `DanS` magic offset is different
-	// than 0x80.
+	// AnoDanSMagicOffset is reported when the `DanS` magic offset is different than 0x80.
 	AnoDanSMagicOffset = "`DanS` magic offset is different than 0x80"
 
 	// ErrInvalidFileAlignment is reported when file alignment is larger than
@@ -63,27 +59,27 @@ var (
 
 	// ErrInvalidSectionAlignment is reported when file alignment is lesser
 	// than 0x200 and different from section alignment.
-	ErrInvalidSectionAlignment = `FileAlignment lesser than 0x200 and different 
-		from section alignment`
+	ErrInvalidSectionAlignment = "FileAlignment lesser than 0x200 and different from section alignment"
 
 	// AnoMajorSubsystemVersion is reported when MajorSubsystemVersion has a
 	// value different than the standard 3 --> 6.
-	AnoMajorSubsystemVersion = `MajorSubsystemVersion is outside 3<-->6 boundary`
+	AnoMajorSubsystemVersion = "MajorSubsystemVersion is outside 3<-->6 boundary"
 
 	// AnonWin32VersionValue is reported when Win32VersionValue is different than 0
-	AnonWin32VersionValue = `Win32VersionValue is a reserved field, should be
-		normally set to 0x0.`
+	AnonWin32VersionValue = "Win32VersionValue is a reserved field, must be set to zero"
 
 	// AnoInvalidPEChecksum is reported when the optional header checksum field
 	// is different from what it should normally be.
-	AnoInvalidPEChecksum = `Optional header checksum is invalid.`
+	AnoInvalidPEChecksum = "Optional header checksum is invalid"
 
-	// AnoNumberOfRvaAndSizes is reported when NumberOfRvaAndSizes is different
-	// than 16.
-	AnoNumberOfRvaAndSizes = `Optional header NumberOfRvaAndSizes != 16`
+	// AnoNumberOfRvaAndSizes is reported when NumberOfRvaAndSizes is different than 16.
+	AnoNumberOfRvaAndSizes = "Optional header NumberOfRvaAndSizes != 16"
+
+	// AnoReservedDataDirectoryEntry is reported when the last data directory entry is not zero.
+	AnoReservedDataDirectoryEntry = "Last data directory entry is a reserved field, must be set to zero"
 
 	// AnoNumberOfRvaAndSizes is reported when number of COFF symbols is absurdly high.
-	AnoCOFFSymbolsCount = `COFF symbols count is absurdly high`
+	AnoCOFFSymbolsCount = "COFF symbols count is absurdly high"
 )
 
 // GetAnomalies reportes anomalies found in a PE binary.

@@ -22,13 +22,11 @@ func TestIsEXE(t *testing.T) {
 		t.Run(tt.in, func(t *testing.T) {
 			file, err := New(tt.in, nil)
 			if err != nil {
-				t.Errorf("New(%s) failed, reason: %v", tt.in, err)
-				return
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
 			}
 			err = file.Parse()
 			if err != nil {
-				t.Errorf("Parse(%s) failed, reason: %v", tt.in, err)
-				return
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
 			}
 
 			got := file.IsEXE()
@@ -54,13 +52,11 @@ func TestIsDLL(t *testing.T) {
 		t.Run(tt.in, func(t *testing.T) {
 			file, err := New(tt.in, nil)
 			if err != nil {
-				t.Errorf("New(%s) failed, reason: %v", tt.in, err)
-				return
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
 			}
 			err = file.Parse()
 			if err != nil {
-				t.Errorf("Parse(%s) failed, reason: %v", tt.in, err)
-				return
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
 			}
 
 			got := file.IsDLL()
@@ -86,13 +82,11 @@ func TestIsDriver(t *testing.T) {
 		t.Run(tt.in, func(t *testing.T) {
 			file, err := New(tt.in, nil)
 			if err != nil {
-				t.Errorf("New(%s) failed, reason: %v", tt.in, err)
-				return
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
 			}
 			err = file.Parse()
 			if err != nil {
-				t.Errorf("Parse(%s) failed, reason: %v", tt.in, err)
-				return
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
 			}
 
 			got := file.IsDriver()
