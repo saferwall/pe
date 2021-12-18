@@ -175,6 +175,7 @@ func (pe *File) PrettyDataDirectory(entry int) string {
 		ImageDirectoryEntryIAT:          "IAT",
 		ImageDirectoryEntryDelayImport:  "DelayImport",
 		ImageDirectoryEntryCLR:          "CLR",
+		ImageDirectoryEntryReserved:     "Reserved",
 	}
 
 	return dataDirMap[entry]
@@ -232,7 +233,7 @@ func (pe *File) ParseDataDirectories() error {
 
 		if va != 0 {
 			func() {
-				//  keep parsing data directories even though some entries fails.
+				// keep parsing data directories even though some entries fails.
 				defer func() {
 					if e := recover(); e != nil {
 						fmt.Printf("Unhandled Exception when trying to parse data directory %s, reason: %v\n",
@@ -240,6 +241,14 @@ func (pe *File) ParseDataDirectories() error {
 						foundErr = true
 					}
 				}()
+
+				// the last entry in the data directories must be zero and
+				// is reserved.
+				if entryIndex == ImageDirectoryEntryReserved {
+					pe.Anomalies = append(pe.Anomalies, AnoReservedDataDirectoryEntry)
+					return
+				}
+
 
 				err := funcMaps[entryIndex](va, size)
 				if err != nil {
