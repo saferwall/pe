@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parse .net metadata Module table.
 - Parse .net metadata stream headers and metadata tables stream header.
 - Add cmd/pedumper to illustrate how to use the library.
-- Add unit test for relocation, exception, security, symbol, file, section and helper files.
+- Add unit test for relocation, exception, security, symbol, file, nt header, section and helper files.
 - Add an option `New()` to customize max of relocations entries and COFF symbols to parse.
 
 ### Changed
