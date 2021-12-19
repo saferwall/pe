@@ -288,7 +288,7 @@ func (pe *File) ParseCOFFSymbolTable() error {
 	if symCount == 0 {
 		return nil
 	}
-	if symCount > MaxDefaultCOFFSymbolsCount {
+	if symCount > pe.opts.MaxCOFFSymbolsCount {
 		pe.addAnomaly(AnoCOFFSymbolsCount)
 		return errCOFFSymbolsTooHigh
 	}
@@ -332,7 +332,7 @@ func (pe *File) COFFStringTable() error {
 	if symCount == 0 {
 		return nil
 	}
-	if symCount > MaxDefaultCOFFSymbolsCount {
+	if symCount > pe.opts.MaxCOFFSymbolsCount {
 		pe.addAnomaly(AnoCOFFSymbolsCount)
 		return errCOFFSymbolsTooHigh
 	}
