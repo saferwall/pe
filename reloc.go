@@ -85,6 +85,14 @@ const (
 	ImageRelBasedDir64 = 10
 )
 
+const (
+	// MaxDefaultRelocEntriesCount represents the default maximum number of
+	// relocations entries to parse. Some malwares uses a fake huge reloc entries that
+	// can slow significantly the parser.
+	// Example:  01008963d32f5cc17b64c31446386ee5b36a7eab6761df87a2989ba9394d8f3d
+	MaxDefaultRelocEntriesCount = 0x1000
+)
+
 // ImageBaseRelocation represents the IMAGE_BASE_RELOCATION structure.
 // Each chunk of base relocation data begins with an IMAGE_BASE_RELOCATION structure.
 type ImageBaseRelocation struct {
@@ -124,11 +132,20 @@ type Relocation struct {
 
 func (pe *File) parseRelocations(dataRVA, rva, size uint32) ([]ImageBaseRelocationEntry, error) {
 	var relocEntries []ImageBaseRelocationEntry
+
 	relocEntriesCount := size / 2
+	if relocEntriesCount > pe.opts.MaxRelocEntriesCount {
+		pe.Anomalies = append(pe.Anomalies, AnoAddressOfDataBeyondLimits)
+	}
+
 	offset := pe.getOffsetFromRva(dataRVA)
+	var err error
 	for i := uint32(0); i < relocEntriesCount; i++ {
 		entry := ImageBaseRelocationEntry{}
-		entry.Data = binary.LittleEndian.Uint16(pe.data[offset+(i*2):])
+		entry.Data, err = pe.ReadUint16(offset+(i*2))
+		if err != nil {
+			break
+		}
 		entry.Type = uint8(entry.Data >> 12)
 		entry.Offset = entry.Data & 0x0fff
 		relocEntries = append(relocEntries, entry)

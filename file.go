@@ -54,7 +54,10 @@ type Options struct {
 	SectionEntropy bool
 
 	// Maximum COFF symbols to parse.
-	MaxCOFFSymbolsCount uint64
+	MaxCOFFSymbolsCount uint32
+
+	// Maximum relocations to parse.
+	MaxRelocEntriesCount uint32
 }
 
 // New instaniates a file instance with options given a file name.
@@ -81,6 +84,9 @@ func New(name string, opts *Options) (*File, error) {
 
 	if file.opts.MaxCOFFSymbolsCount == 0 {
 		file.opts.MaxCOFFSymbolsCount = MaxDefaultCOFFSymbolsCount
+	}
+	if file.opts.MaxRelocEntriesCount == 0 {
+		file.opts.MaxRelocEntriesCount = MaxDefaultRelocEntriesCount
 	}
 
 	file.data = data
