@@ -6,6 +6,7 @@ package pe
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -72,6 +73,7 @@ func TestParseSectionHeaders(t *testing.T) {
 			}
 
 			prettySectionFlags := section.PrettySectionFlags()
+			sort.Strings(prettySectionFlags)
 			if !reflect.DeepEqual(prettySectionFlags, tt.out.sectionFlags) {
 				t.Errorf("pretty section flags assertion failed, got %v, want %v",
 					prettySectionFlags, tt.out.sectionFlags)

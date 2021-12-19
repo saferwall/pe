@@ -54,7 +54,6 @@ func parsePE(filename string, cmd *cobra.Command) {
 	data, _ := ioutil.ReadFile(filename)
 	pe, err := peparser.NewBytes(data, &peparser.Options{})
 
-	// pe, err := peparser.New(filename, &peparser.Options{})
 	if err != nil {
 		log.Printf("Error while opening file: %s, reason: %s", filename, err)
 		return
@@ -66,6 +65,12 @@ func parsePE(filename string, cmd *cobra.Command) {
 		log.Printf("Error while parsing file: %s, reason: %s", filename, err)
 		return
 	}
+
+	// Calculate the PE authentihash.
+	//pe.Authentihash()
+
+	// Calculate the PE checksum.
+	pe.Checksum()
 
 	wantDosHeader, _ := cmd.Flags().GetBool("dosheader")
 	if wantDosHeader {
@@ -81,6 +86,12 @@ func parsePE(filename string, cmd *cobra.Command) {
 
 	wantSections, _ := cmd.Flags().GetBool("sections")
 	if wantSections {
+		for _, sec := range pe.Sections {
+			fmt.Printf("Section Name : %s\n", sec.NameString())
+			fmt.Printf("Section VirtualSize : %x\n", sec.Header.VirtualSize)
+			fmt.Printf("Section Flags : %x, Meaning: %v\n\n",
+			 sec.Header.Characteristics, sec.PrettySectionFlags())
+		}
 		sectionsHeaders, _ := json.Marshal(pe.Sections)
 		fmt.Println(prettyPrint(sectionsHeaders))
 	}
