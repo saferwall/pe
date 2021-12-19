@@ -36,7 +36,8 @@ const (
 	// ImageScnCntCode indicates the section contains executable code.
 	ImageScnCntCode = 0x00000020
 
-	// ImageScnCntInitializedData indicates the section contains initialized data.
+	// ImageScnCntInitializedData indicates the section contains initialized
+	// data.
 	ImageScnCntInitializedData = 0x00000040
 
 	// ImageScnCntUninitializedData indicates the section contains uninitialized
@@ -135,13 +136,14 @@ const (
 	// Valid only for object files.
 	ImageScnAlign8192Bytes = 0x00E00000
 
-	// ImageScnLnkMRelocOvfl indicates the section contains extended relocations.
+	// ImageScnLnkMRelocOvfl indicates the section contains extended
+	// relocations.
 	ImageScnLnkMRelocOvfl = 0x01000000
 
 	// ImageScnMemDiscardable indicates the section can be discarded as needed.
 	ImageScnMemDiscardable = 0x02000000
 
-	//ImageScnMemNotCached indicates the  section cannot be cached.
+	// ImageScnMemNotCached indicates the  section cannot be cached.
 	ImageScnMemNotCached = 0x04000000
 
 	// ImageScnMemNotPaged indicates the section is not pageable.
@@ -436,9 +438,9 @@ func (section *Section) Data(start, length uint32, pe *File) []byte {
 		end = offset + section.Header.SizeOfRawData
 	}
 
-	// PointerToRawData is not adjusted here as we might want to read any
-	// possible extra bytes that might get cut off by aligning the start (and
-	// hence cutting something off the end)
+	// PointerToRawData is not adjusted here as we might want to read any possible 
+	// extra bytes that might get cut off by aligning the start (and hence cutting
+	// something off the end)
 	if end > section.Header.PointerToRawData+section.Header.SizeOfRawData &&
 		section.Header.PointerToRawData+section.Header.SizeOfRawData > offset {
 		end = section.Header.PointerToRawData + section.Header.SizeOfRawData
@@ -497,13 +499,12 @@ func (s byPointerToRawData) Less(i, j int) bool {
 	return s[i].Header.PointerToRawData < s[j].Header.PointerToRawData
 }
 
-// PrettySectionFlags returns the string representations of the
-// `Flags` field of section header.
-func (pe *File) PrettySectionFlags(curSectionFlag uint32) []string {
+// PrettySectionFlags returns the string representations of the `Flags` field of section header.
+func (section *Section) PrettySectionFlags() []string {
 	var values []string
 
 	sectionFlags := map[uint32]string{
-		ImageScnReserved1:            "Reserved1",
+		//ImageScnReserved1:            "Reserved1",
 		ImageScnReserved2:            "Reserved2",
 		ImageScnReserved3:            "Reserved3",
 		ImageScnReserved4:            "Reserved4",
@@ -529,7 +530,7 @@ func (pe *File) PrettySectionFlags(curSectionFlag uint32) []string {
 		ImageScnAlign32Bytes:         "Align32Bytes",
 		ImageScnAlign64Bytes:         "Align64Bytes",
 		ImageScnAlign128Bytes:        "Align128Bytes",
-		ImageScnAlign256Bytes:        "Align265Bytes",
+		ImageScnAlign256Bytes:        "Align256Bytes",
 		ImageScnAlign512Bytes:        "Align512Bytes",
 		ImageScnAlign1024Bytes:       "Align1024Bytes",
 		ImageScnAlign2048Bytes:       "Align2048Bytes",
@@ -545,9 +546,10 @@ func (pe *File) PrettySectionFlags(curSectionFlag uint32) []string {
 		ImageScnMemWrite:             "Writable",
 	}
 
-	for k, s := range sectionFlags {
-		if k&curSectionFlag != 0 {
-			values = append(values, s)
+	flags := section.Header.Characteristics
+	for k, v := range sectionFlags {
+		if (k & flags) == k {
+			values = append(values, v)
 		}
 	}
 
