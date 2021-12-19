@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parse .net metadata Module table.
 - Parse .net metadata stream headers and metadata tables stream header.
 - Add cmd/pedumper to illustrate how to use the library.
-- Add unit test for relocation, exception, security, symbol, file and helper files.
+- Add unit test for relocation, exception, security, symbol, file, section and helper files.
+- Add an option `New()` to customize max of relocations entries and COFF symbols to parse.
 
 ### Changed
 - Remove uneeded break statements & lowercase error messages and anomalies.
@@ -25,13 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - License from Apache 2 to MIT.
 
 ### Fixed
-- Probe for invalid NtHeader offset.
+- Probe for invalid Nt Header offset.
 - Fix authenticode hash calculation.
-- Compile correctly on 32 bit thnkas to `Max Altgelt.
+- Compile correctly on 32 bit thnkas to @Max Altgelt.
 - COFF symbol table `readASCIIStringAtOffset()` out of bounds exception.
 - Probe for optional header section alignment != 0.
 - Fix infinite loop in exception unwind code parsing.
 - Fix last data directory entry is reserved and must be zero.
+- Safe ready of global pointer register
 
 ## [1.0.0] - 2021-03-04 (Initial Release)
 - Works with PE32/PE32+ file fomat.
