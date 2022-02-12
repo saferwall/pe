@@ -220,7 +220,8 @@ func (pe *File) getOffsetFromRva(rva uint32) uint32 {
 	return rva - sectionAlignment + fileAlignment
 }
 
-func (pe *File) getRvaFromOffset(offset uint32) uint32 {
+// GetRVAFromOffset retuns an RVA given an offset.
+func (pe *File) GetRVAFromOffset(offset uint32) uint32 {
 	section := pe.getSectionByOffset(offset)
 	minAddr := ^uint32(0)
 	if section == nil {
@@ -300,7 +301,7 @@ func (pe *File) readASCIIStringAtOffset(offset, maxLength uint32) (uint32, strin
 	i := uint32(0)
 
 	for i = 0; i < maxLength; i++ {
-		if offset + i >= pe.size || pe.data[offset+i] == 0 { 
+		if offset+i >= pe.size || pe.data[offset+i] == 0 {
 			break
 		}
 
@@ -341,9 +342,9 @@ func (pe *File) getStringAtOffset(offset, size uint32) (string, error) {
 	return strings.Replace(str, "\x00", "", -1), nil
 }
 
-// getData returns the data given an RVA regardless of the section where it
+// GetData returns the data given an RVA regardless of the section where it
 // lies on.
-func (pe *File) getData(rva, length uint32) ([]byte, error) {
+func (pe *File) GetData(rva, length uint32) ([]byte, error) {
 
 	// Given a RVA and the size of the chunk to retrieve, this method
 	// will find the section where the data lies and return the data.
@@ -593,7 +594,7 @@ func (pe *File) ReadUint64(offset uint32) (uint64, error) {
 
 // ReadUint32 read a uint32 from a buffer.
 func (pe *File) ReadUint32(offset uint32) (uint32, error) {
-	if offset > pe.size  - 4 {
+	if offset > pe.size-4 {
 		return 0, ErrOutsideBoundary
 	}
 
@@ -602,7 +603,7 @@ func (pe *File) ReadUint32(offset uint32) (uint32, error) {
 
 // ReadUint16 read a uint16 from a buffer.
 func (pe *File) ReadUint16(offset uint32) (uint16, error) {
-	if offset > pe.size - 2 {
+	if offset > pe.size-2 {
 		return 0, ErrOutsideBoundary
 	}
 

@@ -133,21 +133,21 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 
 	length = min(lengthUntilEOF(exportDir.AddressOfNames),
 		exportDir.NumberOfNames*4)
-	addressOfNames, err = pe.getData(exportDir.AddressOfNames, length)
+	addressOfNames, err = pe.GetData(exportDir.AddressOfNames, length)
 	if err != nil {
 		return errors.New(errorMsg)
 	}
 
 	length = min(lengthUntilEOF(exportDir.AddressOfNameOrdinals),
 		exportDir.NumberOfNames*4)
-	addressOfNameOrdinals, err := pe.getData(exportDir.AddressOfNameOrdinals, length)
+	addressOfNameOrdinals, err := pe.GetData(exportDir.AddressOfNameOrdinals, length)
 	if err != nil {
 		return errors.New(errorMsg)
 	}
 
 	length = min(lengthUntilEOF(exportDir.AddressOfFunctions),
 		exportDir.NumberOfFunctions*4)
-	addressOfFunctions, err := pe.getData(exportDir.AddressOfFunctions, length)
+	addressOfFunctions, err := pe.GetData(exportDir.AddressOfFunctions, length)
 	if err != nil {
 		return errors.New(errorMsg)
 	}
