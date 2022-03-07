@@ -765,8 +765,10 @@ func (pe *File) ImpHash() (string, error) {
 	for _, imp := range pe.Imports {
 		var libname string
 		parts := strings.Split(imp.Name, ".")
-		if len(parts) > 0 && stringInSlice(parts[1], extensions) {
+		if len(parts) == 2 && stringInSlice(strings.ToLower(parts[1]), extensions) {
 			libname = parts[0]
+		} else {
+			libname = imp.Name
 		}
 
 		libname = strings.ToLower(libname)
@@ -774,7 +776,7 @@ func (pe *File) ImpHash() (string, error) {
 		for _, function := range imp.Functions {
 			var funcname string
 			if function.ByOrdinal {
-				funcname = OrdLookup(libname, uint64(function.Ordinal), true)
+				funcname = OrdLookup(imp.Name, uint64(function.Ordinal), true)
 			} else {
 				funcname = function.Name
 			}
