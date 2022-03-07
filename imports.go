@@ -774,7 +774,7 @@ func (pe *File) ImpHash() (string, error) {
 		for _, function := range imp.Functions {
 			var funcname string
 			if function.ByOrdinal {
-				funcname = OrdLookup(libname, uint64(function.Ordinal), true)
+				funcname = OrdLookup(imp.Name, uint64(function.Ordinal), true)
 			} else {
 				funcname = function.Name
 			}
