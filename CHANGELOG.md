@@ -1,4 +1,5 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -6,8 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Added
+
+- Unit test for bound imports directory.
+
+## Changed
+
+- Make GetData() and GetRVAFromOffset() helper routines public.
+
+## Fixed
+
+- Imphash calculation [#17](https://github.com/saferwall/pe/pull/17) thanks to [@secDre4mer](https://github.com/secDre4mer).
+
+
 ## [1.1.0] - 2021-12-20
+
 ### Added
+
 - Add .editorconfig and .vscode config.
 - Add github action CI workflow to test the package.
 - Add few badges for the README.md to track build status, coverage and code quality.
@@ -19,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add an option `New()` to customize max of relocations entries and COFF symbols to parse.
 
 ### Changed
+
 - Remove uneeded break statements & lowercase error messages and anomalies.
 - Make COFF entry in File struct a pointer.
 - Remove unsafe pointer usage from resource directory.
@@ -26,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - License from Apache 2 to MIT.
 
 ### Fixed
+
 - Probe for invalid Nt Header offset.
 - Fix authenticode hash calculation.
 - Compile correctly on 32 bit thnkas to @Max Altgelt.
@@ -36,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Safe ready of global pointer register
 
 ## [1.0.0] - 2021-03-04 (Initial Release)
+
 - Works with PE32/PE32+ file fomat.
 - Supports Intel x86/AMD64/ARM7ARM7 Thumb/ARM8-64/IA64/CHPE architectures.
 - MS DOS header.

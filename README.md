@@ -4,39 +4,39 @@
 
 ## Table of content
 
-- [Features](#features)
-- [Installing](#installing)
-- [Using the library](#using-the-library)
-    - [Access the PE header](#pe-header)
-    - [Iterating over sections](#iterating-over-sections)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-- [References](#references)
+-   [Features](#features)
+-   [Installing](#installing)
+-   [Using the library](#using-the-library)
+    -   [Access the PE header](#pe-header)
+    -   [Iterating over sections](#iterating-over-sections)
+-   [Roadmap](#roadmap)
+-   [Contributing](#contributing)
+-   [License](#license)
+-   [References](#references)
 
 ## Features
 
-- Works with PE32/PE32+ file fomat.
-- Supports Intel x86/AMD64/ARM7ARM7 Thumb/ARM8-64/IA64/CHPE architectures.
-- MS DOS header.
-- Rich Header (calculate checksum).
-- NT Header (file header + optional header).
-- COFF symbol table and string table.
-- Sections headers + entropy calculation. 
-- Data directories
-    - Import Table + ImpHash calculation.
-    - Export Table
-    - Resource Table
-    - Exceptions Table
-    - Security Table + Authentihash calculation.
-    - Relocations Table
-    - Debug Table (CODEVIEW, POGO, VC FEATURE, REPRO, FPO, EXDLL CHARACTERISTICS debug types).
-    - TLS Table
-    - Load Config Directory (SEH, GFID, GIAT, Guard LongJumps, CHPE, Dynamic Value Reloc Table, Enclave Configuration, Volatile Metadata tables).
-    - Bound Import Table
-    - Delay Import Table
-    - COM Table (CLR Metadata Header, Metadata Table Streams)
-- Report several anomalies
+-   Works with PE32/PE32+ file fomat.
+-   Supports Intel x86/AMD64/ARM7ARM7 Thumb/ARM8-64/IA64/CHPE architectures.
+-   MS DOS header.
+-   Rich Header (calculate checksum).
+-   NT Header (file header + optional header).
+-   COFF symbol table and string table.
+-   Sections headers + entropy calculation.
+-   Data directories
+    -   Import Table + ImpHash calculation.
+    -   Export Table
+    -   Resource Table
+    -   Exceptions Table
+    -   Security Table + Authentihash calculation.
+    -   Relocations Table
+    -   Debug Table (CODEVIEW, POGO, VC FEATURE, REPRO, FPO, EXDLL CHARACTERISTICS debug types).
+    -   TLS Table
+    -   Load Config Directory (SEH, GFID, GIAT, Guard LongJumps, CHPE, Dynamic Value Reloc Table, Enclave Configuration, Volatile Metadata tables).
+    -   Bound Import Table
+    -   Delay Import Table
+    -   COM Table (CLR Metadata Header, Metadata Table Streams)
+-   Report several anomalies
 
 ## Installing
 
@@ -65,7 +65,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error while opening file: %s, reason: %v", filename, err)
     }
-    
+
     err = pe.Parse()
     if err != nil {
         log.Fatalf("Error while parsing file: %s, reason: %v", filename, err)
@@ -78,31 +78,31 @@ Afterwards, a call to the `Parse()` method will give you access to all the diffe
 
 ```go
 type File struct {
-	DosHeader    ImageDosHeader              `json:",omitempty"`
-	RichHeader   *RichHeader                 `json:",omitempty"`
-	NtHeader     ImageNtHeader               `json:",omitempty"`
-	COFF         *COFF                        `json:",omitempty"`
-	Sections     []Section                   `json:",omitempty"`
-	Imports      []Import                    `json:",omitempty"`
-	Export       *Export                     `json:",omitempty"`
-	Debugs       []DebugEntry                `json:",omitempty"`
-	Relocations  []Relocation                `json:",omitempty"`
-	Resources    *ResourceDirectory          `json:",omitempty"`
-	TLS          *TLSDirectory               `json:",omitempty"`
-	LoadConfig   *LoadConfig                 `json:",omitempty"`
-	Exceptions   []Exception                 `json:",omitempty"`
-	Certificates *Certificate                `json:",omitempty"`
-	DelayImports []DelayImport               `json:",omitempty"`
-	BoundImports []BoundImportDescriptorData `json:",omitempty"`
-	GlobalPtr    uint32                      `json:",omitempty"`
-	CLR          *CLRData                    `json:",omitempty"`
-	IAT          []IATEntry                  `json:",omitempty"`
+	DosHeader    ImageDosHeader
+	RichHeader   *RichHeader
+	NtHeader     ImageNtHeader
+	COFF         *COFF
+	Sections     []Section
+	Imports      []Import
+	Export       *Export
+	Debugs       []DebugEntry
+	Relocations  []Relocation
+	Resources    *ResourceDirectory
+	TLS          *TLSDirectory
+	LoadConfig   *LoadConfig
+	Exceptions   []Exception
+	Certificates *Certificate
+	DelayImports []DelayImport
+	BoundImports []BoundImportDescriptorData
+	GlobalPtr    uint32
+	CLR          *CLRData
+	IAT          []IATEntry
 	Header       []byte
 	data         mmap.MMap
 	closer       io.Closer
 	Is64         bool
 	Is32         bool
-	Anomalies    []string `json:",omitempty"`
+	Anomalies    []string
 	size         uint32
 	f            *os.File
 	opts         *Options
@@ -165,11 +165,11 @@ Section Flags : 40600040, Meaning: [Align2Bytes Align8Bytes Readable Initialized
 
 To validate the parser we use the [go-fuzz](https://github.com/dvyukov/go-fuzz) and a corpus of known malformed and tricky PE files from [corkami](https://github.com/corkami/pocs/tree/master/PE).
 
-# References
+## References
 
 - [Peering Inside the PE: A Tour of the Win32 Portable Executable File Format by Matt Pietrek](http://bytepointer.com/resources/pietrek_peering_inside_pe.htm)
 - [An In-Depth Look into the Win32 Portable Executable File Format - Part 1 by Matt Pietrek](http://www.delphibasics.info/home/delphibasicsarticles/anin-depthlookintothewin32portableexecutablefileformat-part1)
 - [An In-Depth Look into the Win32 Portable Executable File Format - Part 2 by Matt Pietrek](http://www.delphibasics.info/home/delphibasicsarticles/anin-depthlookintothewin32portableexecutablefileformat-part2)
 - [Portable Executable File Format](https://blog.kowalczyk.info/articles/pefileformat.html)
 - [PE Format MSDN spec](https://docs.microsoft.com/en-us/windows/win32/debug/pe-format)
-- https://www.ntcore.com/files/dotnetformat.htm
+- [DotNET format](https://www.ntcore.com/files/dotnetformat.htm)
