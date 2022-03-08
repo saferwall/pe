@@ -32,7 +32,7 @@ type ImageBoundForwardedRef struct {
 	Reserved         uint16
 }
 
-// BoundImportDescriptorData represents the descripts in addition to forwarded refs.
+// BoundImportDescriptorData represents the descriptor in addition to forwarded refs.
 type BoundImportDescriptorData struct {
 	Struct        ImageBoundImportDescriptor
 	Name          string
@@ -59,8 +59,7 @@ func (pe *File) parseBoundImportDirectory(rva, size uint32) (err error) {
 	for {
 		bndDesc := ImageBoundImportDescriptor{}
 		bndDescSize := uint32(binary.Size(bndDesc))
-		buf := bytes.NewReader(pe.data[rva : rva+bndDescSize])
-		err := binary.Read(buf, binary.LittleEndian, &bndDesc)
+		err = pe.structUnpack(&bndDesc, rva, bndDescSize)
 		// If the RVA is invalid all would blow up. Some EXEs seem to be
 		// specially nasty and have an invalid RVA.
 		if err != nil {
