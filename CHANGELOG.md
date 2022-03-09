@@ -9,16 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-- Unit test for bound imports directory.
+- Unit test for bound imports directory [#18](https://github.com/saferwall/pe/pull/18)
+- Unit test for security directory [#19](https://github.com/saferwall/pe/pull/19).
 
 ## Changed
 
-- Make GetData() and GetRVAFromOffset() helper routines public.
+- Make `GetData()` and `GetRVAFromOffset()` helper routines public.
 
 ## Fixed
 
 - Imphash calculation [#17](https://github.com/saferwall/pe/pull/17) thanks to [@secDre4mer](https://github.com/secDre4mer).
-
+- Null certificate header in security directory [#19](https://github.com/saferwall/pe/pull/19)
 
 ## [1.1.0] - 2021-12-20
 

@@ -49,8 +49,10 @@ const (
 )
 
 var (
-	errSecurityDataDirOutOfBands = errors.New(
-		`boundary checks failed in security data directory`)
+	// ErrSecurityDataDirInvalidCertHeader is reported when the certificate
+	// header in the security directory is invalid.
+	ErrSecurityDataDirInvalid = errors.New(
+		`invalid certificate header in security directory`)
 )
 
 // Certificate directory.
@@ -216,11 +218,15 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 	for {
 		err := pe.structUnpack(&certHeader, fileOffset, certSize)
 		if err != nil {
-			return errSecurityDataDirOutOfBands
+			return ErrOutsideBoundary
 		}
 
 		if fileOffset+certHeader.Length > pe.size {
-			return errSecurityDataDirOutOfBands
+			return ErrOutsideBoundary
+		}
+
+		if certHeader.Length == 0 {
+			return ErrSecurityDataDirInvalid
 		}
 
 		certContent := pe.data[fileOffset+certSize : fileOffset+certHeader.Length]

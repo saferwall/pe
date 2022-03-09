@@ -5,7 +5,6 @@
 package pe
 
 import (
-	"bytes"
 	"encoding/binary"
 	"log"
 )
@@ -109,8 +108,7 @@ func (pe *File) parseBoundImportDirectory(rva, size uint32) (err error) {
 
 		var forwarderRefs []BoundForwardedRefData
 		for i := uint32(0); i < count; i++ {
-			buf := bytes.NewReader(pe.data[rva : rva+bndFrwdRefSize])
-			err := binary.Read(buf, binary.LittleEndian, &bndFrwdRef)
+			err = pe.structUnpack(&bndFrwdRef, rva, bndFrwdRefSize)
 			if err != nil {
 				return err
 			}
