@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-- Unit test for bound imports directory [#18](https://github.com/saferwall/pe/pull/18)
-- Unit test for security directory [#19](https://github.com/saferwall/pe/pull/19).
+- Unit tests for bound imports directory [#18](https://github.com/saferwall/pe/pull/18).
+- Unit tests for security directory [#19](https://github.com/saferwall/pe/pull/19).
+- Allow access to the raw certificates content [#22](https://github.com/saferwall/pe/pull/22).
 
 ## Changed
 
