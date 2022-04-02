@@ -59,6 +59,7 @@ var (
 type Certificate struct {
 	Header   WinCertificate
 	Content  *pkcs7.PKCS7 `json:"-"`
+	Raw      []byte
 	Info     CertInfo
 	Verified bool
 }
@@ -209,6 +210,7 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 	certInfo := CertInfo{}
 	certHeader := WinCertificate{}
 	certSize := uint32(binary.Size(certHeader))
+	var certContent []byte
 
 	// The virtual address value from the Certificate Table entry in the
 	// Optional Header Data Directory is a file offset to the first attribute
@@ -229,10 +231,10 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 			return ErrSecurityDataDirInvalid
 		}
 
-		certContent := pe.data[fileOffset+certSize : fileOffset+certHeader.Length]
+		certContent = pe.data[fileOffset+certSize : fileOffset+certHeader.Length]
 		pkcs, err = pkcs7.Parse(certContent)
 		if err != nil {
-			pe.Certificates = &Certificate{Header: certHeader}
+			pe.Certificates = &Certificate{Header: certHeader, Raw: certContent}
 			return err
 		}
 
@@ -321,6 +323,6 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 	}
 
 	pe.Certificates = &Certificate{Header: certHeader, Content: pkcs,
-		Info: certInfo, Verified: isValid}
+		Raw: certContent, Info: certInfo, Verified: isValid}
 	return nil
 }
