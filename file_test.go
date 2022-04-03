@@ -19,7 +19,7 @@ var peTests = []struct {
 func TestParse(t *testing.T) {
 	for _, tt := range peTests {
 		t.Run(tt.in, func(t *testing.T) {
-			file, err := New(tt.in, nil)
+			file, err := New(tt.in, &Options{})
 			if err != nil {
 				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
 			}
@@ -36,7 +36,7 @@ func TestNewBytes(t *testing.T) {
 	for _, tt := range peTests {
 		t.Run(tt.in, func(t *testing.T) {
 			data, _ := ioutil.ReadFile(tt.in)
-			file, err := NewBytes(data, nil)
+			file, err := NewBytes(data, &Options{})
 			if err != nil {
 				t.Fatalf("NewBytes(%s) failed, reason: %v", tt.in, err)
 			}
@@ -65,7 +65,7 @@ func TestChecksum(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {
-			file, err := New(tt.in, nil)
+			file, err := New(tt.in, &Options{})
 			if err != nil {
 				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
 			}

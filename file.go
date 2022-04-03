@@ -6,10 +6,10 @@ package pe
 
 import (
 	"errors"
-	"fmt"
 	"os"
 
 	mmap "github.com/edsrzf/mmap-go"
+	"github.com/saferwall/pe/log"
 )
 
 // A File represents an open PE file.
@@ -41,6 +41,7 @@ type File struct {
 	size         uint32
 	f            *os.File
 	opts         *Options
+	logger       *log.Helper
 }
 
 // Options for Parsing
@@ -58,6 +59,9 @@ type Options struct {
 
 	// Maximum relocations to parse.
 	MaxRelocEntriesCount uint32
+
+	// A custom logger.
+	Logger log.Logger
 }
 
 // New instaniates a file instance with options given a file name.
@@ -89,6 +93,15 @@ func New(name string, opts *Options) (*File, error) {
 		file.opts.MaxRelocEntriesCount = MaxDefaultRelocEntriesCount
 	}
 
+	var logger log.Logger
+	if opts.Logger == nil {
+		logger = log.NewStdLogger(os.Stdout)
+		file.logger = log.NewHelper(log.NewFilter(logger,
+			log.FilterLevel(log.LevelError)))
+	} else {
+		file.logger = log.NewHelper(logger)
+	}
+
 	file.data = data
 	file.size = uint32(len(file.data))
 	file.f = f
@@ -104,6 +117,23 @@ func NewBytes(data []byte, opts *Options) (*File, error) {
 	} else {
 		file.opts = &Options{}
 	}
+
+	if file.opts.MaxCOFFSymbolsCount == 0 {
+		file.opts.MaxCOFFSymbolsCount = MaxDefaultCOFFSymbolsCount
+	}
+	if file.opts.MaxRelocEntriesCount == 0 {
+		file.opts.MaxRelocEntriesCount = MaxDefaultRelocEntriesCount
+	}
+
+	var logger log.Logger
+	if opts.Logger == nil {
+		logger = log.NewStdLogger(os.Stdout)
+		file.logger = log.NewHelper(log.NewFilter(logger,
+			log.FilterLevel(log.LevelError)))
+	} else {
+		file.logger = log.NewHelper(logger)
+	}
+
 	file.data = data
 	file.size = uint32(len(file.data))
 	return &file, nil
@@ -242,7 +272,7 @@ func (pe *File) ParseDataDirectories() error {
 				// keep parsing data directories even though some entries fails.
 				defer func() {
 					if e := recover(); e != nil {
-						fmt.Printf("Unhandled Exception when trying to parse data directory %s, reason: %v\n",
+						pe.logger.Warnf("Unhandled Exception when trying to parse data directory %s, reason: %v\n",
 							pe.PrettyDataDirectory(entryIndex), e)
 						foundErr = true
 					}
@@ -255,10 +285,9 @@ func (pe *File) ParseDataDirectories() error {
 					return
 				}
 
-
 				err := funcMaps[entryIndex](va, size)
 				if err != nil {
-					fmt.Printf("Failed to parse data directory %s, reason: %v\n",
+					pe.logger.Warnf("Failed to parse data directory %s, reason: %v\n",
 						pe.PrettyDataDirectory(entryIndex), err)
 					foundErr = true
 				}

@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"log"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -245,7 +244,7 @@ func (pe *File) GetRVAFromOffset(offset uint32) uint32 {
 			return offset
 		}
 
-		log.Println("data at Offset can't be fetched. Corrupt header?")
+		pe.logger.Warn("data at Offset can't be fetched. Corrupt header?")
 		return ^uint32(0)
 	}
 	sectionAlignment := pe.adjustSectionAlignment(section.Header.VirtualAddress)

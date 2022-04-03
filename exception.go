@@ -6,7 +6,6 @@ package pe
 
 import (
 	"encoding/binary"
-	"log"
 	"strconv"
 )
 
@@ -404,7 +403,7 @@ func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) 
 		advanceBy += 3
 	default:
 		advanceBy++ // so we can get out of the loop
-		log.Printf("Wrong unwind opcode %d", unwindCode.UnwindOp)
+		pe.logger.Warnf("Wrong unwind opcode %d", unwindCode.UnwindOp)
 	}
 
 	return unwindCode, advanceBy

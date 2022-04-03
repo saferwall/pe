@@ -477,7 +477,8 @@ type ModuleTableRow struct {
 	// zero terminator.
 	Name uint32
 
-	// (offset in the #GUID stream) A globally unique identifier, assigned to the module as it is generated.
+	// (offset in the #GUID stream) A globally unique identifier, assigned
+	// to the module as it is generated.
 	Mvid uint32
 
 	// (offset in the #GUID stream): Used only at run time, in
@@ -527,7 +528,6 @@ func (pe *File) readFromMetadataSteam(Stream int, off uint32, out *uint32) (uint
 		if err != nil {
 			return 0, err
 		}
-
 	}
 
 	*out = data
