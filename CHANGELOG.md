@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
+- Add a new option to allow usage of a custom logger [#24](https://github.com/saferwall/pe/pull/24).
 - Unit tests for delay imports directory [#23](https://github.com/saferwall/pe/pull/23).
 - Allow access to the raw certificates content [#22](https://github.com/saferwall/pe/pull/22).
 - Unit tests for security directory [#19](https://github.com/saferwall/pe/pull/19).
