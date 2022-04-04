@@ -106,7 +106,7 @@ func TestAuthentihash(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {
-			file, err := New(tt.in, nil)
+			file, err := New(tt.in, &Options{})
 			if err != nil {
 				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
 			}

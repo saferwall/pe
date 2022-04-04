@@ -6,7 +6,6 @@ package pe
 
 import (
 	"encoding/binary"
-	"log"
 )
 
 const (
@@ -144,7 +143,7 @@ func (pe *File) parseResourceDataEntry(rva uint32) *ImageResourceDataEntry {
 	offset := pe.getOffsetFromRva(rva)
 	err := pe.structUnpack(&dataEntry, offset, dataEntrySize)
 	if err != nil {
-		log.Println("Error parsing a resource directory data entry, the RVA is invalid")
+		pe.logger.Warnf("Error parsing a resource directory data entry, the RVA is invalid")
 		return nil
 	}
 	return &dataEntry
@@ -207,7 +206,7 @@ func (pe *File) doParseResourceDirectory(rva, size, baseRVA, level uint32,
 
 	// Set a hard limit on the maximum reasonable number of entries.
 	if numberOfEntries > maxAllowedEntries {
-		log.Printf(`Error parsing the resources directory. 
+		pe.logger.Warnf(`Error parsing the resources directory. 
 		 The directory contains %d entries`, numberOfEntries)
 		return ResourceDirectory{}, nil
 	}
@@ -215,7 +214,7 @@ func (pe *File) doParseResourceDirectory(rva, size, baseRVA, level uint32,
 	for i := 0; i < numberOfEntries; i++ {
 		res := pe.parseResourceDirectoryEntry(rva)
 		if res == nil {
-			log.Println("Error parsing a resource directory entry, the RVA is invalid")
+			pe.logger.Warn("Error parsing a resource directory entry, the RVA is invalid")
 			break
 		}
 

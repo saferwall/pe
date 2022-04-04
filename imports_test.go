@@ -17,7 +17,7 @@ func TestImpHash(t *testing.T) {
 		{getAbsoluteFilePath("test/0585495341e0ffaae1734acb78708ff55cd3612d844672d37226ef63d12652d0"), "e4290fa6afc89d56616f34ebbd0b1f2c"},
 	} {
 		t.Run(tt.in, func(t *testing.T) {
-			file, err := New(tt.in, nil)
+			file, err := New(tt.in, &Options{})
 			if err != nil {
 				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
 			}
