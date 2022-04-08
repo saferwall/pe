@@ -81,6 +81,17 @@ func parsePE(filename string, cmd *cobra.Command) {
 	// Calculate the PE checksum.
 	pe.Checksum()
 
+	// Get file type.
+	if pe.IsEXE() {
+		log.Debug("File is Exe")
+	}
+	if pe.IsDLL() {
+		log.Debug("File is DLL")
+	}
+	if pe.IsDriver() {
+		log.Debug("File is Driver")
+	}
+
 	wantDosHeader, _ := cmd.Flags().GetBool("dosheader")
 	if wantDosHeader {
 		dosHeader, _ := json.Marshal(pe.DosHeader)
@@ -134,16 +145,6 @@ func parsePE(filename string, cmd *cobra.Command) {
 		log.Info(prettyPrint(ntHeader))
 		log.Info(prettyPrint(sectionsHeaders))
 	}
-
-	if pe.IsEXE() {
-		log.Debug("File is Exe")
-	}
-	if pe.IsDLL() {
-		log.Debug("File is DLL")
-	}
-	if pe.IsDriver() {
-		log.Debug("File is Driver")
-	}
 }
 
 func parse(cmd *cobra.Command, args []string) {
@@ -185,7 +186,7 @@ func main() {
 		Short: "Print version number",
 		Long:  "Print version number",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Print("You are using version 1.0.4")
+			fmt.Print("You are using version 1.1.6")
 		},
 	}
 
@@ -213,8 +214,7 @@ func main() {
 	dumpCmd.Flags().BoolVarP(&all, "all", "", false, "Dump everything")
 
 	if err := rootCmd.Execute(); err != nil {
-		log.Info(err)
+		fmt.Print(err)
 		os.Exit(1)
 	}
-
 }
