@@ -131,7 +131,7 @@ func NewBytes(data []byte, opts *Options) (*File, error) {
 		file.logger = log.NewHelper(log.NewFilter(logger,
 			log.FilterLevel(log.LevelError)))
 	} else {
-		file.logger = log.NewHelper(logger)
+		file.logger = log.NewHelper(opts.Logger)
 	}
 
 	file.data = data
@@ -272,7 +272,7 @@ func (pe *File) ParseDataDirectories() error {
 				// keep parsing data directories even though some entries fails.
 				defer func() {
 					if e := recover(); e != nil {
-						pe.logger.Warnf("Unhandled Exception when trying to parse data directory %s, reason: %v\n",
+						pe.logger.Errorf("Unhandled Exception when trying to parse data directory %s, reason: %v",
 							pe.PrettyDataDirectory(entryIndex), e)
 						foundErr = true
 					}
@@ -287,7 +287,7 @@ func (pe *File) ParseDataDirectories() error {
 
 				err := funcMaps[entryIndex](va, size)
 				if err != nil {
-					pe.logger.Warnf("Failed to parse data directory %s, reason: %v\n",
+					pe.logger.Warnf("Failed to parse data directory %s, reason: %v",
 						pe.PrettyDataDirectory(entryIndex), err)
 					foundErr = true
 				}

@@ -1,6 +1,6 @@
 module github.com/saferwall/pe
 
-go 1.15
+go 1.17
 
 require (
 	github.com/edsrzf/mmap-go v1.0.0

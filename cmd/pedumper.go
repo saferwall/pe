@@ -9,11 +9,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 
 	peparser "github.com/saferwall/pe"
+	"github.com/saferwall/pe/log"
 	"github.com/spf13/cobra"
 )
 
@@ -33,11 +33,11 @@ func prettyPrint(buff []byte) string {
 	var prettyJSON bytes.Buffer
 	error := json.Indent(&prettyJSON, buff, "", "\t")
 	if error != nil {
-		log.Println("JSON parse error: ", error)
+		log.Info("JSON parse error: ", error)
 		return string(buff)
 	}
 
-	return string(prettyJSON.Bytes())
+	return prettyJSON.String()
 }
 
 func isDirectory(path string) bool {
@@ -49,20 +49,29 @@ func isDirectory(path string) bool {
 }
 
 func parsePE(filename string, cmd *cobra.Command) {
-	log.Printf("Processing filename %s", filename)
+
+	logger := log.NewStdLogger(os.Stdout)
+	logger = log.NewFilter(logger, log.FilterLevel(log.LevelInfo))
+	log := log.NewHelper(logger)
+
+	log.Infof("parsing filename %s", filename)
 
 	data, _ := ioutil.ReadFile(filename)
-	pe, err := peparser.NewBytes(data, &peparser.Options{})
+	pe, err := peparser.NewBytes(data, &peparser.Options{
+		Logger: logger,
+	})
 
 	if err != nil {
-		log.Printf("Error while opening file: %s, reason: %s", filename, err)
+		log.Infof("Error while opening file: %s, reason: %s", filename, err)
 		return
 	}
 	defer pe.Close()
 
 	err = pe.Parse()
 	if err != nil {
-		log.Printf("Error while parsing file: %s, reason: %s", filename, err)
+		if err != peparser.ErrDOSMagicNotFound {
+			log.Infof("Error while parsing file: %s, reason: %s", filename, err)
+		}
 		return
 	}
 
@@ -75,46 +84,45 @@ func parsePE(filename string, cmd *cobra.Command) {
 	wantDosHeader, _ := cmd.Flags().GetBool("dosheader")
 	if wantDosHeader {
 		dosHeader, _ := json.Marshal(pe.DosHeader)
-		fmt.Println(prettyPrint(dosHeader))
+		log.Info(prettyPrint(dosHeader))
 	}
 
 	wantNtHeader, _ := cmd.Flags().GetBool("ntheader")
 	if wantNtHeader {
 		ntHeader, _ := json.Marshal(pe.NtHeader)
-		fmt.Println(prettyPrint(ntHeader))
+		log.Info(prettyPrint(ntHeader))
 	}
 
 	wantSections, _ := cmd.Flags().GetBool("sections")
 	if wantSections {
 		for _, sec := range pe.Sections {
-			fmt.Printf("Section Name : %s\n", sec.NameString())
-			fmt.Printf("Section VirtualSize : %x\n", sec.Header.VirtualSize)
-			fmt.Printf("Section Flags : %x, Meaning: %v\n\n",
-			 sec.Header.Characteristics, sec.PrettySectionFlags())
+			log.Infof("Section Name : %s\n", sec.NameString())
+			log.Infof("Section VirtualSize : %x\n", sec.Header.VirtualSize)
+			log.Infof("Section Flags : %x, Meaning: %v\n\n",
+				sec.Header.Characteristics, sec.PrettySectionFlags())
 		}
 		sectionsHeaders, _ := json.Marshal(pe.Sections)
-		fmt.Println(prettyPrint(sectionsHeaders))
+		log.Info(prettyPrint(sectionsHeaders))
 	}
 
 	wantResources, _ := cmd.Flags().GetBool("resources")
 	if wantResources {
 		rsrc, _ := json.Marshal(pe.Resources)
-		fmt.Println(prettyPrint(rsrc))
+		log.Info(prettyPrint(rsrc))
 	}
 
 	wantCLR, _ := cmd.Flags().GetBool("clr")
 	if wantCLR && pe.CLR != nil {
 		dotnetMetadata, _ := json.Marshal(pe.CLR)
-		fmt.Println(prettyPrint(dotnetMetadata))
+		log.Info(prettyPrint(dotnetMetadata))
 		if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {
 			if modTable.Content != nil {
 				modTableRow := modTable.Content.(peparser.ModuleTableRow)
 				modName := pe.GetStringFromData(modTableRow.Name, pe.CLR.MetadataStreams["#Strings"])
 				moduleName := string(modName)
-				log.Println(moduleName)
+				log.Info(moduleName)
 			}
 		}
-
 	}
 
 	wantAll, _ := cmd.Flags().GetBool("all")
@@ -122,19 +130,19 @@ func parsePE(filename string, cmd *cobra.Command) {
 		dosHeader, _ := json.Marshal(pe.DosHeader)
 		ntHeader, _ := json.Marshal(pe.NtHeader)
 		sectionsHeaders, _ := json.Marshal(pe.Sections)
-		fmt.Println(prettyPrint(dosHeader))
-		fmt.Println(prettyPrint(ntHeader))
-		fmt.Println(prettyPrint(sectionsHeaders))
+		log.Info(prettyPrint(dosHeader))
+		log.Info(prettyPrint(ntHeader))
+		log.Info(prettyPrint(sectionsHeaders))
 	}
 
 	if pe.IsEXE() {
-		log.Print("File is Exe")
+		log.Debug("File is Exe")
 	}
 	if pe.IsDLL() {
-		log.Print("File is DLL")
+		log.Debug("File is DLL")
 	}
 	if pe.IsDriver() {
-		log.Print("File is Driver")
+		log.Debug("File is Driver")
 	}
 }
 
@@ -205,7 +213,7 @@ func main() {
 	dumpCmd.Flags().BoolVarP(&all, "all", "", false, "Dump everything")
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		log.Info(err)
 		os.Exit(1)
 	}
 
