@@ -99,7 +99,7 @@ func New(name string, opts *Options) (*File, error) {
 		file.logger = log.NewHelper(log.NewFilter(logger,
 			log.FilterLevel(log.LevelError)))
 	} else {
-		file.logger = log.NewHelper(logger)
+		file.logger = log.NewHelper(opts.Logger)
 	}
 
 	file.data = data
