@@ -438,7 +438,7 @@ func (section *Section) Data(start, length uint32, pe *File) []byte {
 		end = offset + section.Header.SizeOfRawData
 	}
 
-	// PointerToRawData is not adjusted here as we might want to read any possible 
+	// PointerToRawData is not adjusted here as we might want to read any possible
 	// extra bytes that might get cut off by aligning the start (and hence cutting
 	// something off the end)
 	if end > section.Header.PointerToRawData+section.Header.SizeOfRawData &&

@@ -137,16 +137,15 @@ type ResourceDataEntry struct {
 	Sublang uint32 // Sublanguage ID
 }
 
-func (pe *File) parseResourceDataEntry(rva uint32) *ImageResourceDataEntry {
+func (pe *File) parseResourceDataEntry(rva uint32) (ImageResourceDataEntry) {
 	dataEntry := ImageResourceDataEntry{}
 	dataEntrySize := uint32(binary.Size(dataEntry))
 	offset := pe.getOffsetFromRva(rva)
 	err := pe.structUnpack(&dataEntry, offset, dataEntrySize)
 	if err != nil {
 		pe.logger.Warnf("Error parsing a resource directory data entry, the RVA is invalid")
-		return nil
 	}
-	return &dataEntry
+	return dataEntry
 }
 
 func (pe *File) parseResourceDirectoryEntry(rva uint32) *ImageResourceDirectoryEntry {
@@ -206,7 +205,7 @@ func (pe *File) doParseResourceDirectory(rva, size, baseRVA, level uint32,
 
 	// Set a hard limit on the maximum reasonable number of entries.
 	if numberOfEntries > maxAllowedEntries {
-		pe.logger.Warnf(`Error parsing the resources directory. 
+		pe.logger.Warnf(`Error parsing the resources directory.
 		 The directory contains %d entries`, numberOfEntries)
 		return ResourceDirectory{}, nil
 	}
@@ -276,7 +275,7 @@ func (pe *File) doParseResourceDirectory(rva, size, baseRVA, level uint32,
 			dataEntryStruct := pe.parseResourceDataEntry(baseRVA +
 				OffsetToDirectory)
 			entryData := ResourceDataEntry{
-				Struct:  *dataEntryStruct,
+				Struct:  dataEntryStruct,
 				Lang:    res.Name & 0x3ff,
 				Sublang: res.Name >> 10,
 			}

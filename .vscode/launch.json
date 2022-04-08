@@ -12,9 +12,7 @@
             "program": "${workspaceFolder}\\cmd",
             "args": [
                 "dump",
-                "--dosheader",
-                "--clr",
-                "C:\\coding\\pe-parser\\pkg\\peparser\\cmd\\bin\\symbol-table\\liblzo2-2.dll"
+                "U:\\00\\6a\\006a5ca2c03a079c4665eab6457aeac9586eab160f021eab2cfc50eb5bd57429"
             ]
         }
     ]
