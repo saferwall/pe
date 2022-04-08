@@ -122,13 +122,11 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 	// Some DLLs have null number of functions.
 	if exportDir.NumberOfFunctions == 0 {
 		pe.Anomalies = append(pe.Anomalies, AnoNullNumberOfFunctions)
-		return nil
 	}
 
 	// Some DLLs have null address of functions.
 	if exportDir.AddressOfFunctions == 0 {
 		pe.Anomalies = append(pe.Anomalies, AnoNullAddressOfFunctions)
-		return nil
 	}
 
 	length = min(lengthUntilEOF(exportDir.AddressOfNames),
@@ -322,6 +320,5 @@ func (pe *File) GetExportFunctionByRVA(rva uint32) ExportFunction {
 			return exp
 		}
 	}
-
 	return ExportFunction{}
 }
