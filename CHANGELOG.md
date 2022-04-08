@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 
+- Null pointer dereference in resource directory parsing [#25](https://github.com/saferwall/pe/pull/25).
 - Imphash calculation [#17](https://github.com/saferwall/pe/pull/17) thanks to [@secDre4mer](https://github.com/secDre4mer).
 - Null certificate header in security directory [#19](https://github.com/saferwall/pe/pull/19)
 
