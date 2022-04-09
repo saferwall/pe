@@ -286,13 +286,17 @@ func (pe *File) getStringAtRVA(rva, maxLen uint32) string {
 }
 
 func (pe *File) readUnicodeStringAtRVA(rva uint32, maxLength uint32) string {
-	unicodeString := ""
+	str := ""
 	offset := pe.getOffsetFromRva(rva)
-	buff := pe.data[offset : offset+(maxLength*2)]
-	for i := uint32(0); i < maxLength*2; i += 2 {
-		unicodeString += string(buff[i])
+	i := uint32(0)
+	for i = 0; i < maxLength; i+=2 {
+		if offset+i >= pe.size || pe.data[offset+i] == 0 {
+			break
+		}
+
+		str += string(pe.data[offset+i])
 	}
-	return unicodeString
+	return str
 }
 
 func (pe *File) readASCIIStringAtOffset(offset, maxLength uint32) (uint32, string) {
