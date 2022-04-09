@@ -186,7 +186,7 @@ func main() {
 		Short: "Print version number",
 		Long:  "Print version number",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Print("You are using version 1.1.6")
+			fmt.Print("You are using version 1.1.7")
 		},
 	}
 
