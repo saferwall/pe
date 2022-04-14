@@ -270,7 +270,9 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 			continue
 		}
 
-		symbolAddress = binary.LittleEndian.Uint32(addressOfFunctions[i*4:])
+		if len(addressOfFunctions) >= int(i*4) + 4 {
+			symbolAddress = binary.LittleEndian.Uint32(addressOfFunctions[i*4:])
+		}
 		if symbolAddress == 0 {
 			continue
 		}
