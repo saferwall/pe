@@ -99,7 +99,6 @@ func TestBoundImportDirectory(t *testing.T) {
 					t.Errorf("bound import entry assertion failed, got %v, want %v", boundImportEntry, tt.out.entry)
 				}
 			}
-
 		})
 	}
 }
