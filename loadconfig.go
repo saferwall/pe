@@ -1770,7 +1770,10 @@ func (pe *File) getControlFlowGuardFunctions() []CFGFunction {
 						return GFIDS
 					}
 					if n > 0 {
-						pe.structUnpack(&cfgFlags, offset+4, uint32(n))
+						err = pe.structUnpack(&cfgFlags, offset+4, uint32(n))
+						if err != nil {
+							return GFIDS
+						}
 						cfgFunction.Flags = &cfgFlags
 						if cfgFlags == ImageGuardFlagFIDSupressed ||
 							cfgFlags == ImageGuardFlagExportSupressed {

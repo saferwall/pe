@@ -17,6 +17,7 @@ vendor/
 
 # Code editors configs
 .idea/
+.vscode/launch.json
 
 # Go fuzz artefact
 crashers/
