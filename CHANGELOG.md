@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
+- Unit tests for export directory [#28](https://github.com/saferwall/pe/pull/28).
 - Add a new option to allow usage of a custom logger [#24](https://github.com/saferwall/pe/pull/24).
 - Unit tests for delay imports directory [#23](https://github.com/saferwall/pe/pull/23).
 - Allow access to the raw certificates content [#22](https://github.com/saferwall/pe/pull/22).
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 
+- Null pointer dereference in `GetExportFunctionByRVA()` and out of bounds when calculating `symbolAddress` in export directory [#28](https://github.com/saferwall/pe/pull/28).
 - Reading unicode string from resource directory `readUnicodeStringAtRVA()` [#26](https://github.com/saferwall/pe/pull/26).
 - Null pointer dereference in resource directory parsing [#25](https://github.com/saferwall/pe/pull/25).
 - Imphash calculation [#17](https://github.com/saferwall/pe/pull/17) thanks to [@secDre4mer](https://github.com/secDre4mer).
