@@ -299,7 +299,7 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 
 		// SystemCertPool() return an error in Windows, so we skip verification
 		// for now.
-		if skipCertVerification {
+		if !skipCertVerification {
 			err = pkcs.VerifyWithChain(certPool)
 			if err == nil {
 				isValid = true
