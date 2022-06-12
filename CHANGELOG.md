@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2022-06-12
 
 ## Added
 
@@ -18,12 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
-- Make `GetData()` and `GetRVAFromOffset()` helper routines public.
+- Make `GetData()` and `GetRVAFromOffset()` and `GetOffsetFromRva()` helper routines public.
 - Keep parsing in exports directories even when anomalies are found [#26](https://github.com/saferwall/pe/pull/26).
 
 ## Fixed
 
-- Incorrect check for `skipCertVerification` in security directory [#30](https://github.com/saferwall/pe/pull/30).
+- Incorrect check for `skipCertVerification` in security directory.
 - Null pointer dereference in `GetExportFunctionByRVA()` and out of bounds when calculating `symbolAddress` in export directory [#28](https://github.com/saferwall/pe/pull/28).
 - Reading unicode string from resource directory `readUnicodeStringAtRVA()` [#26](https://github.com/saferwall/pe/pull/26).
 - Null pointer dereference in resource directory parsing [#25](https://github.com/saferwall/pe/pull/25).
