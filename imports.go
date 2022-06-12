@@ -145,7 +145,7 @@ func (pe *File) parseImportDirectory(rva, size uint32) (err error) {
 
 	for {
 		importDesc := ImageImportDescriptor{}
-		fileOffset := pe.getOffsetFromRva(rva)
+		fileOffset := pe.GetOffsetFromRva(rva)
 		importDescSize := uint32(binary.Size(importDesc))
 		err := pe.structUnpack(&importDesc, fileOffset, importDescSize)
 
@@ -256,12 +256,12 @@ func (pe *File) getImportTable32(rva uint32, maxLen uint32,
 		if isOldDelayImport {
 			oh32 := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32)
 			newRVA := rva - oh32.ImageBase
-			offset = pe.getOffsetFromRva(newRVA)
+			offset = pe.GetOffsetFromRva(newRVA)
 			if offset == ^uint32(0) {
 				return []*ThunkData32{}, nil
 			}
 		} else {
-			offset = pe.getOffsetFromRva(rva)
+			offset = pe.GetOffsetFromRva(rva)
 			if offset == ^uint32(0) {
 				return []*ThunkData32{}, nil
 			}
@@ -381,12 +381,12 @@ func (pe *File) getImportTable64(rva uint32, maxLen uint32,
 		if isOldDelayImport {
 			oh64 := pe.NtHeader.OptionalHeader.(ImageOptionalHeader64)
 			newRVA := rva - uint32(oh64.ImageBase)
-			offset = pe.getOffsetFromRva(newRVA)
+			offset = pe.GetOffsetFromRva(newRVA)
 			if offset == ^uint32(0) {
 				return []*ThunkData64{}, nil
 			}
 		} else {
-			offset = pe.getOffsetFromRva(rva)
+			offset = pe.GetOffsetFromRva(rva)
 			if offset == ^uint32(0) {
 				return []*ThunkData64{}, nil
 			}
@@ -547,7 +547,7 @@ func (pe *File) parseImports32(importDesc interface{}, maxLen uint32) (
 
 				// Thunk
 				hintNameTableRva := table[idx].ImageThunkData.AddressOfData & addressMask32
-				off := pe.getOffsetFromRva(hintNameTableRva)
+				off := pe.GetOffsetFromRva(hintNameTableRva)
 				imp.Hint, err = pe.ReadUint16(off)
 				if err != nil {
 					imp.Hint = ^uint16(0)
@@ -685,7 +685,7 @@ func (pe *File) parseImports64(importDesc interface{}, maxLen uint32) ([]*Import
 				}
 
 				hintNameTableRva := table[idx].ImageThunkData.AddressOfData & addressMask64
-				off := pe.getOffsetFromRva(uint32(hintNameTableRva))
+				off := pe.GetOffsetFromRva(uint32(hintNameTableRva))
 				imp.Hint = binary.LittleEndian.Uint16(pe.data[off:])
 				imp.Name = pe.getStringAtRVA(uint32(table[idx].ImageThunkData.AddressOfData+2),
 					maxImportNameLength)

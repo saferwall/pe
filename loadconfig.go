@@ -1499,7 +1499,7 @@ func (pe *File) parseLoadConfigDirectory(rva, size uint32) error {
 
 	// As the load config structure changes over time,
 	// we first read it size to figure out which one we have to cast against.
-	fileOffset := pe.getOffsetFromRva(rva)
+	fileOffset := pe.GetOffsetFromRva(rva)
 	structSize, err := pe.ReadUint32(fileOffset)
 	if err != nil {
 		return err
@@ -1722,7 +1722,7 @@ func (pe *File) getSEHHandlers() []uint32 {
 			imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
 			rva := SEHandlerTable - imageBase
 			for i := uint32(0); i < SEHandlerCount; i++ {
-				offset := pe.getOffsetFromRva(rva + i*4)
+				offset := pe.GetOffsetFromRva(rva + i*4)
 				handler, err := pe.ReadUint32(offset)
 				if err != nil {
 					return handlers
@@ -1761,7 +1761,7 @@ func (pe *File) getControlFlowGuardFunctions() []CFGFunction {
 				GuardCFFunctionTable := uint32(v.Field(22).Uint())
 				imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
 				rva := GuardCFFunctionTable - imageBase
-				offset := pe.getOffsetFromRva(rva)
+				offset := pe.GetOffsetFromRva(rva)
 				for i := uint32(1); i <= uint32(GuardCFFunctionCount); i++ {
 					cfgFunction := CFGFunction{}
 					var cfgFlags uint8
@@ -1789,7 +1789,7 @@ func (pe *File) getControlFlowGuardFunctions() []CFGFunction {
 				GuardCFFunctionTable := v.Field(22).Uint()
 				imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).ImageBase
 				rva := uint32(GuardCFFunctionTable - imageBase)
-				offset := pe.getOffsetFromRva(rva)
+				offset := pe.GetOffsetFromRva(rva)
 				for i := uint64(1); i <= GuardCFFunctionCount; i++ {
 					var cfgFlags uint8
 					cfgFunction := CFGFunction{}
@@ -1842,7 +1842,7 @@ func (pe *File) getControlFlowGuardIAT() []CFGIATEntry {
 				GuardAddressTakenIatEntryTable := uint32(v.Field(26).Uint())
 				imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
 				rva := GuardAddressTakenIatEntryTable - imageBase
-				offset := pe.getOffsetFromRva(rva)
+				offset := pe.GetOffsetFromRva(rva)
 				for i := uint32(1); i <= uint32(GuardAddressTakenIatEntryCount); i++ {
 					cfgIATEntry := CFGIATEntry{}
 					cfgIATEntry.RVA, err = pe.ReadUint32(offset)
@@ -1862,7 +1862,7 @@ func (pe *File) getControlFlowGuardIAT() []CFGIATEntry {
 				GuardAddressTakenIatEntryTable := v.Field(26).Uint()
 				imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).ImageBase
 				rva := uint32(GuardAddressTakenIatEntryTable - imageBase)
-				offset := pe.getOffsetFromRva(rva)
+				offset := pe.GetOffsetFromRva(rva)
 				for i := uint64(1); i <= GuardAddressTakenIatEntryCount; i++ {
 					cfgIATEntry := CFGIATEntry{}
 					cfgIATEntry.RVA, err = pe.ReadUint32(offset)
@@ -1907,7 +1907,7 @@ func (pe *File) getLongJumpTargetTable() []uint32 {
 				GuardLongJumpTargetTable := uint32(v.Field(28).Uint())
 				imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
 				rva := GuardLongJumpTargetTable - imageBase
-				offset := pe.getOffsetFromRva(rva)
+				offset := pe.GetOffsetFromRva(rva)
 				for i := uint32(1); i <= uint32(GuardLongJumpTargetCount); i++ {
 					target, err := pe.ReadUint32(offset)
 					if err != nil {
@@ -1920,7 +1920,7 @@ func (pe *File) getLongJumpTargetTable() []uint32 {
 				GuardLongJumpTargetTable := v.Field(26).Uint()
 				imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).ImageBase
 				rva := uint32(GuardLongJumpTargetTable - imageBase)
-				offset := pe.getOffsetFromRva(rva)
+				offset := pe.GetOffsetFromRva(rva)
 				for i := uint64(1); i <= GuardLongJumpTargetCount; i++ {
 					target, err := pe.ReadUint32(offset)
 					if err != nil {
@@ -1961,7 +1961,7 @@ func (pe *File) getHybridPE() *HybridPE {
 	// As the image chpe metadata structure changes over time,
 	// we first read its version to figure out which one we have to
 	// cast against.
-	fileOffset := pe.getOffsetFromRva(rva)
+	fileOffset := pe.GetOffsetFromRva(rva)
 	version, err := pe.ReadUint32(fileOffset)
 	if err != nil {
 		return nil
@@ -2014,7 +2014,7 @@ func (pe *File) getHybridPE() *HybridPE {
 	for i := 0; i < CHPECodeAddressRangeCount; i++ {
 
 		codeRange := CodeRange{}
-		fileOffset := pe.getOffsetFromRva(rva)
+		fileOffset := pe.GetOffsetFromRva(rva)
 		begin, err := pe.ReadUint32(fileOffset)
 		if err != nil {
 			break
@@ -2044,7 +2044,7 @@ func (pe *File) getHybridPE() *HybridPE {
 		for i := 0; i < 1024; i++ {
 			compilerIAT := CompilerIAT{}
 			compilerIAT.RVA = rva
-			fileOffset = pe.getOffsetFromRva(rva)
+			fileOffset = pe.GetOffsetFromRva(rva)
 			compilerIAT.Value, err = pe.ReadUint32(fileOffset)
 			if err != nil {
 				break
@@ -2083,7 +2083,7 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 
 	// Get the dynamic value relocation table.
 	rva := section.VirtualAddress + uint32(DynamicValueRelocTableOffset)
-	offset := pe.getOffsetFromRva(rva)
+	offset := pe.GetOffsetFromRva(rva)
 	structSize = uint32(binary.Size(imgDynRelocTable))
 	err := pe.structUnpack(&imgDynRelocTable, offset, structSize)
 	if err != nil {
@@ -2192,7 +2192,7 @@ func (pe *File) getEnclaveConfiguration() *Enclave {
 		imgEnclaveCfgSize := uint32(binary.Size(imgEnclaveCfg))
 		imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
 		rva := uint32(EnclaveConfigurationPointer) - imageBase
-		offset := pe.getOffsetFromRva(rva)
+		offset := pe.GetOffsetFromRva(rva)
 		err := pe.structUnpack(&imgEnclaveCfg, offset, imgEnclaveCfgSize)
 		if err != nil {
 			return nil
@@ -2203,7 +2203,7 @@ func (pe *File) getEnclaveConfiguration() *Enclave {
 		imgEnclaveCfgSize := uint32(binary.Size(imgEnclaveCfg))
 		imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).ImageBase
 		rva := uint32(EnclaveConfigurationPointer - imageBase)
-		offset := pe.getOffsetFromRva(rva)
+		offset := pe.GetOffsetFromRva(rva)
 		err := pe.structUnpack(&imgEnclaveCfg, offset, imgEnclaveCfgSize)
 		if err != nil {
 			return nil
@@ -2217,7 +2217,7 @@ func (pe *File) getEnclaveConfiguration() *Enclave {
 	ImportListRVA := val.FieldByName("ImportList").Interface().(uint32)
 	NumberOfImports := val.FieldByName("NumberOfImports").Interface().(uint32)
 
-	offset := pe.getOffsetFromRva(ImportListRVA)
+	offset := pe.GetOffsetFromRva(ImportListRVA)
 	for i := uint32(0); i < NumberOfImports; i++ {
 		imgEncImp := ImageEnclaveImport{}
 		imgEncImpSize := uint32(binary.Size(imgEncImp))
@@ -2257,7 +2257,7 @@ func (pe *File) getVolatileMetadata() *VolatileMetadata {
 		rva = uint32(VolatileMetadataPointer - imageBase)
 	}
 
-	offset := pe.getOffsetFromRva(rva)
+	offset := pe.GetOffsetFromRva(rva)
 	imgVolatileMetaSize := uint32(binary.Size(imgVolatileMeta))
 	err := pe.structUnpack(&imgVolatileMeta, offset, imgVolatileMetaSize)
 	if err != nil {
@@ -2267,7 +2267,7 @@ func (pe *File) getVolatileMetadata() *VolatileMetadata {
 
 	if imgVolatileMeta.VolatileAccessTable != 0 &&
 		imgVolatileMeta.VolatileAccessTableSize != 0 {
-		offset := pe.getOffsetFromRva(imgVolatileMeta.VolatileAccessTable)
+		offset := pe.GetOffsetFromRva(imgVolatileMeta.VolatileAccessTable)
 		for i := uint32(0); i < imgVolatileMeta.VolatileAccessTableSize/4; i++ {
 			accessRVA, err := pe.ReadUint32(offset)
 			if err != nil {
@@ -2280,7 +2280,7 @@ func (pe *File) getVolatileMetadata() *VolatileMetadata {
 	}
 
 	if imgVolatileMeta.VolatileInfoRangeTable != 0 && imgVolatileMeta.VolatileAccessTableSize != 0 {
-		offset := pe.getOffsetFromRva(imgVolatileMeta.VolatileInfoRangeTable)
+		offset := pe.GetOffsetFromRva(imgVolatileMeta.VolatileInfoRangeTable)
 		rangeEntrySize := uint32(binary.Size(RangeTableEntry{}))
 		for i := uint32(0); i < imgVolatileMeta.VolatileAccessTableSize/rangeEntrySize; i++ {
 			entry := RangeTableEntry{}

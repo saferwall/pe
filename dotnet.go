@@ -629,7 +629,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	clrHeader := ImageCOR20Header{}
 	pe.CLR = &clr
 
-	offset := pe.getOffsetFromRva(rva)
+	offset := pe.GetOffsetFromRva(rva)
 	err := pe.structUnpack(&clrHeader, offset, size)
 	if err != nil {
 		return err
@@ -640,7 +640,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 		return nil
 	}
 
-	offset = pe.getOffsetFromRva(clrHeader.MetaData.VirtualAddress)
+	offset = pe.GetOffsetFromRva(clrHeader.MetaData.VirtualAddress)
 	mh, err := pe.parseMetadataHeader(offset, clrHeader.MetaData.Size)
 	if err != nil {
 		return err
@@ -690,7 +690,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 
 		// Save the stream into a map <string> []byte.
 		rva = clrHeader.MetaData.VirtualAddress + sh.Offset
-		start := pe.getOffsetFromRva(rva)
+		start := pe.GetOffsetFromRva(rva)
 		clr.MetadataStreams[sh.Name] = pe.data[start : start+sh.Size]
 		clr.MetadataStreamHeaders = append(clr.MetadataStreamHeaders, &sh)
 	}
@@ -702,7 +702,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	// The .Offset indicated by the stream header is an RVA relative to the
 	// metadataDirectoryAddress in the CLRHeader.
 	rva = clrHeader.MetaData.VirtualAddress + mdStreamHdrOff
-	offset = pe.getOffsetFromRva(rva)
+	offset = pe.GetOffsetFromRva(rva)
 	mdTableStreamHdr, err := pe.parseMetadataStream(offset, mdStreamHdrSize)
 	if err != nil {
 		return nil

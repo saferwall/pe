@@ -202,8 +202,8 @@ func (pe *File) getSectionByOffset(offset uint32) *Section {
 	return nil
 }
 
-// getOffsetFromRva returns the file offset corresponding to this RVA.
-func (pe *File) getOffsetFromRva(rva uint32) uint32 {
+// GetOffsetFromRva returns the file offset corresponding to this RVA.
+func (pe *File) GetOffsetFromRva(rva uint32) uint32 {
 
 	// Given a RVA, this method will find the section where the
 	// data lies and return the offset within the file.
@@ -287,9 +287,9 @@ func (pe *File) getStringAtRVA(rva, maxLen uint32) string {
 
 func (pe *File) readUnicodeStringAtRVA(rva uint32, maxLength uint32) string {
 	str := ""
-	offset := pe.getOffsetFromRva(rva)
+	offset := pe.GetOffsetFromRva(rva)
 	i := uint32(0)
-	for i = 0; i < maxLength; i+=2 {
+	for i = 0; i < maxLength; i += 2 {
 		if offset+i >= pe.size || pe.data[offset+i] == 0 {
 			break
 		}

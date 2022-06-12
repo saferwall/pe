@@ -99,7 +99,7 @@ func (pe *File) parseTLSDirectory(rva, size uint32) error {
 	if pe.Is64 {
 		tlsDir := ImageTLSDirectory64{}
 		tlsSize := uint32(binary.Size(tlsDir))
-		fileOffset := pe.getOffsetFromRva(rva)
+		fileOffset := pe.GetOffsetFromRva(rva)
 		err := pe.structUnpack(&tlsDir, fileOffset, tlsSize)
 		if err != nil {
 			return err
@@ -110,7 +110,7 @@ func (pe *File) parseTLSDirectory(rva, size uint32) error {
 			var callbacks []uint64
 			rvaAddressOfCallBacks := uint32(tlsDir.AddressOfCallBacks -
 				pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).ImageBase)
-			offset := pe.getOffsetFromRva(rvaAddressOfCallBacks)
+			offset := pe.GetOffsetFromRva(rvaAddressOfCallBacks)
 			for {
 				c, err := pe.ReadUint64(offset)
 				if err != nil || c == 0 {
@@ -124,7 +124,7 @@ func (pe *File) parseTLSDirectory(rva, size uint32) error {
 	} else {
 		tlsDir := ImageTLSDirectory32{}
 		tlsSize := uint32(binary.Size(tlsDir))
-		fileOffset := pe.getOffsetFromRva(rva)
+		fileOffset := pe.GetOffsetFromRva(rva)
 		err := pe.structUnpack(&tlsDir, fileOffset, tlsSize)
 		if err != nil {
 			return err
@@ -137,7 +137,7 @@ func (pe *File) parseTLSDirectory(rva, size uint32) error {
 			var callbacks []uint32
 			rvaAddressOfCallBacks := tlsDir.AddressOfCallBacks -
 				pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
-			offset := pe.getOffsetFromRva(rvaAddressOfCallBacks)
+			offset := pe.GetOffsetFromRva(rvaAddressOfCallBacks)
 			for {
 				c, err := pe.ReadUint32(offset)
 				if err != nil || c == 0 {

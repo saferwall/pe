@@ -138,11 +138,11 @@ func (pe *File) parseRelocations(dataRVA, rva, size uint32) ([]ImageBaseRelocati
 		pe.Anomalies = append(pe.Anomalies, AnoAddressOfDataBeyondLimits)
 	}
 
-	offset := pe.getOffsetFromRva(dataRVA)
+	offset := pe.GetOffsetFromRva(dataRVA)
 	var err error
 	for i := uint32(0); i < relocEntriesCount; i++ {
 		entry := ImageBaseRelocationEntry{}
-		entry.Data, err = pe.ReadUint16(offset+(i*2))
+		entry.Data, err = pe.ReadUint16(offset + (i * 2))
 		if err != nil {
 			break
 		}
@@ -167,7 +167,7 @@ func (pe *File) parseRelocDirectory(rva, size uint32) error {
 	end := rva + size
 	for rva < end {
 		baseReloc := ImageBaseRelocation{}
-		offset := pe.getOffsetFromRva(rva)
+		offset := pe.GetOffsetFromRva(rva)
 		err := pe.structUnpack(&baseReloc, offset, relocSize)
 		if err != nil {
 			return err

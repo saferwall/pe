@@ -413,7 +413,7 @@ func (pe *File) parseUnwinInfo(unwindInfo uint32) UnwindInfo {
 
 	ui := UnwindInfo{}
 
-	offset := pe.getOffsetFromRva(unwindInfo)
+	offset := pe.GetOffsetFromRva(unwindInfo)
 	v, err := pe.ReadUint32(offset)
 	if err != nil {
 		return ui
@@ -491,7 +491,7 @@ func (pe *File) parseExceptionDirectory(rva, size uint32) error {
 	// The target platform determines which format of the function table entry
 	// to use.
 	var exceptions []Exception
-	fileOffset := pe.getOffsetFromRva(rva)
+	fileOffset := pe.GetOffsetFromRva(rva)
 
 	entrySize := uint32(binary.Size(ImageRuntimeFunctionEntry{}))
 	entriesCount := size / entrySize

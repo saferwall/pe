@@ -69,7 +69,7 @@ type DelayImport struct {
 func (pe *File) parseDelayImportDirectory(rva, size uint32) error {
 	for {
 		importDelayDesc := ImageDelayImportDescriptor{}
-		fileOffset := pe.getOffsetFromRva(rva)
+		fileOffset := pe.GetOffsetFromRva(rva)
 		importDescSize := uint32(binary.Size(importDelayDesc))
 		err := pe.structUnpack(&importDelayDesc, fileOffset, importDescSize)
 
