@@ -72,7 +72,7 @@ func (pe *File) parseBoundImportDirectory(rva, size uint32) (err error) {
 		rva += bndDescSize
 		sectionsAfterOffset = nil
 
-		fileOffset := pe.getOffsetFromRva(rva)
+		fileOffset := pe.GetOffsetFromRva(rva)
 		section := pe.getSectionByRva(rva)
 		if section == nil {
 			safetyBoundary = pe.size - fileOffset

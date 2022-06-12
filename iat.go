@@ -35,7 +35,7 @@ func (pe *File) parseIATDirectory(rva, size uint32) error {
 
 	for startRva+size > rva {
 		ie := IATEntry{}
-		offset := pe.getOffsetFromRva(rva)
+		offset := pe.GetOffsetFromRva(rva)
 		if pe.Is64 {
 			ie.Value, err = pe.ReadUint64(offset)
 			if err != nil {

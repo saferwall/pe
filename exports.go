@@ -103,7 +103,7 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 	exportDir := ImageExportDirectory{}
 	errorMsg := fmt.Sprintf("Error parsing export directory at RVA: 0x%x", rva)
 
-	fileOffset := pe.getOffsetFromRva(rva)
+	fileOffset := pe.GetOffsetFromRva(rva)
 	exportDirSize := uint32(binary.Size(exportDir))
 	err := pe.structUnpack(&exportDir, fileOffset, exportDirSize)
 	if err != nil {
@@ -114,7 +114,7 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 	// We keep track of the bytes left in the file and use it to set a upper
 	// bound in the number of items that can be read from the different arrays.
 	lengthUntilEOF := func(rva uint32) uint32 {
-		return pe.size - pe.getOffsetFromRva(rva)
+		return pe.size - pe.GetOffsetFromRva(rva)
 	}
 	var length uint32
 	var addressOfNames []byte
@@ -188,7 +188,7 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 		// instead of pointing the the function start address.
 		if symbolAddress >= rva && symbolAddress < rva+size {
 			forwarderStr = pe.getStringAtRVA(symbolAddress, 0x100000)
-			forwarderOffset = pe.getOffsetFromRva(symbolAddress)
+			forwarderOffset = pe.GetOffsetFromRva(symbolAddress)
 		} else {
 			forwarderStr = ""
 			fileOffset = 0
@@ -208,7 +208,7 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 			break
 		}
 
-		symbolNameOffset := pe.getOffsetFromRva(symbolNameAddress)
+		symbolNameOffset := pe.GetOffsetFromRva(symbolNameAddress)
 		if symbolNameOffset == 0 {
 			maxFailedEntries--
 			if maxFailedEntries <= 0 {
@@ -270,7 +270,7 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 			continue
 		}
 
-		if len(addressOfFunctions) >= int(i*4) + 4 {
+		if len(addressOfFunctions) >= int(i*4)+4 {
 			symbolAddress = binary.LittleEndian.Uint32(addressOfFunctions[i*4:])
 		}
 		if symbolAddress == 0 {
@@ -280,7 +280,7 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 		// Checking for forwarder again.
 		if symbolAddress >= rva && symbolAddress < rva+size {
 			forwarderStr = pe.getStringAtRVA(symbolAddress, 0x100000)
-			forwarderOffset = pe.getOffsetFromRva(symbolAddress)
+			forwarderOffset = pe.GetOffsetFromRva(symbolAddress)
 		} else {
 			forwarderStr = ""
 			fileOffset = 0
