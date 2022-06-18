@@ -8,6 +8,7 @@
 -   [Installing](#installing)
 -   [Using the library](#using-the-library)
     -   [Access the PE header](#pe-header)
+    -   [Viewing the rich header](#rich-header)
     -   [Iterating over sections](#iterating-over-sections)
 -   [Roadmap](#roadmap)
 -   [Contributing](#contributing)
@@ -111,20 +112,93 @@ type File struct {
 
 ### PE Header
 
-As mentionned before, all members of the struct are directly (no getters/setters) accessible, additionally, the fields types has been preserved as the spec defines them, that means if you need to show the prettified version of an `int` type, you have to call the corresponding function.
+As mentionned before, all members of the struct are directly (no getters) accessible, additionally, the fields types has been preserved as the spec defines them, that means if you need to show the prettified version of an `int` type, you have to call the corresponding helper function.
 
 ```go
-fmt.Printf("Magic is: %x\n", pe.DosHeader.Magic)
-fmt.Printf("Signature is: %x\n", pe.NtHeader.Signature)
-fmt.Printf("Machine is: %x, Meaning: %s\n", pe.NtHeader.FileHeader.Machine, pe.PrettyMachineType())
+fmt.Printf("Magic is: 0x%x\n", pe.DosHeader.Magic)
+fmt.Printf("Signature is: 0x%x\n", pe.NtHeader.Signature)
+fmt.Printf("Machine is: 0x%x, Meaning: %s\n", pe.NtHeader.FileHeader.Machine, pe.PrettyMachineType())
 ```
 
 Output:
-
 ```
-Magic is: 5a4d
-Signature is: 4550
-Machine is: 8664, Meaning: x64
+Magic is: 0x5a4d
+Signature is: 0x4550
+Machine is: 0x8664, Meaning: x64
+```
+
+### Rich Header
+
+Example:
+```go
+richHeader, _ := json.Marshal(pe.RichHeader)
+fmt.Print(prettyPrint(richHeader))
+```
+
+Output:
+```json
+{
+    "XorKey": 2796214951,
+    "CompIDs": [
+        {
+            "MinorCV": 27412,
+            "ProdID": 257,
+            "Count": 4,
+            "Unmasked": 16870164
+        },
+        {
+            "MinorCV": 30729,
+            "ProdID": 147,
+            "Count": 193,
+            "Unmasked": 9664521
+        },
+        {
+            "MinorCV": 0,
+            "ProdID": 1,
+            "Count": 1325,
+            "Unmasked": 65536
+        },
+        {
+            "MinorCV": 27412,
+            "ProdID": 260,
+            "Count": 9,
+            "Unmasked": 17066772
+        },
+        {
+            "MinorCV": 27412,
+            "ProdID": 259,
+            "Count": 3,
+            "Unmasked": 17001236
+        },
+        {
+            "MinorCV": 27412,
+            "ProdID": 256,
+            "Count": 1,
+            "Unmasked": 16804628
+        },
+        {
+            "MinorCV": 27412,
+            "ProdID": 269,
+            "Count": 209,
+            "Unmasked": 17656596
+        },
+        {
+            "MinorCV": 27412,
+            "ProdID": 255,
+            "Count": 1,
+            "Unmasked": 16739092
+        },
+        {
+            "MinorCV": 27412,
+            "ProdID": 258,
+            "Count": 1,
+            "Unmasked": 16935700
+        }
+    ],
+    "DansOffset": 128,
+    "Raw": "47vE9afaqqan2qqmp9qqprOxq6ej2qqmrqI5pmbaqqan2qumit+qprOxrqeu2qqms7Gpp6TaqqazsaqnptqqprOxp6d22qqms7FVpqbaqqazsainptqqplJpY2in2qqm"
+}
+
 ```
 
 ### Iterating over sections

@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"text/tabwriter"
 
 	peparser "github.com/saferwall/pe"
 	"github.com/saferwall/pe/log"
@@ -40,6 +41,34 @@ func prettyPrint(buff []byte) string {
 	return prettyJSON.String()
 }
 
+func hexDump(b []byte) {
+	var a [16]byte
+	n := (len(b) + 15) &^ 15
+	for i := 0; i < n; i++ {
+		if i%16 == 0 {
+			fmt.Printf("%4d", i)
+		}
+		if i%8 == 0 {
+			fmt.Print(" ")
+		}
+		if i < len(b) {
+			fmt.Printf(" %02X", b[i])
+		} else {
+			fmt.Print("   ")
+		}
+		if i >= len(b) {
+			a[i%16] = ' '
+		} else if b[i] < 32 || b[i] > 126 {
+			a[i%16] = '.'
+		} else {
+			a[i%16] = b[i]
+		}
+		if i%16 == 15 {
+			fmt.Printf("  %s\n", string(a[:]))
+		}
+	}
+}
+
 func isDirectory(path string) bool {
 	fileInfo, err := os.Stat(path)
 	if err != nil {
@@ -51,7 +80,7 @@ func isDirectory(path string) bool {
 func parsePE(filename string, cmd *cobra.Command) {
 
 	logger := log.NewStdLogger(os.Stdout)
-	logger = log.NewFilter(logger, log.FilterLevel(log.LevelInfo))
+	logger = log.NewFilter(logger, log.FilterLevel(log.LevelError))
 	log := log.NewHelper(logger)
 
 	log.Infof("parsing filename %s", filename)
@@ -95,7 +124,26 @@ func parsePE(filename string, cmd *cobra.Command) {
 	wantDosHeader, _ := cmd.Flags().GetBool("dosheader")
 	if wantDosHeader {
 		dosHeader, _ := json.Marshal(pe.DosHeader)
-		log.Info(prettyPrint(dosHeader))
+		fmt.Print(prettyPrint(dosHeader))
+	}
+
+	wantRichHeader, _ := cmd.Flags().GetBool("rich")
+	if wantRichHeader {
+		richheader := pe.RichHeader
+		fmt.Printf("RICH HEADER\n\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		fmt.Fprintf(w, "\t0x%x\t xor Key\n", richheader.XorKey)
+		fmt.Fprintf(w, "\t0x%x\t DanS offset\n", richheader.DansOffset)
+		fmt.Fprintf(w, "\t0x%x\t checksum\n\n", pe.RichHeaderChecksum())
+		fmt.Fprintln(w, "ProductID\tMinorCV\tCount\tUnmasked\tMeaning\tVSVersion\t")
+		for _, compID := range pe.RichHeader.CompIDs {
+			fmt.Fprintf(w, "0x%x\t0x%x\t0x%x\t0x%x\t%s\t%s\t\n",
+				compID.ProdID, compID.MinorCV, compID.Count, compID.Unmasked,
+				peparser.ProdIDtoStr(compID.ProdID), peparser.ProdIDtoVSversion(compID.ProdID))
+		}
+		w.Flush()
+		fmt.Print("\n   ---Raw header dump---\n")
+		hexDump(richheader.Raw)
 	}
 
 	wantNtHeader, _ := cmd.Flags().GetBool("ntheader")
@@ -145,6 +193,8 @@ func parsePE(filename string, cmd *cobra.Command) {
 		log.Info(prettyPrint(ntHeader))
 		log.Info(prettyPrint(sectionsHeaders))
 	}
+
+	fmt.Println()
 }
 
 func parse(cmd *cobra.Command, args []string) {

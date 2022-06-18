@@ -726,7 +726,7 @@ func ProdIDtoStr(prodID uint16) string {
 	case 0x010a:
 		return "Utc1900_LTCG_MSIL"
 	case 0x010b:
-		return ": 'Utc1900_POGO_I_C"
+		return "Utc1900_POGO_I_C"
 	case 0x010c:
 		return "Utc1900_POGO_I_CPP"
 	case 0x010d:
