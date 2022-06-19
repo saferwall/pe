@@ -59,7 +59,7 @@ type RichHeader struct {
 func (pe *File) ParseRichHeader() error {
 
 	rh := RichHeader{}
-	ntHeaderOffset := pe.DosHeader.AddressOfNewEXEHeader
+	ntHeaderOffset := pe.DOSHeader.AddressOfNewEXEHeader
 	richSigOffset := bytes.Index(pe.data[:ntHeaderOffset], []byte(RichSignature))
 
 	// For example, .NET executable files do not use the MSVC linker and these
@@ -84,7 +84,7 @@ func (pe *File) ParseRichHeader() error {
 	// until the sequence `DanS` is decrypted.
 	var decRichHeader []uint32
 	dansSigOffset := -1
-	estimatedBeginDans := richSigOffset - 4 - binary.Size(ImageDosHeader{})
+	estimatedBeginDans := richSigOffset - 4 - binary.Size(ImageDOSHeader{})
 	for it := 0; it < estimatedBeginDans; it += 4 {
 		buff := binary.LittleEndian.Uint32(pe.data[richSigOffset-4-it:])
 		res := buff ^ rh.XorKey

@@ -114,7 +114,7 @@ func (pe *File) Authentihash() []byte {
 	// Fields.
 	start := uint32(0)
 	fileHdrSize := uint32(binary.Size(pe.NtHeader.FileHeader))
-	optionalHeaderOffset := pe.DosHeader.AddressOfNewEXEHeader + 4 + fileHdrSize
+	optionalHeaderOffset := pe.DOSHeader.AddressOfNewEXEHeader + 4 + fileHdrSize
 	checksumOffset := optionalHeaderOffset + 64
 	h.Write(pe.data[start:checksumOffset])
 

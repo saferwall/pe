@@ -240,7 +240,7 @@ type Section struct {
 func (pe *File) ParseSectionHeader() (err error) {
 
 	// Get the first section offset.
-	optionalHeaderOffset := pe.DosHeader.AddressOfNewEXEHeader + 4 +
+	optionalHeaderOffset := pe.DOSHeader.AddressOfNewEXEHeader + 4 +
 		uint32(binary.Size(pe.NtHeader.FileHeader))
 	offset := optionalHeaderOffset +
 		uint32(pe.NtHeader.FileHeader.SizeOfOptionalHeader)

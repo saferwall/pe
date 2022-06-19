@@ -14,7 +14,7 @@ import (
 
 // A File represents an open PE file.
 type File struct {
-	DosHeader    ImageDosHeader              `json:",omitempty"`
+	DOSHeader    ImageDOSHeader              `json:",omitempty"`
 	RichHeader   *RichHeader                 `json:",omitempty"`
 	NtHeader     ImageNtHeader               `json:",omitempty"`
 	COFF         *COFF                       `json:",omitempty"`

@@ -545,7 +545,7 @@ func (pe *File) Checksum() uint32 {
 	currentDword := uint32(0)
 
 	// Get the Checksum offset.
-	optionalHeaderOffset := pe.DosHeader.AddressOfNewEXEHeader + 4 +
+	optionalHeaderOffset := pe.DOSHeader.AddressOfNewEXEHeader + 4 +
 		uint32(binary.Size(pe.NtHeader.FileHeader))
 
 	// `CheckSum` field position in optional PE headers is always 64 for PE and PE+.

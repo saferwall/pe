@@ -79,7 +79,7 @@ Afterwards, a call to the `Parse()` method will give you access to all the diffe
 
 ```go
 type File struct {
-	DosHeader    ImageDosHeader
+	DOSHeader    ImageDOSHeader
 	RichHeader   *RichHeader
 	NtHeader     ImageNtHeader
 	COFF         *COFF

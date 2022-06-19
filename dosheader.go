@@ -9,7 +9,7 @@ import (
 )
 
 // ImageDosHeader represents the DOS stub of a PE.
-type ImageDosHeader struct {
+type ImageDOSHeader struct {
 	// Magic number.
 	Magic uint16
 
@@ -75,16 +75,16 @@ type ImageDosHeader struct {
 // Windows was required to run the executable.
 func (pe *File) ParseDOSHeader() (err error) {
 	offset := uint32(0)
-	size := uint32(binary.Size(pe.DosHeader))
-	err = pe.structUnpack(&pe.DosHeader, offset, size)
+	size := uint32(binary.Size(pe.DOSHeader))
+	err = pe.structUnpack(&pe.DOSHeader, offset, size)
 	if err != nil {
 		return err
 	}
 
 	// It can be ZM on an (non-PE) EXE.
 	// These executables still work under XP via ntvdm.
-	if pe.DosHeader.Magic != ImageDOSSignature &&
-		pe.DosHeader.Magic != ImageDOSZMSignature {
+	if pe.DOSHeader.Magic != ImageDOSSignature &&
+		pe.DOSHeader.Magic != ImageDOSZMSignature {
 		return ErrDOSMagicNotFound
 	}
 
@@ -92,14 +92,14 @@ func (pe *File) ParseDOSHeader() (err error) {
 	// DOS header to turn the EXE into a PE. It is is a relative offset to the
 	// NT Headers. It can't be null (signatures would overlap).
 	// Can be 4 at minimum.
-	if pe.DosHeader.AddressOfNewEXEHeader < 4 ||
-		pe.DosHeader.AddressOfNewEXEHeader > pe.size {
+	if pe.DOSHeader.AddressOfNewEXEHeader < 4 ||
+		pe.DOSHeader.AddressOfNewEXEHeader > pe.size {
 		return ErrInvalidElfanewValue
 	}
 
 	// tiny pe has a e_lfanew of 4, which means the NT Headers is overlapping
 	// the DOS Header.
-	if pe.DosHeader.AddressOfNewEXEHeader <= 0x3c {
+	if pe.DOSHeader.AddressOfNewEXEHeader <= 0x3c {
 		pe.Anomalies = append(pe.Anomalies, AnoPEHeaderOverlapDOSHeader)
 	}
 

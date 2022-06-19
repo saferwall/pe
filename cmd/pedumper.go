@@ -123,7 +123,7 @@ func parsePE(filename string, cmd *cobra.Command) {
 
 	wantDosHeader, _ := cmd.Flags().GetBool("dosheader")
 	if wantDosHeader {
-		dosHeader, _ := json.Marshal(pe.DosHeader)
+		dosHeader, _ := json.Marshal(pe.DOSHeader)
 		fmt.Print(prettyPrint(dosHeader))
 	}
 
@@ -186,7 +186,7 @@ func parsePE(filename string, cmd *cobra.Command) {
 
 	wantAll, _ := cmd.Flags().GetBool("all")
 	if wantAll {
-		dosHeader, _ := json.Marshal(pe.DosHeader)
+		dosHeader, _ := json.Marshal(pe.DOSHeader)
 		ntHeader, _ := json.Marshal(pe.NtHeader)
 		sectionsHeaders, _ := json.Marshal(pe.Sections)
 		log.Info(prettyPrint(dosHeader))

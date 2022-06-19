@@ -348,7 +348,7 @@ type DataDirectory struct {
 // Its offset is given by the e_lfanew field in the IMAGE_DOS_HEADER at the
 // beginning of the file.
 func (pe *File) ParseNTHeader() (err error) {
-	ntHeaderOffset := pe.DosHeader.AddressOfNewEXEHeader
+	ntHeaderOffset := pe.DOSHeader.AddressOfNewEXEHeader
 	signature, err := pe.ReadUint32(ntHeaderOffset)
 	if err != nil {
 		return ErrInvalidNtHeaderOffset
