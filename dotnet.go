@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2022 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -286,7 +286,7 @@ type ImageCOR20Header struct {
 	MajorRuntimeVersion uint16
 
 	// Minor number of the version of the runtime required to run the program.
-	MinorRuntimeVersio uint16
+	MinorRuntimeVersion uint16
 
 	// RVA and size of the metadata.
 	MetaData ImageDataDirectory
@@ -615,7 +615,6 @@ func (pe *File) parseMetadataModuleTable(moduleTable *MetadataTable, off uint32)
 
 	moduleTable.Content = modTableRow
 	return nil
-
 }
 
 // The 15th directory entry of the PE header contains the RVA and size of the
