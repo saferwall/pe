@@ -9,7 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
+- Unit tests for DOS header parsing.
+- Unit tests for CLR directory [#34](https://github.com/saferwall/pe/pull/28).
 - Unit tests for rich header [#33](https://github.com/saferwall/pe/pull/33).
+
+### Fixed
+
+- Memory leak in `Close()` function that missed a call to `unmap()` thanks to [Mamba24L8](https://github.com/Mamba24L8).
 
 ## [1.2.0] - 2022-06-12
 
