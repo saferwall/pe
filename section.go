@@ -263,6 +263,10 @@ func (pe *File) ParseSectionHeader() (err error) {
 			return err
 		}
 
+		if secEnd := int64(secHeader.PointerToRawData) + int64(secHeader.SizeOfRawData); secEnd > pe.OverlayOffset {
+			pe.OverlayOffset = secEnd
+		}
+
 		countErr := 0
 		sec := Section{Header: secHeader}
 		secName := sec.NameString()
