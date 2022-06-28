@@ -141,6 +141,10 @@ func NewBytes(data []byte, opts *Options) (*File, error) {
 
 // Close closes the File.
 func (pe *File) Close() error {
+	if pe.data != nil {
+		_ = pe.data.Unmap()
+	}
+
 	if pe.f != nil {
 		return pe.f.Close()
 	}
