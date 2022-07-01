@@ -9,10 +9,11 @@ import (
 	"crypto/x509"
 	"encoding/binary"
 	"errors"
+	"fmt"
+	"io"
 	"reflect"
 	"sort"
 	"time"
-	"unsafe"
 
 	"go.mozilla.org/pkcs7"
 )
@@ -94,6 +95,121 @@ type CertInfo struct {
 	NotAfter time.Time
 }
 
+type RelRange struct {
+	Start  uint32
+	Length uint32
+}
+
+type byStart []RelRange
+
+func (s byStart) Len() int      { return len(s) }
+func (s byStart) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s byStart) Less(i, j int) bool {
+	return s[i].Start < s[j].Start
+}
+
+type Range struct {
+	Start uint32
+	End   uint32
+}
+
+func (pe *File) parseLocations() (map[string]*RelRange, error) {
+	location := make(map[string]*RelRange, 3)
+
+	fileHdrSize := uint32(binary.Size(pe.NtHeader.FileHeader))
+	optionalHeaderOffset := pe.DOSHeader.AddressOfNewEXEHeader + 4 + fileHdrSize
+
+	var (
+		oh32 ImageOptionalHeader32
+		oh64 ImageOptionalHeader64
+
+		optionalHeaderSize uint32
+	)
+
+	switch pe.Is64 {
+	case true:
+		oh64 = pe.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+		optionalHeaderSize = oh64.SizeOfHeaders
+	case false:
+		oh32 = pe.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+		optionalHeaderSize = oh32.SizeOfHeaders
+	}
+
+	if optionalHeaderSize > pe.size-optionalHeaderOffset {
+		msgF := "the optional header exceeds the file length (%d + %d > %d)"
+		return nil, fmt.Errorf(msgF, optionalHeaderSize, optionalHeaderOffset, pe.size)
+	}
+
+	if optionalHeaderSize < 68 {
+		msgF := "the optional header size is %d < 68, which is insufficient for authenticode"
+		return nil, fmt.Errorf(msgF, optionalHeaderSize)
+	}
+
+	// The location of the checksum
+	location["checksum"] = &RelRange{optionalHeaderOffset + 64, 4}
+
+	var rvaBase, certBase, numberOfRvaAndSizes uint32
+	switch pe.Is64 {
+	case true:
+		rvaBase = optionalHeaderOffset + 108
+		certBase = optionalHeaderOffset + 144
+		numberOfRvaAndSizes = oh64.NumberOfRvaAndSizes
+	case false:
+		rvaBase = optionalHeaderOffset + 92
+		certBase = optionalHeaderOffset + 128
+		numberOfRvaAndSizes = oh32.NumberOfRvaAndSizes
+	}
+
+	if optionalHeaderOffset+optionalHeaderSize < rvaBase+4 {
+		pe.logger.Debug("The PE Optional Header size can not accommodate for the NumberOfRvaAndSizes field")
+		return location, nil
+	}
+
+	if numberOfRvaAndSizes < uint32(5) {
+		pe.logger.Debugf("The PE Optional Header does not have a Certificate Table entry in its "+
+			"Data Directory; NumberOfRvaAndSizes = %d", numberOfRvaAndSizes)
+		return location, nil
+	}
+
+	if optionalHeaderOffset+optionalHeaderSize < certBase+8 {
+		pe.logger.Debug("The PE Optional Header size can not accommodate for a Certificate Table" +
+			"entry in its Data Directory")
+		return location, nil
+	}
+
+	// The location of the entry of the Certificate Table in the Data Directory
+	location["datadir_certtable"] = &RelRange{certBase, 8}
+
+	var address, size uint32
+	switch pe.Is64 {
+	case true:
+		dirEntry := oh64.DataDirectory[ImageDirectoryEntryCertificate]
+		address = dirEntry.VirtualAddress
+		size = dirEntry.Size
+	case false:
+		dirEntry := oh32.DataDirectory[ImageDirectoryEntryCertificate]
+		address = dirEntry.VirtualAddress
+		size = dirEntry.Size
+	}
+
+	if size == 0 {
+		pe.logger.Debug("The Certificate Table is empty")
+		return location, nil
+	}
+
+	if int64(address) < int64(optionalHeaderSize)+int64(optionalHeaderOffset) ||
+		int64(address)+int64(size) > int64(pe.size) {
+		pe.logger.Debugf("The location of the Certificate Table in the binary makes no sense and "+
+			"is either beyond the boundaries of the file, or in the middle of the PE header; "+
+			"VirtualAddress: %x, Size: %x", address, size)
+		return location, nil
+	}
+
+	// The location of the Certificate Table
+	location["certtable"] = &RelRange{address, size}
+	return location, nil
+}
+
 // Authentihash generates the pe image file hash.
 // The relevant sections to exclude during hashing are:
 // 	- The location of the checksum
@@ -101,100 +217,33 @@ type CertInfo struct {
 //	- The location of the Certificate Table.
 func (pe *File) Authentihash() []byte {
 
-	// Declare some vars.
-	var certDirSize uint32
-	var sizeOfHeaders uint32
-	var dataDirOffset uint32
-
-	// Initialize a hash algorithm context.
-	h := sha256.New()
-
-	// Hash the image header from its base to immediately before the start of
-	// the checksum address, as specified in Optional Header Windows-Specific
-	// Fields.
-	start := uint32(0)
-	fileHdrSize := uint32(binary.Size(pe.NtHeader.FileHeader))
-	optionalHeaderOffset := pe.DOSHeader.AddressOfNewEXEHeader + 4 + fileHdrSize
-	checksumOffset := optionalHeaderOffset + 64
-	h.Write(pe.data[start:checksumOffset])
-
-	// Skip over the checksum, which is a 4-byte field.
-	start += checksumOffset + uint32(4)
-
-	// Hash everything from the end of the checksum field to immediately before
-	// the start of the Certificate Table entry, as specified in Optional Header
-	// Data Directories.
-	oh32 := ImageOptionalHeader32{}
-	oh64 := ImageOptionalHeader64{}
-	switch pe.Is64 {
-	case true:
-		oh64 = pe.NtHeader.OptionalHeader.(ImageOptionalHeader64)
-		certDirSize = oh64.DataDirectory[ImageDirectoryEntryCertificate].Size
-		sizeOfHeaders = oh64.SizeOfHeaders
-		dataDirOffset = uint32(unsafe.Offsetof(oh64.DataDirectory))
-	case false:
-		oh32 = pe.NtHeader.OptionalHeader.(ImageOptionalHeader32)
-		certDirSize = oh32.DataDirectory[ImageDirectoryEntryCertificate].Size
-		sizeOfHeaders = oh32.SizeOfHeaders
-		dataDirOffset = uint32(unsafe.Offsetof(oh32.DataDirectory))
+	locationMap, err := pe.parseLocations()
+	if err != nil {
+		return nil
 	}
-	securityDirOffset := optionalHeaderOffset + dataDirOffset
-	securityDirOffset += uint32(
-		binary.Size(DataDirectory{}) * ImageDirectoryEntryCertificate)
-	h.Write(pe.data[start:securityDirOffset])
 
-	// Skip over the Certificate Table entry, which is 8 bytes long.
-	start = securityDirOffset + uint32(8)
-
-	// Hash everything from the end of the Certificate Table entry to the end of
-	// image header, including Section Table (headers).
-	h.Write(pe.data[start:sizeOfHeaders])
-
-	// Create a counter called SUM_OF_BYTES_HASHED, which is not part of the
-	// signature. Set this counter to the SizeOfHeaders field, as specified in
-	// Optional Header Windows-Specific Field.
-	SumOfBytesHashes := sizeOfHeaders
-
-	// Build a temporary table of pointers to all of the section headers in the
-	// image. The NumberOfSections field of COFF File Header indicates how big
-	// the table should be. Do not include any section headers in the table
-	// whose SizeOfRawData field is zero.
-	sections := []Section{}
-	for _, section := range pe.Sections {
-		if section.Header.SizeOfRawData != 0 {
-			sections = append(sections, section)
+	locationSlice := make([]RelRange, 0, len(locationMap))
+	for k, v := range locationMap {
+		if stringInSlice(k, []string{"checksum", "datadir_certtable", "certtable"}) {
+			locationSlice = append(locationSlice, *v)
 		}
 	}
+	sort.Sort(byStart(locationSlice))
 
-	// Using the PointerToRawData field (offset 20) in the referenced
-	// SectionHeader structure as a key, arrange the table's elements in
-	// ascending order. In other words, sort the section headers in ascending
-	// order according to the disk-file offset of the sections.
-	sort.Sort(byPointerToRawData(sections))
-
-	// Walk through the sorted table, load the corresponding section into
-	// memory, and hash the entire section. Use the SizeOfRawData field in the
-	// SectionHeader structure to determine the amount of data to hash.
-	// Add the section’s SizeOfRawData value to SUM_OF_BYTES_HASHED.
-	for _, s := range sections {
-		sectionData := pe.data[s.Header.PointerToRawData : s.Header.PointerToRawData+s.Header.SizeOfRawData]
-		SumOfBytesHashes += s.Header.SizeOfRawData
-		h.Write(sectionData)
+	ranges := make([]*Range, 0, len(locationSlice))
+	start := uint32(0)
+	for _, r := range locationSlice {
+		ranges = append(ranges, &Range{Start: start, End: r.Start})
+		start = r.Start + r.Length
 	}
+	ranges = append(ranges, &Range{Start: start, End: pe.size})
 
-	// Create a value called FILE_SIZE, which is not part of the signature.
-	// Set this value to the image’s file size, acquired from the underlying
-	// file system. If FILE_SIZE is greater than SUM_OF_BYTES_HASHED, the file
-	// contains extra data that must be added to the hash. This data begins at
-	// the SUM_OF_BYTES_HASHED file offset, and its length is:
-	// (File Size) – ((Size of AttributeCertificateTable) + SUM_OF_BYTES_HASHED)
-	if pe.size > SumOfBytesHashes {
-		length := pe.size - (certDirSize + SumOfBytesHashes)
-		extraData := pe.data[SumOfBytesHashes : SumOfBytesHashes+length]
-		h.Write(extraData)
+	hasher := sha256.New()
+	for _, v := range ranges {
+		sr := io.NewSectionReader(pe.f, int64(v.Start), int64(v.End)-int64(v.Start))
+		io.Copy(hasher, sr)
 	}
-
-	return h.Sum(nil)
+	return hasher.Sum(nil)
 }
 
 // The security directory contains the authenticode signature, which is a digital

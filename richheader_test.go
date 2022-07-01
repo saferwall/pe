@@ -96,7 +96,7 @@ func TestParseRichHeader(t *testing.T) {
 				compIDIndex:  3,
 				prettyProdID: "Utc1900_C",
 				VSVersion:    "Visual Studio 2015 14.00",
-				checksum: 0xa6aadaa7,
+				checksum:     0xa6aadaa7,
 			}},
 	}
 
@@ -136,6 +136,38 @@ func TestParseRichHeader(t *testing.T) {
 			if checksum != tt.out.checksum {
 				t.Errorf("rich header checksum failed, got %v, want %v",
 					checksum, tt.out.checksum)
+			}
+
+		})
+	}
+}
+
+func TestRichHeaderHash(t *testing.T) {
+
+	tests := []struct {
+		in  string
+		out string
+	}{
+		{getAbsoluteFilePath("test/kernel32.dll"),
+			"4549320af6790d410f09ddc3bab86c86"},
+		{getAbsoluteFilePath("test/WdBoot.sys"),
+			"3cbccbf62a2a6a8066a5c9d294c90948"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			file, err := New(tt.in, &Options{})
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
+			}
+
+			got := file.RichHeaderHash()
+			if string(got) != tt.out {
+				t.Errorf("Authentihash(%s) got %v, want %v", tt.in, got, tt.out)
 			}
 
 		})

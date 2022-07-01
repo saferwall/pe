@@ -102,6 +102,14 @@ func TestAuthentihash(t *testing.T) {
 	}{
 		{getAbsoluteFilePath("test/putty.exe"),
 			"8be7d65593b0fff2e8b29004640261b8a0d4fcc651a14cd0b8b702b7928f8ee0"},
+		{getAbsoluteFilePath("test/mscorlib.dll"),
+			"a52bd7784efbf206dbda2db058f3928deaf15f6fedf2773affae56023e2f0edb"},
+		{getAbsoluteFilePath("test/liblzo2-2.dll"),
+			"ae603480b92c7ea3feca164010d2594f9a5282f8b732ecaa0aca29f3225835f6"},
+		{getAbsoluteFilePath("test/kernel32.dll"),
+			"595e4eb556587a1363ff297df9f354a377963ecac0bed19230992b9601426aae"},
+		{getAbsoluteFilePath("test/mfc40u.dll"),
+			"5c8acdf9b2c7854c6b8e22e973d2fbae9c68fc22513d24c68c8e8010b1663e67"},
 	}
 
 	for _, tt := range tests {

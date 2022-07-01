@@ -6,7 +6,9 @@ package pe
 
 import (
 	"bytes"
+	"crypto/md5"
 	"encoding/binary"
+	"fmt"
 )
 
 const (
@@ -185,6 +187,27 @@ func (pe *File) RichHeaderChecksum() uint32 {
 	}
 
 	return checksum
+}
+
+// RichHeaderHash calculate the Rich Header hash.
+func (pe *File) RichHeaderHash() string {
+	if pe.RichHeader == nil {
+		return ""
+	}
+	richIndex := bytes.Index(pe.RichHeader.Raw, []byte(RichSignature))
+	if richIndex == -1 {
+		return ""
+	}
+
+	key := make([]byte, 4)
+	binary.LittleEndian.PutUint32(key, pe.RichHeader.XorKey)
+
+	rawData := pe.RichHeader.Raw[:richIndex]
+	clearData := make([]byte, len(rawData))
+	for idx, val := range rawData {
+		clearData[idx] = val ^ key[idx%len(key)]
+	}
+	return fmt.Sprintf("%x", md5.Sum(clearData))
 }
 
 // ProdIDtoStr mapps product ids to MS internal names.
