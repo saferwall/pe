@@ -9,12 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
+- Calculate Rich header hash thanks to [wanglei-coder](https://github.com/wanglei-coder) [#38](https://github.com/saferwall/pe/pull/38).
+- PE Overlay thanks to [wanglei-coder](https://github.com/wanglei-coder) [#37](https://github.com/saferwall/pe/pull/37).
 - Unit tests for DOS header parsing.
 - Unit tests for CLR directory [#34](https://github.com/saferwall/pe/pull/28).
-- Unit tests for rich header [#33](https://github.com/saferwall/pe/pull/33).
+- Unit tests for Rich header [#33](https://github.com/saferwall/pe/pull/33).
 
 ### Fixed
 
+- Fix `adjustSectionAlignment()` thanks to wanglei-coder [#40](https://github.com/saferwall/pe/pull/40).
+- Fix authentihash calculation thanks to wanglei-coder [#38](https://github.com/saferwall/pe/pull/38).
 - Memory leak in `Close()` function that missed a call to `unmap()` thanks to [Mamba24L8](https://github.com/Mamba24L8).
 
 ## [1.2.0] - 2022-06-12

@@ -421,15 +421,19 @@ func (pe *File) adjustSectionAlignment(va uint32) uint32 {
 	switch pe.Is64 {
 	case true:
 		fileAlignment = pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).FileAlignment
-		sectionAlignment = pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).FileAlignment
+		sectionAlignment = pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).SectionAlignment
 	case false:
-		fileAlignment = pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).SectionAlignment
+		fileAlignment = pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).FileAlignment
 		sectionAlignment = pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).SectionAlignment
 	}
 
 	if fileAlignment < FileAlignmentHardcodedValue &&
 		fileAlignment != sectionAlignment {
 		pe.Anomalies = append(pe.Anomalies, ErrInvalidSectionAlignment)
+	}
+
+	if sectionAlignment < 0x1000 { // page size
+		sectionAlignment = fileAlignment
 	}
 
 	// 0x200 is the minimum valid FileAlignment according to the documentation
