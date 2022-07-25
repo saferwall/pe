@@ -470,7 +470,7 @@ func (section *Section) CalculateEntropy(pe *File) float64 {
 	}
 
 	var frequencies [256]uint64
-	for _, v := range section.Data(0, 0, pe) {
+	for _, v := range sectionData {
 		frequencies[v]++
 	}
 
