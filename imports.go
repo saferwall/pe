@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2022 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -199,6 +199,10 @@ func (pe *File) parseImportDirectory(rva, size uint32) (err error) {
 			Functions:  importedFunctions,
 			Descriptor: importDesc,
 		})
+	}
+
+	if len(pe.Imports) > 0 {
+		pe.HasImport = true
 	}
 
 	return nil

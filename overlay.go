@@ -1,3 +1,7 @@
+// Copyright 2022 Saferwall. All rights reserved.
+// Use of this source code is governed by Apache v2 license
+// license that can be found in the LICENSE file.
+
 package pe
 
 import (
@@ -7,7 +11,7 @@ import (
 
 // error
 var (
-	ErrNoOverlayFound = errors.New("pe: not have overlay data")
+	ErrNoOverlayFound = errors.New("pe does not have overlay data")
 )
 
 // NewOverlayReader returns a new ReadSeeker reading the PE overlay data.
@@ -28,8 +32,10 @@ func (pe *File) Overlay() ([]byte, error) {
 	overlay := make([]byte, int64(pe.size)-pe.OverlayOffset)
 	n, err := sr.ReadAt(overlay, 0)
 	if n == len(overlay) {
+		pe.HasOverlay = true
 		err = nil
 	}
+
 	return overlay, err
 }
 

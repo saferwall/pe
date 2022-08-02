@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2022 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -284,6 +284,7 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 		pkcs, err = pkcs7.Parse(certContent)
 		if err != nil {
 			pe.Certificates = &Certificate{Header: certHeader, Raw: certContent}
+			pe.HasSecurity = true
 			return err
 		}
 
@@ -373,5 +374,6 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 
 	pe.Certificates = &Certificate{Header: certHeader, Content: pkcs,
 		Raw: certContent, Info: certInfo, Verified: isValid}
+	pe.HasSecurity = true
 	return nil
 }

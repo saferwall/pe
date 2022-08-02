@@ -639,6 +639,11 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 		return nil
 	}
 
+	// If we get a CLR header, we assume that this is enough
+	// to say we have a CLR data to show even if parsing
+	// other structures fails later.
+	pe.HasCLR = true
+
 	offset = pe.GetOffsetFromRva(clrHeader.MetaData.VirtualAddress)
 	mh, err := pe.parseMetadataHeader(offset, clrHeader.MetaData.Size)
 	if err != nil {
