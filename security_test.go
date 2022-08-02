@@ -38,9 +38,29 @@ func TestParseSecurityDirectory(t *testing.T) {
 					NotBefore: time.Date(2018, time.November, 13, 00, 00, 0, 0, time.UTC),
 					NotAfter:  time.Date(2021, time.November, 8, 23, 59, 59, 0, time.UTC),
 				},
-				err: nil,
+				Verified: true,
+				err:      nil,
 			},
 		},
+		{
+			getAbsoluteFilePath("test/579fd8a0385482fb4c789561a30b09f25671e86422f40ef5cca2036b28f99648"),
+			TestSecurityEntry{
+				Header: WinCertificate{
+					Length:          0x3488,
+					Revision:        0x200,
+					CertificateType: 0x2,
+				},
+				Info: CertInfo{
+					Issuer:    "US, VeriSign Class 3 Code Signing 2010 CA",
+					Subject:   "US, California, Mountain View, Symantec Corporation, Symantec Corporation",
+					NotBefore: time.Date(2016, time.December, 16, 00, 00, 0, 0, time.UTC),
+					NotAfter:  time.Date(2017, time.December, 17, 23, 59, 59, 0, time.UTC),
+				},
+				Verified: false,
+				err:      nil,
+			},
+		},
+
 		{
 			getAbsoluteFilePath("test/00121dae38f26a33da2990987db58738c5a5966930126a42f606a3b40e014624"),
 			TestSecurityEntry{

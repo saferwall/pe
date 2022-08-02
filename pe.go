@@ -222,4 +222,5 @@ type FileInfo struct {
 	HasDelayImp  bool
 	HasCLR       bool
 	HasOverlay   bool
+	IsSigned     bool
 }

@@ -12,8 +12,11 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"runtime"
 	"sort"
+	"syscall"
 	"time"
+	"unsafe"
 
 	"go.mozilla.org/pkcs7"
 )
@@ -337,19 +340,25 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 			break
 		}
 
-		// Verify the signature. This will also verify the chain of trust of the
-		// the end-entity signer cert to one of the root in the truststore.
+
+		// Let's mark the file as being signed, then we verify if the
+		// signature is valid.
+		pe.IsSigned  = true
+
 		// Let's load the system root certs.
+		// SystemCertPool() return an error in Windows, use loadSystemRoots instead.
+		// loadSystemRoots will enumrate the list of root certs using Windows crypto
+		// APIs.
 		var certPool *x509.CertPool
-		skipCertVerification := false
-		certPool, err = x509.SystemCertPool()
-		if err != nil {
-			skipCertVerification = true
+		if runtime.GOOS == "windows" {
+			certPool, err = loadSystemRoots()
+		} else {
+			certPool, err = x509.SystemCertPool()
 		}
 
-		// SystemCertPool() return an error in Windows, so we skip verification
-		// for now.
-		if !skipCertVerification {
+		// Verify the signature. This will also verify the chain of trust of the
+		// the end-entity signer cert to one of the root in the truststore.
+		if err == nil {
 			err = pkcs.VerifyWithChain(certPool)
 			if err == nil {
 				isValid = true
@@ -376,4 +385,44 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 		Raw: certContent, Info: certInfo, Verified: isValid}
 	pe.HasSecurity = true
 	return nil
+}
+
+func loadSystemRoots() (*x509.CertPool, error) {
+
+	const CRYPT_E_NOT_FOUND = 0x80092004
+	name, err := syscall.UTF16PtrFromString("ROOT")
+	if err != nil {
+		return nil, err
+	}
+
+	store, err := syscall.CertOpenSystemStore(0, name)
+	if err != nil {
+		return nil, err
+	}
+	defer syscall.CertCloseStore(store, 0)
+
+	roots := x509.NewCertPool()
+	var cert *syscall.CertContext
+	for {
+		cert, err = syscall.CertEnumCertificatesInStore(store, cert)
+		if err != nil {
+			if errno, ok := err.(syscall.Errno); ok {
+				if errno == CRYPT_E_NOT_FOUND {
+					break
+				}
+			}
+			return nil, err
+		}
+		if cert == nil {
+			break
+		}
+		// Copy the buf, since ParseCertificate does not create its own copy.
+		buf := (*[1 << 20]byte)(unsafe.Pointer(cert.EncodedCert))[:cert.Length:cert.Length]
+		buf2 := make([]byte, cert.Length)
+		copy(buf2, buf)
+		if c, err := x509.ParseCertificate(buf2); err == nil {
+			roots.AddCert(c)
+		}
+	}
+	return roots, nil
 }
