@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
+- File information structure that helps to identify what parts of the PE file we have, such as `HasImports()` [#42](https://github.com/saferwall/pe/pull/42)..
 - Calculate Rich header hash thanks to [wanglei-coder](https://github.com/wanglei-coder) [#38](https://github.com/saferwall/pe/pull/38).
 - PE Overlay thanks to [wanglei-coder](https://github.com/wanglei-coder) [#37](https://github.com/saferwall/pe/pull/37).
 - Unit tests for DOS header parsing.
@@ -17,8 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix `adjustSectionAlignment()` thanks to wanglei-coder [#40](https://github.com/saferwall/pe/pull/40).
-- Fix authentihash calculation thanks to wanglei-coder [#38](https://github.com/saferwall/pe/pull/38).
+- Fix getting section data repeatedly thanks to [wanglei-coder](https://github.com/wanglei-coder) [#41](https://github.com/saferwall/pe/pull/41).
+- Fix `adjustSectionAlignment()` thanks to [wanglei-coder](https://github.com/wanglei-coder) [#40](https://github.com/saferwall/pe/pull/40).
+- Fix authentihash calculation thanks to [wanglei-coder](https://github.com/wanglei-coder) [#38](https://github.com/saferwall/pe/pull/38).
 - Memory leak in `Close()` function that missed a call to `unmap()` thanks to [Mamba24L8](https://github.com/Mamba24L8).
 
 ## [1.2.0] - 2022-06-12

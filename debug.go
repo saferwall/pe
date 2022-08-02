@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2022 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -419,7 +419,6 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 
 				debugEntry.Info = pogo
 			}
-
 		case ImageDebugTypeVCFeature:
 			vcf := VCFeature{}
 			size := uint32(binary.Size(vcf))
@@ -428,7 +427,6 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 				continue
 			}
 			debugEntry.Info = vcf
-
 		case ImageDebugTypeRepro:
 			repro := REPRO{}
 			offset := debugDir.PointerToRawData
@@ -442,7 +440,6 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 				continue
 			}
 			debugEntry.Info = repro
-
 		case ImageDebugTypeFPO:
 			offset := debugDir.PointerToRawData
 			size := uint32(16)
@@ -519,6 +516,10 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 
 		debugEntry.Struct = debugDir
 		pe.Debugs = append(pe.Debugs, debugEntry)
+	}
+
+	if len(pe.Debugs) > 0 {
+		pe.HasDebug = true
 	}
 
 	return nil

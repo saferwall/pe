@@ -157,6 +157,8 @@ func (pe *File) ParseRichHeader() error {
 	if checksum != rh.XorKey {
 		pe.Anomalies = append(pe.Anomalies, "Invalid rich header checksum")
 	}
+
+	pe.HasRichHdr = true
 	return nil
 }
 

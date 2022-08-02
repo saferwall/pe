@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2022 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -196,3 +196,30 @@ const (
 	ImageDirectoryEntryReserved     = 15 // Must be zero
 	ImageNumberOfDirectoryEntries   = 16 // Tables count.
 )
+
+// FileInfo represents the PE file information struct.
+type FileInfo struct {
+	Is32         bool
+	Is64         bool
+	HasDOSHdr    bool
+	HasRichHdr   bool
+	HasCOFF      bool
+	HasNTHdr     bool
+	HasSections  bool
+	HasExport    bool
+	HasImport    bool
+	HasResource  bool
+	HasException bool
+	HasSecurity  bool
+	HasReloc     bool
+	HasDebug     bool
+	HasArchitect bool
+	HasGlobalPtr bool
+	HasTLS       bool
+	HasLoadCFG   bool
+	HasBoundImp  bool
+	HasIAT       bool
+	HasDelayImp  bool
+	HasCLR       bool
+	HasOverlay   bool
+}

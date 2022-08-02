@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2022 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -301,6 +301,11 @@ func (pe *File) doParseResourceDirectory(rva, size, baseRVA, level uint32,
 func (pe *File) parseResourceDirectory(rva, size uint32) error {
 	var dirs []uint32
 	Resources, err := pe.doParseResourceDirectory(rva, size, 0, 0, dirs)
+	if err != nil {
+		return err
+	}
+
 	pe.Resources = &Resources
+	pe.HasResource = true
 	return err
 }

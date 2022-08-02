@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2022 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -83,19 +83,20 @@ type Export struct {
 	Name      string
 }
 
-// A few notes learned from `Corkami` about parsing export directory:
-// - like many data directories, Exports' size are not necessary, except for
-// forwarding.
-// - Characteristics, TimeDateStamp, MajorVersion and MinorVersion are not necessary.
-// the export name is not necessary, and can be anything.
-// - AddressOfNames is lexicographically-ordered.
-// - export names can have any value (even null or more than 65536 characters
-// long, with unprintable characters), just null terminated.
-// - an EXE can have exports (no need of relocation nor DLL flag), and can use
-// them normally
-// - exports can be not used for execution, but for documenting the internal code
-// - numbers of functions will be different from number of names when the file
-// is exporting some functions by ordinal.
+/*
+A few notes learned from `Corkami` about parsing export directory:
+- like many data directories, Exports' size are not necessary, except for forwarding.
+- Characteristics, TimeDateStamp, MajorVersion and MinorVersion are not necessary.
+- the export name is not necessary, and can be anything.
+- AddressOfNames is lexicographically-ordered.
+- export names can have any value (even null or more than 65536 characters long,
+  with unprintable characters), just null terminated.
+- an EXE can have exports (no need of relocation nor DLL flag), and can use
+them normally
+- exports can be not used for execution, but for documenting the internal code
+- numbers of functions will be different from number of names when the file
+is exporting some functions by ordinal.
+*/
 func (pe *File) parseExportDirectory(rva, size uint32) error {
 
 	// Define some vars.
@@ -312,6 +313,7 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 	}
 
 	pe.Export = &exp
+	pe.HasExport = true
 	return nil
 }
 

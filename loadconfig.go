@@ -1626,6 +1626,7 @@ func (pe *File) parseLoadConfigDirectory(rva, size uint32) error {
 	// Save the load config struct.
 	loadConfig := LoadConfig{}
 	pe.LoadConfig = &loadConfig
+	pe.HasLoadCFG = true
 	loadConfig.LoadCfgStruct = loadCfg
 
 	// Retrieve SEH handlers if there are any..

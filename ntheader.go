@@ -441,6 +441,7 @@ func (pe *File) ParseNTHeader() (err error) {
 		pe.Anomalies = append(pe.Anomalies, AnoImageBaseOverflow)
 	}
 
+	pe.HasNTHdr = true
 	return nil
 }
 
