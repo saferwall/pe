@@ -104,13 +104,12 @@ func parsePE(filename string, cmd *cobra.Command) {
 		return
 	}
 
+	// Dump all results to disk in JSON format.
 	b, _ := json.Marshal(pe)
-
-	fmt.Print(prettyPrint(b))
-	return
+	os.WriteFile("out.json", []byte(prettyPrint(b)), 0644)
 
 	// Calculate the PE authentihash.
-	//pe.Authentihash()
+	pe.Authentihash()
 
 	// Calculate the PE checksum.
 	pe.Checksum()
@@ -197,6 +196,7 @@ func parsePE(filename string, cmd *cobra.Command) {
 		log.Info(prettyPrint(dosHeader))
 		log.Info(prettyPrint(ntHeader))
 		log.Info(prettyPrint(sectionsHeaders))
+		return
 	}
 
 	fmt.Println()
