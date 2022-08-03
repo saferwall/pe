@@ -11,8 +11,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"reflect"
+	"runtime"
 	"sort"
+	"strings"
 	"time"
 
 	"go.mozilla.org/pkcs7"
@@ -46,7 +52,7 @@ const (
 	WinCertTypeReserved1 = 0x0003
 
 	// Terminal Server Protocol Stack Certificate signing (Not Supported).
-	WinCertTypeTsStackSigned = 0x0004
+	WinCertTypeTSStackSigned = 0x0004
 )
 
 var (
@@ -266,6 +272,8 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 	// certificate entry.
 	fileOffset := rva
 
+	// PE file can be dual signed by applying multiple signatures, which is
+	// strongly recommended when using deprecated hashing algorithms such as MD5.
 	for {
 		err := pe.structUnpack(&certHeader, fileOffset, certSize)
 		if err != nil {
@@ -337,19 +345,21 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 			break
 		}
 
-		// Verify the signature. This will also verify the chain of trust of the
-		// the end-entity signer cert to one of the root in the truststore.
+		// Let's mark the file as signed, then we verify if the
+		// signature is valid.
+		pe.IsSigned = true
+
 		// Let's load the system root certs.
 		var certPool *x509.CertPool
-		skipCertVerification := false
-		certPool, err = x509.SystemCertPool()
-		if err != nil {
-			skipCertVerification = true
+		if runtime.GOOS == "windows" {
+			certPool, err = loadSystemRoots()
+		} else {
+			certPool, err = x509.SystemCertPool()
 		}
 
-		// SystemCertPool() return an error in Windows, so we skip verification
-		// for now.
-		if !skipCertVerification {
+		// Verify the signature. This will also verify the chain of trust of the
+		// the end-entity signer cert to one of the root in the truststore.
+		if err == nil {
 			err = pkcs.VerifyWithChain(certPool)
 			if err == nil {
 				isValid = true
@@ -376,4 +386,69 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 		Raw: certContent, Info: certInfo, Verified: isValid}
 	pe.HasSecurity = true
 	return nil
+}
+
+// loadSystemsRoots manually downloads all the trusted root certificates
+// in Windows by spawning certutil then adding root certs individually
+// to the cert pool. Initially, when running in windows, go SystemCertPool()
+// used to enumerate all the ceritificate in the Windows store using
+// (CertEnumCertificatesInStore). Unfortunately, Windows does not ship
+// with all of its root certificates installed. Instead, it downloads them
+// on-demand. As a consequence, this behavior leads to a non-deterministic
+// results. Go team then disabled loadding Windows root certs.
+func loadSystemRoots() (*x509.CertPool, error) {
+
+	needSync := true
+	roots := x509.NewCertPool()
+
+	// Create a temporary dir in the OS temp folder
+	// if it does not exists.
+	dir := filepath.Join(os.TempDir(), "certs")
+	info, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		if err = os.Mkdir(dir, 0755); err != nil {
+			return roots, err
+		}
+	} else {
+		now := time.Now()
+		modTime := info.ModTime()
+		diff := now.Sub(modTime).Hours()
+		if diff < 24 {
+			needSync = false
+		}
+	}
+
+	// Use certutil to download all the root certs.
+	if needSync {
+		cmd := exec.Command("certutil", "-syncWithWU", dir)
+		out, err := cmd.Output()
+		if err != nil {
+			return roots, err
+		}
+		if !strings.Contains(string(out), "command completed successfully") {
+			return roots, err
+		}
+	}
+
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return roots, err
+	}
+
+	for _, f := range files {
+		if !strings.HasSuffix(f.Name(), ".crt") {
+			continue
+		}
+		certPath := filepath.Join(dir, f.Name())
+		certData, err := ioutil.ReadFile(certPath)
+		if err != nil {
+			return roots, err
+		}
+
+		if crt, err := x509.ParseCertificate(certData); err == nil {
+			roots.AddCert(crt)
+		}
+	}
+
+	return roots, nil
 }

@@ -500,38 +500,29 @@ func ProdIDtoStr(prodID uint16) string {
 // ProdIDtoVSversion retrieves the Visual Studio version from product id.
 // list from: https://github.com/kirschju/richheader
 func ProdIDtoVSversion(prodID uint16) string {
-	if prodID > 0x010e || prodID < 0 {
+	if prodID > 0x010e {
 		return ""
-	}
-	if prodID >= 0x00fd && prodID < (0x010e+1) {
+	} else if prodID >= 0x00fd && prodID < 0x010e+1 {
 		return "Visual Studio 2015 14.00"
-	}
-	if prodID >= 0x00eb && prodID < 0x00fd {
+	} else if prodID >= 0x00eb && prodID < 0x00fd {
 		return "Visual Studio 2013 12.10"
-	}
-	if prodID >= 0x00d9 && prodID < 0x00eb {
+	} else if prodID >= 0x00d9 && prodID < 0x00eb {
 		return "Visual Studio 2013 12.00"
-	}
-	if prodID >= 0x00c7 && prodID < 0x00d9 {
+	} else if prodID >= 0x00c7 && prodID < 0x00d9 {
 		return "Visual Studio 2012 11.00"
-	}
-	if prodID >= 0x00b5 && prodID < 0x00c7 {
+	} else if prodID >= 0x00b5 && prodID < 0x00c7 {
 		return "Visual Studio 2010 10.10"
-	}
-	if prodID >= 0x0098 && prodID < 0x00b5 {
+	} else if prodID >= 0x0098 && prodID < 0x00b5 {
 		return "Visual Studio 2010 10.00"
-	}
-	if prodID >= 0x0083 && prodID < 0x0098 {
+	} else if prodID >= 0x0083 && prodID < 0x0098 {
 		return "Visual Studio 2008 09.00"
-	}
-	if prodID >= 0x006d && prodID < 0x0083 {
+	} else if prodID >= 0x006d && prodID < 0x0083 {
 		return "Visual Studio 2005 08.00"
-	}
-	if prodID >= 0x005a && prodID < 0x006d {
+	} else if prodID >= 0x005a && prodID < 0x006d {
 		return "Visual Studio 2003 07.10"
-	}
-	if prodID == 1 {
+	} else if prodID == 1 {
 		return "Visual Studio"
+	} else {
+		return "<unknown>"
 	}
-	return ""
 }

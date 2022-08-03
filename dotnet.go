@@ -609,7 +609,7 @@ func (pe *File) parseMetadataModuleTable(moduleTable *MetadataTable, off uint32)
 	}
 	off += indexSize
 
-	if indexSize, err = pe.readFromMetadataSteam(GUIDStream, off, &modTableRow.EncBaseID); err != nil {
+	if _, err = pe.readFromMetadataSteam(GUIDStream, off, &modTableRow.EncBaseID); err != nil {
 		return err
 	}
 

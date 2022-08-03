@@ -12,7 +12,8 @@
             "program": "${workspaceFolder}\\cmd",
             "args": [
                 "dump",
-                "./notepad.exe"
+                "../test/putty.exe",
+                "all"
             ]
         }
     ]
