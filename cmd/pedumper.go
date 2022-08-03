@@ -106,7 +106,12 @@ func parsePE(filename string, cmd *cobra.Command) {
 
 	// Dump all results to disk in JSON format.
 	b, _ := json.Marshal(pe)
-	os.WriteFile("out.json", []byte(prettyPrint(b)), 0644)
+	f, err := os.Create("out.json")
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	f.WriteString(prettyPrint(b))
 
 	// Calculate the PE authentihash.
 	pe.Authentihash()
