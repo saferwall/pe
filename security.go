@@ -11,12 +11,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"sort"
-	"syscall"
+	"strings"
 	"time"
-	"unsafe"
 
 	"go.mozilla.org/pkcs7"
 )
@@ -269,6 +272,8 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 	// certificate entry.
 	fileOffset := rva
 
+	// PE file can be dual signed by applying multiple signatures, which is
+	// strongly recommended when using deprecated hashing algorithms such as MD5.
 	for {
 		err := pe.structUnpack(&certHeader, fileOffset, certSize)
 		if err != nil {
@@ -340,15 +345,11 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 			break
 		}
 
-
 		// Let's mark the file as being signed, then we verify if the
 		// signature is valid.
-		pe.IsSigned  = true
+		pe.IsSigned = true
 
 		// Let's load the system root certs.
-		// SystemCertPool() return an error in Windows, use loadSystemRoots instead.
-		// loadSystemRoots will enumrate the list of root certs using Windows crypto
-		// APIs.
 		var certPool *x509.CertPool
 		if runtime.GOOS == "windows" {
 			certPool, err = loadSystemRoots()
@@ -387,42 +388,67 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 	return nil
 }
 
+// loadSystemsRoots manually downloads all the trusted root certificates
+// in Windows by spawning certutil then adding root certs individually
+// to the cert pool. Initially, when running in windows, go SystemCertPool()
+// used to enumerate all the ceritificate in the Windows store using
+// (CertEnumCertificatesInStore). Unfortunately, Windows does not ship
+// with all of its root certificates installed. Instead, it downloads them
+// on-demand. As a consequence, this behavior leads to a non-deterministic
+// results. Go team then disabled loadding Windows root certs.
 func loadSystemRoots() (*x509.CertPool, error) {
 
-	const CRYPT_E_NOT_FOUND = 0x80092004
-	name, err := syscall.UTF16PtrFromString("ROOT")
-	if err != nil {
-		return nil, err
-	}
-
-	store, err := syscall.CertOpenSystemStore(0, name)
-	if err != nil {
-		return nil, err
-	}
-	defer syscall.CertCloseStore(store, 0)
-
+	needSync := true
 	roots := x509.NewCertPool()
-	var cert *syscall.CertContext
-	for {
-		cert, err = syscall.CertEnumCertificatesInStore(store, cert)
-		if err != nil {
-			if errno, ok := err.(syscall.Errno); ok {
-				if errno == CRYPT_E_NOT_FOUND {
-					break
-				}
-			}
-			return nil, err
+
+	// Create a temporary dir in the OS temp folder
+	// if it does not exists.
+	dir := filepath.Join(os.TempDir(), "certs")
+	info, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		if err = os.Mkdir(dir, 0755); err != nil {
+			return roots, err
 		}
-		if cert == nil {
-			break
-		}
-		// Copy the buf, since ParseCertificate does not create its own copy.
-		buf := (*[1 << 20]byte)(unsafe.Pointer(cert.EncodedCert))[:cert.Length:cert.Length]
-		buf2 := make([]byte, cert.Length)
-		copy(buf2, buf)
-		if c, err := x509.ParseCertificate(buf2); err == nil {
-			roots.AddCert(c)
+	} else {
+		now := time.Now()
+		modTime := info.ModTime()
+		diff := now.Sub(modTime).Hours()
+		if diff < 24 {
+			needSync = false
 		}
 	}
+
+	// Use certutil to download all the root certs.
+	if needSync {
+		cmd := exec.Command("certutil", "-syncWithWU", dir)
+		out, err := cmd.Output()
+		if err != nil {
+			return roots, err
+		}
+		if !strings.Contains(string(out), "command completed successfully") {
+			return roots, err
+		}
+	}
+
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return roots, err
+	}
+
+	for _, f := range files {
+		if !strings.HasSuffix(f.Name(), ".crt") {
+			continue
+		}
+		certPath := filepath.Join(dir, f.Name())
+		certData, err := ioutil.ReadFile(certPath)
+		if err != nil {
+			return roots, err
+		}
+
+		if crt, err := x509.ParseCertificate(certData); err == nil {
+			roots.AddCert(crt)
+		}
+	}
+
 	return roots, nil
 }
