@@ -19,11 +19,6 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Install dependencies
-        run: |
-          go version
-          go get -u golang.org/x/lint/golint
-
       - name: Build
         run: |
           go env -w GOFLAGS=-mod=mod
@@ -46,4 +41,4 @@ jobs:
       - name: Run Vet & Lint
         run: |
           go vet .
-          golint -set_exit_status=0 .
+          staticcheck
