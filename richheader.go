@@ -151,14 +151,14 @@ func (pe *File) ParseRichHeader() error {
 		rh.CompIDs = append(rh.CompIDs, cid)
 	}
 
-	pe.RichHeader = &rh
+	pe.RichHeader = rh
+	pe.HasRichHdr = true
 
 	checksum := pe.RichHeaderChecksum()
 	if checksum != rh.XorKey {
 		pe.Anomalies = append(pe.Anomalies, "Invalid rich header checksum")
 	}
 
-	pe.HasRichHdr = true
 	return nil
 }
 
@@ -193,9 +193,10 @@ func (pe *File) RichHeaderChecksum() uint32 {
 
 // RichHeaderHash calculate the Rich Header hash.
 func (pe *File) RichHeaderHash() string {
-	if pe.RichHeader == nil {
+	if !pe.HasRichHdr {
 		return ""
 	}
+
 	richIndex := bytes.Index(pe.RichHeader.Raw, []byte(RichSignature))
 	if richIndex == -1 {
 		return ""

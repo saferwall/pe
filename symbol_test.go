@@ -95,7 +95,8 @@ func TestParseCOFFSymbolTable(t *testing.T) {
 				)
 			}
 
-			if file.COFF == nil {
+			// exit early when err is errCOFFSymbolsTooHigh.
+			if err == errCOFFSymbolsTooHigh {
 				return
 			}
 

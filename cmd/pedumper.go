@@ -104,6 +104,11 @@ func parsePE(filename string, cmd *cobra.Command) {
 		return
 	}
 
+	b, _ := json.Marshal(pe)
+
+	fmt.Print(prettyPrint(b))
+	return
+
 	// Calculate the PE authentihash.
 	//pe.Authentihash()
 
@@ -171,7 +176,7 @@ func parsePE(filename string, cmd *cobra.Command) {
 	}
 
 	wantCLR, _ := cmd.Flags().GetBool("clr")
-	if wantCLR && pe.CLR != nil {
+	if wantCLR {
 		dotnetMetadata, _ := json.Marshal(pe.CLR)
 		log.Info(prettyPrint(dotnetMetadata))
 		if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {

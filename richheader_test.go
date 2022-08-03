@@ -114,7 +114,7 @@ func TestParseRichHeader(t *testing.T) {
 			}
 
 			richheader := file.RichHeader
-			if !reflect.DeepEqual(richheader, &tt.out.richheader) {
+			if !reflect.DeepEqual(richheader, tt.out.richheader) {
 				t.Errorf("rich header test failed, got %v, want %v",
 					richheader, tt.out)
 			}

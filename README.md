@@ -1,26 +1,29 @@
-# Portable Executable Parser [![GoDoc](http://godoc.org/github.com/saferwall/pe?status.svg)](https://pkg.go.dev/github.com/saferwall/pe) ![Go Version](https://img.shields.io/badge/go%20version-%3E=1.15-61CFDD.svg?style=flat-square) [![Report Card](https://goreportcard.com/badge/github.com/saferwall/pe)](https://goreportcard.com/report/github.com/saferwall/pe) [![codecov](https://codecov.io/gh/saferwall/pe/branch/main/graph/badge.svg?token=W7WTOUZLRY)](https://codecov.io/gh/saferwall/pe) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/saferwall/pe/Build%20&%20Test)
+# Portable Executable Parser
+
+[![GoDoc](http://godoc.org/github.com/saferwall/pe?status.svg)](https://pkg.go.dev/github.com/saferwall/pe) ![Go Version](https://img.shields.io/badge/go%20version-%3E=1.15-61CFDD.svg) [![Report Card](https://goreportcard.com/badge/github.com/saferwall/pe)](https://goreportcard.com/report/github.com/saferwall/pe) [![codecov](https://codecov.io/gh/saferwall/pe/branch/main/graph/badge.svg?token=W7WTOUZLRY)](https://codecov.io/gh/saferwall/pe) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/saferwall/pe/Build%20&%20Test)
 
 **pe** is a go package for parsing the [portable executable](https://docs.microsoft.com/en-us/windows/win32/debug/pe-format) file format. This package was designed with malware analysis in mind, and being resistent to PE malformations.
 
 ## Table of content
 
--   [Features](#features)
--   [Installing](#installing)
--   [Using the library](#using-the-library)
-    -   [Access the PE header](#pe-header)
-    -   [Viewing the rich header](#rich-header)
-    -   [Iterating over sections](#iterating-over-sections)
--   [Roadmap](#roadmap)
--   [Contributing](#contributing)
--   [License](#license)
--   [References](#references)
+- [Portable Executable Parser](#portable-executable-parser)
+  - [Table of content](#table-of-content)
+  - [Features](#features)
+  - [Installing](#installing)
+  - [Using the library](#using-the-library)
+    - [PE Header](#pe-header)
+    - [Rich Header](#rich-header)
+    - [Iterating over sections](#iterating-over-sections)
+  - [Roadmap](#roadmap)
+  - [Fuzz Testing](#fuzz-testing)
+  - [References](#references)
 
 ## Features
 
 -   Works with PE32/PE32+ file fomat.
 -   Supports Intel x86/AMD64/ARM7ARM7 Thumb/ARM8-64/IA64/CHPE architectures.
 -   MS DOS header.
--   Rich Header (calculate checksum).
+-   Rich Header (calculate checksum and hash).
 -   NT Header (file header + optional header).
 -   COFF symbol table and string table.
 -   Sections headers + entropy calculation.
@@ -80,15 +83,15 @@ Afterwards, a call to the `Parse()` method will give you access to all the diffe
 ```go
 type File struct {
 	DOSHeader    ImageDOSHeader
-	RichHeader   *RichHeader
+	RichHeader   RichHeader
 	NtHeader     ImageNtHeader
-	COFF         *COFF
+	COFF         COFF
 	Sections     []Section
 	Imports      []Import
-	Export       *Export
+	Export       Export
 	Debugs       []DebugEntry
 	Relocations  []Relocation
-	Resources    *ResourceDirectory
+	Resources    ResourceDirectory
 	TLS          *TLSDirectory
 	LoadConfig   *LoadConfig
 	Exceptions   []Exception

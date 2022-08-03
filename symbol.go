@@ -310,13 +310,12 @@ func (pe *File) ParseCOFFSymbolTable() error {
 		offset += size
 	}
 
-	pe.COFF = &COFF{}
 	pe.COFF.SymbolTable = symbols
-	pe.HasCOFF = true
 
 	// Get the COFF string table.
 	pe.COFFStringTable()
 
+	pe.HasCOFF = true
 	return nil
 }
 

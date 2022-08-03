@@ -312,19 +312,18 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 		exp.Functions = append(exp.Functions, newExport)
 	}
 
-	pe.Export = &exp
+	pe.Export = exp
 	pe.HasExport = true
 	return nil
 }
 
 // GetExportFunctionByRVA return an export function given an RVA.
 func (pe *File) GetExportFunctionByRVA(rva uint32) ExportFunction {
-	if pe.Export != nil {
-		for _, exp := range pe.Export.Functions {
-			if exp.FunctionRVA == rva {
-				return exp
-			}
+	for _, exp := range pe.Export.Functions {
+		if exp.FunctionRVA == rva {
+			return exp
 		}
 	}
+
 	return ExportFunction{}
 }

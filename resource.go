@@ -305,7 +305,7 @@ func (pe *File) parseResourceDirectory(rva, size uint32) error {
 		return err
 	}
 
-	pe.Resources = &Resources
+	pe.Resources = Resources
 	pe.HasResource = true
 	return err
 }

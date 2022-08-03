@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2022 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -15,23 +15,23 @@ import (
 // A File represents an open PE file.
 type File struct {
 	DOSHeader    ImageDOSHeader              `json:",omitempty"`
-	RichHeader   *RichHeader                 `json:",omitempty"`
+	RichHeader   RichHeader                  `json:",omitempty"`
 	NtHeader     ImageNtHeader               `json:",omitempty"`
-	COFF         *COFF                       `json:",omitempty"`
+	COFF         COFF                        `json:",omitempty"`
 	Sections     []Section                   `json:",omitempty"`
 	Imports      []Import                    `json:",omitempty"`
-	Export       *Export                     `json:",omitempty"`
+	Export       Export                      `json:",omitempty"`
 	Debugs       []DebugEntry                `json:",omitempty"`
 	Relocations  []Relocation                `json:",omitempty"`
-	Resources    *ResourceDirectory          `json:",omitempty"`
-	TLS          *TLSDirectory               `json:",omitempty"`
-	LoadConfig   *LoadConfig                 `json:",omitempty"`
+	Resources    ResourceDirectory           `json:",omitempty"`
+	TLS          TLSDirectory                `json:",omitempty"`
+	LoadConfig   LoadConfig                  `json:",omitempty"`
 	Exceptions   []Exception                 `json:",omitempty"`
-	Certificates *Certificate                `json:",omitempty"`
+	Certificates Certificate                 `json:",omitempty"`
 	DelayImports []DelayImport               `json:",omitempty"`
 	BoundImports []BoundImportDescriptorData `json:",omitempty"`
 	GlobalPtr    uint32                      `json:",omitempty"`
-	CLR          *CLRData                    `json:",omitempty"`
+	CLR          CLRData                     `json:",omitempty"`
 	IAT          []IATEntry                  `json:",omitempty"`
 	Header       []byte
 	data         mmap.MMap

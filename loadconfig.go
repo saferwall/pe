@@ -1624,37 +1624,35 @@ func (pe *File) parseLoadConfigDirectory(rva, size uint32) error {
 	}
 
 	// Save the load config struct.
-	loadConfig := LoadConfig{}
-	pe.LoadConfig = &loadConfig
 	pe.HasLoadCFG = true
-	loadConfig.LoadCfgStruct = loadCfg
+	pe.LoadConfig.LoadCfgStruct = loadCfg
 
 	// Retrieve SEH handlers if there are any..
 	if pe.Is32 {
 		handlers := pe.getSEHHandlers()
-		loadConfig.SEH = handlers
+		pe.LoadConfig.SEH = handlers
 	}
 
 	// Retrieve Control Flow Guard Function Targets if there are any.
-	loadConfig.GFIDS = pe.getControlFlowGuardFunctions()
+	pe.LoadConfig.GFIDS = pe.getControlFlowGuardFunctions()
 
 	// Retrieve Control Flow Guard IAT entries if there are any.
-	loadConfig.CFGIAT = pe.getControlFlowGuardIAT()
+	pe.LoadConfig.CFGIAT = pe.getControlFlowGuardIAT()
 
 	// Retrive Long jump target functions if there are any.
-	loadConfig.CFGLongJump = pe.getLongJumpTargetTable()
+	pe.LoadConfig.CFGLongJump = pe.getLongJumpTargetTable()
 
 	// Retrieve compiled hybrid PE metadata if there are any.
-	loadConfig.CHPE = pe.getHybridPE()
+	pe.LoadConfig.CHPE = pe.getHybridPE()
 
 	// Retrieve dynamic value relocation table if there are any.
-	loadConfig.DVRT = pe.getDynamicValueRelocTable()
+	pe.LoadConfig.DVRT = pe.getDynamicValueRelocTable()
 
 	// Retrieve enclave configuration if there are any.
-	loadConfig.Enclave = pe.getEnclaveConfiguration()
+	pe.LoadConfig.Enclave = pe.getEnclaveConfiguration()
 
 	// Retrieve volatile metadat table if there are any.
-	loadConfig.VolatileMetadata = pe.getVolatileMetadata()
+	pe.LoadConfig.VolatileMetadata = pe.getVolatileMetadata()
 
 	return nil
 }
