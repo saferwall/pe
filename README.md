@@ -92,14 +92,14 @@ type File struct {
 	Debugs       []DebugEntry
 	Relocations  []Relocation
 	Resources    ResourceDirectory
-	TLS          *TLSDirectory
-	LoadConfig   *LoadConfig
+	TLS          TLSDirectory
+	LoadConfig   LoadConfig
 	Exceptions   []Exception
-	Certificates *Certificate
+	Certificates Certificate
 	DelayImports []DelayImport
 	BoundImports []BoundImportDescriptorData
 	GlobalPtr    uint32
-	CLR          *CLRData
+	CLR          CLRData
 	IAT          []IATEntry
 	Header       []byte
 	data         mmap.MMap
