@@ -166,7 +166,10 @@ func (pe *File) Parse() error {
 	}
 
 	// Parse the Rich header.
-	_ = pe.ParseRichHeader()
+	err = pe.ParseRichHeader()
+	if err != nil {
+		pe.logger.Errorf("rich header parsing failed: %v", err)
+	}
 
 	// Parse the NT header.
 	err = pe.ParseNTHeader()
@@ -175,7 +178,10 @@ func (pe *File) Parse() error {
 	}
 
 	// Parse COFF symbol table.
-	_ = pe.ParseCOFFSymbolTable()
+	err = pe.ParseCOFFSymbolTable()
+	if err != nil {
+		pe.logger.Errorf("coff symbols parsing failed: %v", err)
+	}
 
 	// Parse the Section Header.
 	err = pe.ParseSectionHeader()
