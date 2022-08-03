@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2022 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -104,8 +104,17 @@ func parsePE(filename string, cmd *cobra.Command) {
 		return
 	}
 
+	// Dump all results to disk in JSON format.
+	b, _ := json.Marshal(pe)
+	f, err := os.Create("out.json")
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	f.WriteString(prettyPrint(b))
+
 	// Calculate the PE authentihash.
-	//pe.Authentihash()
+	pe.Authentihash()
 
 	// Calculate the PE checksum.
 	pe.Checksum()
@@ -171,7 +180,7 @@ func parsePE(filename string, cmd *cobra.Command) {
 	}
 
 	wantCLR, _ := cmd.Flags().GetBool("clr")
-	if wantCLR && pe.CLR != nil {
+	if wantCLR {
 		dotnetMetadata, _ := json.Marshal(pe.CLR)
 		log.Info(prettyPrint(dotnetMetadata))
 		if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {
@@ -192,6 +201,7 @@ func parsePE(filename string, cmd *cobra.Command) {
 		log.Info(prettyPrint(dosHeader))
 		log.Info(prettyPrint(ntHeader))
 		log.Info(prettyPrint(sectionsHeaders))
+		return
 	}
 
 	fmt.Println()

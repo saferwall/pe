@@ -624,17 +624,14 @@ func (pe *File) parseMetadataModuleTable(moduleTable *MetadataTable, off uint32)
 // language runtime header in the .text section.
 func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 
-	clr := CLRData{}
 	clrHeader := ImageCOR20Header{}
-	pe.CLR = &clr
-
 	offset := pe.GetOffsetFromRva(rva)
 	err := pe.structUnpack(&clrHeader, offset, size)
 	if err != nil {
 		return err
 	}
 
-	clr.CLRHeader = &clrHeader
+	pe.CLR.CLRHeader = &clrHeader
 	if clrHeader.MetaData.VirtualAddress == 0 || clrHeader.MetaData.Size == 0 {
 		return nil
 	}
@@ -649,8 +646,8 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	if err != nil {
 		return err
 	}
-	clr.MetadataHeader = &mh
-	clr.MetadataStreams = make(map[string][]byte)
+	pe.CLR.MetadataHeader = &mh
+	pe.CLR.MetadataStreams = make(map[string][]byte)
 	offset += 16 + mh.VersionString + 4
 
 	// Immediately following the MetadataHeader is a series of Stream Headers.
@@ -695,8 +692,8 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 		// Save the stream into a map <string> []byte.
 		rva = clrHeader.MetaData.VirtualAddress + sh.Offset
 		start := pe.GetOffsetFromRva(rva)
-		clr.MetadataStreams[sh.Name] = pe.data[start : start+sh.Size]
-		clr.MetadataStreamHeaders = append(clr.MetadataStreamHeaders, &sh)
+		pe.CLR.MetadataStreams[sh.Name] = pe.data[start : start+sh.Size]
+		pe.CLR.MetadataStreamHeaders = append(pe.CLR.MetadataStreamHeaders, &sh)
 	}
 
 	// Get the Metadata Table Stream.
@@ -711,19 +708,19 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	if err != nil {
 		return nil
 	}
-	clr.MetadataTablesStreamHeader = &mdTableStreamHdr
+	pe.CLR.MetadataTablesStreamHeader = &mdTableStreamHdr
 
 	// Get the size of indexes of #String", "#GUID" and "#Blob" streams.
-	clr.StringStreamIndexSize = pe.GetMetadataStreamIndexSize(StringStream)
-	clr.GUIDStreamIndexSize = pe.GetMetadataStreamIndexSize(GUIDStream)
-	clr.BlobStreamIndexSize = pe.GetMetadataStreamIndexSize(BlobStream)
+	pe.CLR.StringStreamIndexSize = pe.GetMetadataStreamIndexSize(StringStream)
+	pe.CLR.GUIDStreamIndexSize = pe.GetMetadataStreamIndexSize(GUIDStream)
+	pe.CLR.BlobStreamIndexSize = pe.GetMetadataStreamIndexSize(BlobStream)
 
 	// This header is followed by a sequence of 4-byte unsigned integers
 	// indicating the number of records in each table marked 1 in the MaskValid
 	// bit vector.
 	tablesCount := 0
 	offset += uint32(binary.Size(mdTableStreamHdr))
-	clr.MetadataTables = make(map[int]*MetadataTable)
+	pe.CLR.MetadataTables = make(map[int]*MetadataTable)
 	for i := 0; i < GenericParamConstraint; i++ {
 		if IsBitSet(mdTableStreamHdr.MaskValid, i) {
 			mdTable := MetadataTable{}
@@ -734,12 +731,12 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 			}
 			tablesCount++
 			offset += 4
-			clr.MetadataTables[i] = &mdTable
+			pe.CLR.MetadataTables[i] = &mdTable
 		}
 	}
 
 	// Parse the metadata tables.
-	for tableIdx, table := range clr.MetadataTables {
+	for tableIdx, table := range pe.CLR.MetadataTables {
 		switch tableIdx {
 		case Module:
 			if err = pe.parseMetadataModuleTable(table, offset); err != nil {
