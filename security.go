@@ -345,7 +345,7 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 			break
 		}
 
-		// Let's mark the file as being signed, then we verify if the
+		// Let's mark the file as signed, then we verify if the
 		// signature is valid.
 		pe.IsSigned = true
 
