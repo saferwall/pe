@@ -8,7 +8,7 @@ import (
 	"encoding/binary"
 )
 
-// ImageDosHeader represents the DOS stub of a PE.
+// ImageDOSHeader represents the DOS stub of a PE.
 type ImageDOSHeader struct {
 	// Magic number.
 	Magic uint16

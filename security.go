@@ -52,7 +52,7 @@ const (
 	WinCertTypeReserved1 = 0x0003
 
 	// Terminal Server Protocol Stack Certificate signing (Not Supported).
-	WinCertTypeTsStackSigned = 0x0004
+	WinCertTypeTSStackSigned = 0x0004
 )
 
 var (

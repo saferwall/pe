@@ -72,23 +72,23 @@ const (
 
 	ImageDynamicRelocationGuardRfPrologue = 0x00000001
 	ImageDynamicRelocationGuardREpilogue  = 0x00000002
-	ImageEnclaveLongIdLength              = 32
-	ImageEnclaveShortIdLength             = 16
+	ImageEnclaveLongIDLength              = 32
+	ImageEnclaveShortIDLength             = 16
 
 	// ImageEnclaveImportMatchNone indicates that none of the identifiers of the image need to match the value in the import record.
 	ImageEnclaveImportMatchNone = 0x00000000
 
 	// ImageEnclaveImportMatchUniqueId indicates that the value of the enclave unique identifier of the image must match the value in the import record. Otherwise, loading of the image fails.
-	ImageEnclaveImportMatchUniqueId = 0x00000001
+	ImageEnclaveImportMatchUniqueID = 0x00000001
 
 	// ImageEnclaveImportMatchAuthorId indicates that the value of the enclave author identifier of the image must match the value in the import record. Otherwise, loading of the image fails. If this flag is set and the import record indicates an author identifier of all zeros, the imported image must be part of the Windows installation.
-	ImageEnclaveImportMatchAuthorId = 0x00000002
+	ImageEnclaveImportMatchAuthorID = 0x00000002
 
 	// ImageEnclaveImportMatchFamilyId indicates that the value of the enclave family identifier of the image must match the value in the import record. Otherwise, loading of the image fails.
-	ImageEnclaveImportMatchFamilyId = 0x00000003
+	ImageEnclaveImportMatchFamilyID = 0x00000003
 
 	// ImageEnclaveImportMatchImageId indicates that the value of the enclave image identifier must match the value in the import record. Otherwise, loading of the image fails.
-	ImageEnclaveImportMatchImageId = 0x00000004
+	ImageEnclaveImportMatchImageID = 0x00000004
 )
 
 // https://www.virtualbox.org/svn/vbox/trunk/include/iprt/formats/pecoff.h
@@ -1377,10 +1377,10 @@ type ImageEnclaveConfig32 struct {
 	ImportEntrySize uint32
 
 	// The family identifier that the author of the enclave assigned to the enclave.
-	FamilyID [ImageEnclaveShortIdLength]uint8
+	FamilyID [ImageEnclaveShortIDLength]uint8
 
 	// The image identifier that the author of the enclave assigned to the enclave.
-	ImageID [ImageEnclaveShortIdLength]uint8
+	ImageID [ImageEnclaveShortIDLength]uint8
 
 	// The version number that the author of the enclave assigned to the enclave.
 	ImageVersion uint32
@@ -1427,10 +1427,10 @@ type ImageEnclaveConfig64 struct {
 	ImportEntrySize uint32
 
 	// The family identifier that the author of the enclave assigned to the enclave.
-	FamilyID [ImageEnclaveShortIdLength]uint8
+	FamilyID [ImageEnclaveShortIDLength]uint8
 
 	// The image identifier that the author of the enclave assigned to the enclave.
-	ImageID [ImageEnclaveShortIdLength]uint8
+	ImageID [ImageEnclaveShortIDLength]uint8
 
 	// The version number that the author of the enclave assigned to the enclave.
 	ImageVersion uint32
@@ -1459,13 +1459,13 @@ type ImageEnclaveImport struct {
 	MinimumSecurityVersion uint32
 
 	// The unique identifier of the primary module for the enclave, if the MatchType member is IMAGE_ENCLAVE_IMPORT_MATCH_UNIQUE_ID. Otherwise, the author identifier of the primary module for the enclave..
-	UniqueOrAuthorID [ImageEnclaveLongIdLength]uint8
+	UniqueOrAuthorID [ImageEnclaveShortIDLength]uint8
 
 	// The family identifier of the primary module for the enclave.
-	FamilyID [ImageEnclaveShortIdLength]uint8
+	FamilyID [ImageEnclaveShortIDLength]uint8
 
 	// The image identifier of the primary module for the enclave.
-	ImageID [ImageEnclaveShortIdLength]uint8
+	ImageID [ImageEnclaveShortIDLength]uint8
 
 	// The relative virtual address of a NULL-terminated string that contains the same value found in the import directory for the image.
 	ImportName uint32
@@ -1975,17 +1975,26 @@ func (pe *File) getHybridPE() *HybridPE {
 		ImageCHPEMetaX86v1 := ImageCHPEMetadataX86v1{}
 		structSize := uint32(binary.Size(ImageCHPEMetaX86v1))
 		err = pe.structUnpack(&ImageCHPEMetaX86v1, fileOffset, structSize)
+		if err != nil {
+			return nil
+		}
 		ImageCHPEMetaX86 = ImageCHPEMetaX86v1
 	case 0x2:
 		ImageCHPEMetaX86v2 := ImageCHPEMetadataX86v2{}
 		structSize := uint32(binary.Size(ImageCHPEMetaX86v2))
 		err = pe.structUnpack(&ImageCHPEMetaX86v2, fileOffset, structSize)
+		if err != nil {
+			return nil
+		}
 		ImageCHPEMetaX86 = ImageCHPEMetaX86v2
 	case 0x3:
 	default:
 		ImageCHPEMetaX86v3 := ImageCHPEMetadataX86v3{}
 		structSize := uint32(binary.Size(ImageCHPEMetaX86v3))
 		err = pe.structUnpack(&ImageCHPEMetaX86v3, fileOffset, structSize)
+		if err != nil {
+			return nil
+		}
 		ImageCHPEMetaX86 = ImageCHPEMetaX86v3
 	}
 
