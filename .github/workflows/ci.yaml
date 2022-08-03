@@ -40,5 +40,6 @@ jobs:
 
       - name: Run Vet & Lint
         run: |
+          go install honnef.co/go/tools/cmd/staticcheck@2022.1
           go vet .
           staticcheck
