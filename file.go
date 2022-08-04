@@ -168,7 +168,7 @@ func (pe *File) Parse() error {
 	// Parse the Rich header.
 	err = pe.ParseRichHeader()
 	if err != nil {
-		return err
+		pe.logger.Errorf("rich header parsing failed: %v", err)
 	}
 
 	// Parse the NT header.
@@ -178,7 +178,10 @@ func (pe *File) Parse() error {
 	}
 
 	// Parse COFF symbol table.
-	_ = pe.ParseCOFFSymbolTable()
+	err = pe.ParseCOFFSymbolTable()
+	if err != nil {
+		pe.logger.Errorf("coff symbols parsing failed: %v", err)
+	}
 
 	// Parse the Section Header.
 	err = pe.ParseSectionHeader()
@@ -192,8 +195,7 @@ func (pe *File) Parse() error {
 	}
 
 	// Parse the Data Directory entries.
-	err = pe.ParseDataDirectories()
-	return err
+	return pe.ParseDataDirectories()
 }
 
 // PrettyDataDirectory returns the string representations
@@ -276,14 +278,13 @@ func (pe *File) ParseDataDirectories() error {
 				// keep parsing data directories even though some entries fails.
 				defer func() {
 					if e := recover(); e != nil {
-						pe.logger.Errorf("Unhandled Exception when trying to parse data directory %s, reason: %v",
+						pe.logger.Errorf("unhandled exception when parsing data directory %s, reason: %v",
 							pe.PrettyDataDirectory(entryIndex), e)
 						foundErr = true
 					}
 				}()
 
-				// the last entry in the data directories must be zero and
-				// is reserved.
+				// the last entry in the data directories is reserved and must be zero.
 				if entryIndex == ImageDirectoryEntryReserved {
 					pe.Anomalies = append(pe.Anomalies, AnoReservedDataDirectoryEntry)
 					return
@@ -291,9 +292,8 @@ func (pe *File) ParseDataDirectories() error {
 
 				err := funcMaps[entryIndex](va, size)
 				if err != nil {
-					pe.logger.Warnf("Failed to parse data directory %s, reason: %v",
+					pe.logger.Warnf("failed to parse data directory %s, reason: %v",
 						pe.PrettyDataDirectory(entryIndex), err)
-					foundErr = true
 				}
 			}()
 		}

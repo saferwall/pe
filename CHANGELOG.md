@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit tests for CLR directory [#34](https://github.com/saferwall/pe/pull/28).
 - Unit tests for Rich header [#33](https://github.com/saferwall/pe/pull/33).
 
+## Changed
+
+- Do not return an error when parsing a data directory fails [#45](https://github.com/saferwall/pe/pull/45).
+- Remove pointers from fields in the main `File` structure [#44](https://github.com/saferwall/pe/pull/44).
+
 ### Fixed
 
 - Fix getting section data repeatedly thanks to [wanglei-coder](https://github.com/wanglei-coder) [#41](https://github.com/saferwall/pe/pull/41).
