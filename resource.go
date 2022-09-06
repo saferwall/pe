@@ -230,7 +230,7 @@ func (pe *File) doParseResourceDirectory(rva, size, baseRVA, level uint32,
 				break
 			}
 			entryName = pe.readUnicodeStringAtRVA(baseRVA+nameOffset+2,
-				uint32(maxLen))
+				uint32(maxLen*2))
 		}
 
 		// A directory entry points to either another resource directory or to
