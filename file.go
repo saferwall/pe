@@ -180,7 +180,7 @@ func (pe *File) Parse() error {
 	// Parse COFF symbol table.
 	err = pe.ParseCOFFSymbolTable()
 	if err != nil {
-		pe.logger.Errorf("coff symbols parsing failed: %v", err)
+		pe.logger.Debugf("coff symbols parsing failed: %v", err)
 	}
 
 	// Parse the Section Header.

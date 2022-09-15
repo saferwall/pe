@@ -202,7 +202,9 @@ type CvInfoPDB20 struct {
 	PDBFileName string
 }
 
-// FPOData Represents the stack frame layout for a function on an x86 computer when frame pointer omission (FPO) optimization is used. The structure is used to locate the base of the call frame.
+// FPOData Represents the stack frame layout for a function on an x86 computer when
+// frame pointer omission (FPO) optimization is used. The structure is used to locate
+// the base of the call frame.
 type FPOData struct {
 	// The offset of the first byte of the function code.
 	OffStart uint32
@@ -391,10 +393,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 			pogo := POGO{}
 
 			switch pogoSignature {
-			case POGOTypePGU:
-			case POGzOTypePGI:
-			case POGOTypePGO:
-			case POGOTypeLTCG:
+			case POGOTypePGU, POGzOTypePGI, POGOTypePGO, POGOTypeLTCG:
 				pogo.Signature = pogoSignature
 				offset = debugDir.PointerToRawData + 4
 				c := uint32(0)
