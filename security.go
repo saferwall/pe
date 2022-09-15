@@ -5,6 +5,7 @@
 package pe
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/binary"
@@ -244,9 +245,15 @@ func (pe *File) Authentihash() []byte {
 	}
 	ranges = append(ranges, &Range{Start: start, End: pe.size})
 
+	var rd io.ReaderAt
+	if pe.f != nil {
+		rd = pe.f
+	} else {
+		rd = bytes.NewReader(pe.data)
+	}
 	hasher := sha256.New()
 	for _, v := range ranges {
-		sr := io.NewSectionReader(pe.f, int64(v.Start), int64(v.End)-int64(v.Start))
+		sr := io.NewSectionReader(rd, int64(v.Start), int64(v.End)-int64(v.Start))
 		io.Copy(hasher, sr)
 	}
 	return hasher.Sum(nil)
