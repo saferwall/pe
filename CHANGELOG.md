@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - Unreleased
+## [1.4.0] - Unreleased
+
+### Added
+
+- Unit tests test debug directory [#49](https://github.com/saferwall/pe/pull/49).
+
+### Fixed
+
+- `Authentihash()` for instances w/o fd thanks to [flanfly](https://github.com/flanfly) [#47](https://github.com/saferwall/pe/pull/47).
+
+## [1.3.0] - 2022-08-04
 
 ## Added
 
