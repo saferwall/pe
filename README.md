@@ -74,6 +74,7 @@ func main() {
     if err != nil {
         log.Fatalf("Error while parsing file: %s, reason: %v", filename, err)
     }
+}
 ```
 
 Start by instantiating a pe object by called the `New()` method, which takes the file path to the file to be parsed and some optional options.
