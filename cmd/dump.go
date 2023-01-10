@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -8,26 +8,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"text/tabwriter"
 
 	peparser "github.com/saferwall/pe"
 	"github.com/saferwall/pe/log"
-	"github.com/spf13/cobra"
-)
-
-var (
-	all         bool
-	verbose     bool
-	dosHeader   bool
-	richHeader  bool
-	ntHeader    bool
-	directories bool
-	sections    bool
-	resources   bool
-	clr         bool
 )
 
 func prettyPrint(buff []byte) string {
@@ -77,15 +63,38 @@ func isDirectory(path string) bool {
 	return fileInfo.IsDir()
 }
 
-func parsePE(filename string, cmd *cobra.Command) {
+func parse(filePath string, cfg config) {
+
+	// filePath points to a file.
+	if !isDirectory(filePath) {
+		parsePE(filePath, cfg)
+
+	} else {
+		// filePath points to a directory,
+		// walk recursively through all files.
+		fileList := []string{}
+		filepath.Walk(filePath, func(path string, f os.FileInfo, err error) error {
+			if !isDirectory(path) {
+				fileList = append(fileList, path)
+			}
+			return nil
+		})
+
+		for _, file := range fileList {
+			parsePE(file, cfg)
+		}
+	}
+}
+
+func parsePE(filename string, cfg config) {
 
 	logger := log.NewStdLogger(os.Stdout)
-	logger = log.NewFilter(logger, log.FilterLevel(log.LevelError))
+	logger = log.NewFilter(logger, log.FilterLevel(log.LevelInfo))
 	log := log.NewHelper(logger)
 
 	log.Infof("parsing filename %s", filename)
 
-	data, _ := ioutil.ReadFile(filename)
+	data, _ := os.ReadFile(filename)
 	pe, err := peparser.NewBytes(data, &peparser.Options{
 		Logger: logger,
 	})
@@ -130,14 +139,12 @@ func parsePE(filename string, cmd *cobra.Command) {
 		log.Debug("File is Driver")
 	}
 
-	wantDosHeader, _ := cmd.Flags().GetBool("dosheader")
-	if wantDosHeader {
+	if cfg.wantDOSHeader {
 		dosHeader, _ := json.Marshal(pe.DOSHeader)
 		fmt.Print(prettyPrint(dosHeader))
 	}
 
-	wantRichHeader, _ := cmd.Flags().GetBool("rich")
-	if wantRichHeader {
+	if cfg.wantRichHeader {
 		richheader := pe.RichHeader
 		fmt.Printf("RICH HEADER\n\n")
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
@@ -155,14 +162,12 @@ func parsePE(filename string, cmd *cobra.Command) {
 		hexDump(richheader.Raw)
 	}
 
-	wantNtHeader, _ := cmd.Flags().GetBool("ntheader")
-	if wantNtHeader {
+	if cfg.wantNTHeader {
 		ntHeader, _ := json.Marshal(pe.NtHeader)
 		log.Info(prettyPrint(ntHeader))
 	}
 
-	wantSections, _ := cmd.Flags().GetBool("sections")
-	if wantSections {
+	if cfg.wantSections {
 		for _, sec := range pe.Sections {
 			log.Infof("Section Name : %s\n", sec.NameString())
 			log.Infof("Section VirtualSize : %x\n", sec.Header.VirtualSize)
@@ -173,14 +178,7 @@ func parsePE(filename string, cmd *cobra.Command) {
 		log.Info(prettyPrint(sectionsHeaders))
 	}
 
-	wantResources, _ := cmd.Flags().GetBool("resources")
-	if wantResources {
-		rsrc, _ := json.Marshal(pe.Resources)
-		log.Info(prettyPrint(rsrc))
-	}
-
-	wantCLR, _ := cmd.Flags().GetBool("clr")
-	if wantCLR {
+	if cfg.wantCLR {
 		dotnetMetadata, _ := json.Marshal(pe.CLR)
 		log.Info(prettyPrint(dotnetMetadata))
 		if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {
@@ -193,88 +191,5 @@ func parsePE(filename string, cmd *cobra.Command) {
 		}
 	}
 
-	wantAll, _ := cmd.Flags().GetBool("all")
-	if wantAll {
-		dosHeader, _ := json.Marshal(pe.DOSHeader)
-		ntHeader, _ := json.Marshal(pe.NtHeader)
-		sectionsHeaders, _ := json.Marshal(pe.Sections)
-		log.Info(prettyPrint(dosHeader))
-		log.Info(prettyPrint(ntHeader))
-		log.Info(prettyPrint(sectionsHeaders))
-		return
-	}
-
 	fmt.Println()
-}
-
-func parse(cmd *cobra.Command, args []string) {
-	filePath := args[0]
-
-	// filePath points to a file.
-	if !isDirectory(filePath) {
-		parsePE(filePath, cmd)
-
-	} else {
-		// filePath points to a directory,
-		// walk recursively through all files.
-		fileList := []string{}
-		filepath.Walk(filePath, func(path string, f os.FileInfo, err error) error {
-			if !isDirectory(path) {
-				fileList = append(fileList, path)
-			}
-			return nil
-		})
-
-		for _, file := range fileList {
-			parsePE(file, cmd)
-		}
-	}
-}
-
-func main() {
-
-	var rootCmd = &cobra.Command{
-		Use:   "pedumper",
-		Short: "A Portable Executable file parser",
-		Long:  "A PE-Parser built for speed and malware-analysis in mind by Saferwall",
-		Run: func(cmd *cobra.Command, args []string) {
-		},
-	}
-
-	var versionCmd = &cobra.Command{
-		Use:   "version",
-		Short: "Print version number",
-		Long:  "Print version number",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Print("You are using version 1.1.7")
-		},
-	}
-
-	var dumpCmd = &cobra.Command{
-		Use:   "dump",
-		Short: "Dumps the file",
-		Long:  "Dumps interesting structure of the Portable Executable file",
-		Args:  cobra.MinimumNArgs(1),
-		Run:   parse,
-	}
-
-	// Init root command.
-	rootCmd.AddCommand(versionCmd)
-	rootCmd.AddCommand(dumpCmd)
-
-	// Init flags
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
-	dumpCmd.Flags().BoolVarP(&dosHeader, "dosheader", "", false, "Dump DOS header")
-	dumpCmd.Flags().BoolVarP(&richHeader, "rich", "", false, "Dump Rich header")
-	dumpCmd.Flags().BoolVarP(&ntHeader, "ntheader", "", false, "Dump NT header")
-	dumpCmd.Flags().BoolVarP(&directories, "directories", "", false, "Dump data directories")
-	dumpCmd.Flags().BoolVarP(&sections, "sections", "", false, "Dump section headers")
-	dumpCmd.Flags().BoolVarP(&resources, "resources", "", false, "Dump resources")
-	dumpCmd.Flags().BoolVarP(&clr, "clr", "", false, "Dump .NET metadata")
-	dumpCmd.Flags().BoolVarP(&all, "all", "", false, "Dump everything")
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Print(err)
-		os.Exit(1)
-	}
 }
