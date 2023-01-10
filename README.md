@@ -1,6 +1,7 @@
 # Portable Executable Parser
 
-[![GoDoc](http://godoc.org/github.com/saferwall/pe?status.svg)](https://pkg.go.dev/github.com/saferwall/pe) ![Go Version](https://img.shields.io/badge/go%20version-%3E=1.15-61CFDD.svg) [![Report Card](https://goreportcard.com/badge/github.com/saferwall/pe)](https://goreportcard.com/report/github.com/saferwall/pe) [![codecov](https://codecov.io/gh/saferwall/pe/branch/main/graph/badge.svg?token=W7WTOUZLRY)](https://codecov.io/gh/saferwall/pe) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/saferwall/pe/Build%20&%20Test)
+[![GoDoc](http://godoc.org/github.com/saferwall/pe?status.svg)](https://pkg.go.dev/github.com/saferwall/pe) ![Go Version](https://img.shields.io/badge/go%20version-%3E=1.15-61CFDD.svg) [![Report Card](https://goreportcard.com/badge/github.com/saferwall/pe)](https://goreportcard.com/report/github.com/saferwall/pe) [![codecov](https://codecov.io/gh/saferwall/pe/branch/main/graph/badge.svg?token=W7WTOUZLRY)](https://codecov.io/gh/saferwall/pe) ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/saferwall/pe/ci.yaml?branch=main)
+
 
 **pe** is a go package for parsing the [portable executable](https://docs.microsoft.com/en-us/windows/win32/debug/pe-format) file format. This package was designed with malware analysis in mind, and being resistent to PE malformations.
 
@@ -20,7 +21,7 @@
 
 ## Features
 
--   Works with PE32/PE32+ file fomat.
+-   Works with PE32/PE32+ file format.
 -   Supports Intel x86/AMD64/ARM7ARM7 Thumb/ARM8-64/IA64/CHPE architectures.
 -   MS DOS header.
 -   Rich Header (calculate checksum and hash).

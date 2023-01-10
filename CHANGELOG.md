@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Authentihash()` for instances w/o fd thanks to [flanfly](https://github.com/flanfly) [#47](https://github.com/saferwall/pe/pull/47).
 
+### Changed
+
+- Remove `cobra` dependency from cmd/pedumper [#56](https://github.com/saferwall/pe/pull/56).
+
 ## [1.3.0] - 2022-08-04
 
 ## Added
