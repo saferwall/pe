@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/tabwriter"
 
 	peparser "github.com/saferwall/pe"
@@ -144,7 +145,7 @@ func parsePE(filename string, cfg config) {
 		fmt.Print(prettyPrint(dosHeader))
 	}
 
-	if cfg.wantRichHeader {
+	if cfg.wantRichHeader && pe.FileInfo.HasRichHdr {
 		richheader := pe.RichHeader
 		fmt.Printf("RICH HEADER\n\n")
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
@@ -189,6 +190,36 @@ func parsePE(filename string, cfg config) {
 				log.Info(moduleName)
 			}
 		}
+	}
+
+	if cfg.wantExceptions && pe.FileInfo.HasException {
+		fmt.Printf("\n\nEXCEPTIONS\n***********\n")
+		for _, exception := range pe.Exceptions {
+			entry := exception.RuntimeFunction
+			fmt.Printf("\n\u27A1 BeginAddress: 0x%x EndAddress:0x%x UnwindInfoAddress:0x%x\t\n",
+				entry.BeginAddress, entry.EndAddress, entry.UnwindInfoAddress)
+
+			ui := exception.UnwinInfo
+			handlerFlags := peparser.PrettyUnwindInfoHandlerFlags(ui.Flags)
+			prettyFlags := strings.Join(handlerFlags, ",")
+			fmt.Printf("|- Version: 0x%x\n", ui.Version)
+			fmt.Printf("|- Flags: 0x%x", ui.Flags)
+			if ui.Flags == 0 {
+				fmt.Print(" (None)\n")
+			} else {
+				fmt.Printf(" (%s)\n", prettyFlags)
+			}
+
+			fmt.Printf("|- Size Of Prolog: 0x%x\n", ui.SizeOfProlog)
+			fmt.Printf("|- Count Of Codes: 0x%x\n", ui.CountOfCodes)
+			fmt.Printf("|- Exception Handler: 0x%x\n", ui.ExceptionHandler)
+			fmt.Print("|- Unwind codes:\n")
+			for _, uc := range ui.UnwindCodes {
+				fmt.Printf("|-  * %.2x: %s, %s\n", uc.CodeOffset,
+					peparser.PrettyUnwindOpcode(uc.UnwindOp), uc.Operand)
+			}
+		}
+
 	}
 
 	fmt.Println()

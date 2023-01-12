@@ -168,22 +168,6 @@ const (
 	UwOpSetFpRegLarge = uint8(11)
 )
 
-// UnOpToString maps unwind opcodes to strings.
-var UnOpToString = map[uint8]string{
-	UwOpPushNonVol:    "UWOP_PUSH_NONVOL",
-	UwOpAllocLarge:    "UWOP_ALLOC_LARE",
-	UwOpAllocSmall:    "UWOP_ALLOC_SMALL",
-	UwOpSetFpReg:      "UWOP_SET_FPREG",
-	UwOpSaveNonVol:    "UWOP_SAVE_NONVOL",
-	UwOpSaveNonVolFar: "UWOP_SAVE_NONVOL_FAR",
-	UwOpEpilog:        "UWOP_EPILOG",
-	UwOpSpareCode:     "UWOP_SPARE_CODE",
-	UwOpSaveXmm128:    "UWOP_SAVE_XMM128",
-	UwOpSaveXmm128Far: "UWOP_SAVE_XMM128_FAR",
-	UwOpPushMachFrame: "UWOP_PUSH_MACHFRAME",
-	UwOpSetFpRegLarge: "UWOP_SET_FPREG_LARGE",
-}
-
 // ImageRuntimeFunctionEntry represents an entry in the function table on 64-bit
 // Windows (IMAGE_RUNTIME_FUNCTION_ENTRY). Table-based exception handling request
 // a table entry for all functions that allocate stack space or call another
@@ -583,4 +567,26 @@ func PrettyUnwindInfoHandlerFlags(flags uint8) []string {
 		}
 	}
 	return values
+}
+
+// PrettyUnwindOpcode returns the string representation of the
+// an unwind opcode
+func PrettyUnwindOpcode(unwindOpcode uint8) string {
+
+	unOpToString := map[uint8]string{
+		UwOpPushNonVol:    "UWOP_PUSH_NONVOL",
+		UwOpAllocLarge:    "UWOP_ALLOC_LARE",
+		UwOpAllocSmall:    "UWOP_ALLOC_SMALL",
+		UwOpSetFpReg:      "UWOP_SET_FPREG",
+		UwOpSaveNonVol:    "UWOP_SAVE_NONVOL",
+		UwOpSaveNonVolFar: "UWOP_SAVE_NONVOL_FAR",
+		UwOpEpilog:        "UWOP_EPILOG",
+		UwOpSpareCode:     "UWOP_SPARE_CODE",
+		UwOpSaveXmm128:    "UWOP_SAVE_XMM128",
+		UwOpSaveXmm128Far: "UWOP_SAVE_XMM128_FAR",
+		UwOpPushMachFrame: "UWOP_PUSH_MACHFRAME",
+		UwOpSetFpRegLarge: "UWOP_SET_FPREG_LARGE",
+	}
+
+	return unOpToString[unwindOpcode]
 }
