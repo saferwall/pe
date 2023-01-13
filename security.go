@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -219,9 +219,9 @@ func (pe *File) parseLocations() (map[string]*RelRange, error) {
 
 // Authentihash generates the pe image file hash.
 // The relevant sections to exclude during hashing are:
-// 	- The location of the checksum
-//  - The location of the entry of the Certificate Table in the Data Directory
-//	- The location of the Certificate Table.
+//   - The location of the checksum
+//   - The location of the entry of the Certificate Table in the Data Directory
+//   - The location of the Certificate Table.
 func (pe *File) Authentihash() []byte {
 
 	locationMap, err := pe.parseLocations()
@@ -305,7 +305,7 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 
 		// The pkcs7.PKCS7 structure contains many fields that we are not
 		// interested to, so create another structure, similar to _CERT_INFO
-		// structure which contains only the imporant information.
+		// structure which contains only the important information.
 		serialNumber := pkcs.Signers[0].IssuerAndSerialNumber.SerialNumber
 		for _, cert := range pkcs.Certificates {
 			if !reflect.DeepEqual(cert.SerialNumber, serialNumber) {
@@ -357,21 +357,23 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 		pe.IsSigned = true
 
 		// Let's load the system root certs.
-		var certPool *x509.CertPool
-		if runtime.GOOS == "windows" {
-			certPool, err = loadSystemRoots()
-		} else {
-			certPool, err = x509.SystemCertPool()
-		}
-
-		// Verify the signature. This will also verify the chain of trust of the
-		// the end-entity signer cert to one of the root in the truststore.
-		if err == nil {
-			err = pkcs.VerifyWithChain(certPool)
-			if err == nil {
-				isValid = true
+		if !pe.opts.DisableCertValidation {
+			var certPool *x509.CertPool
+			if runtime.GOOS == "windows" {
+				certPool, err = loadSystemRoots()
 			} else {
-				isValid = false
+				certPool, err = x509.SystemCertPool()
+			}
+
+			// Verify the signature. This will also verify the chain of trust of the
+			// the end-entity signer cert to one of the root in the trust store.
+			if err == nil {
+				err = pkcs.VerifyWithChain(certPool)
+				if err == nil {
+					isValid = true
+				} else {
+					isValid = false
+				}
 			}
 		}
 
@@ -398,11 +400,11 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 // loadSystemsRoots manually downloads all the trusted root certificates
 // in Windows by spawning certutil then adding root certs individually
 // to the cert pool. Initially, when running in windows, go SystemCertPool()
-// used to enumerate all the ceritificate in the Windows store using
+// used to enumerate all the certificate in the Windows store using
 // (CertEnumCertificatesInStore). Unfortunately, Windows does not ship
 // with all of its root certificates installed. Instead, it downloads them
 // on-demand. As a consequence, this behavior leads to a non-deterministic
-// results. Go team then disabled loadding Windows root certs.
+// results. Go team then disabled the loading Windows root certs.
 func loadSystemRoots() (*x509.CertPool, error) {
 
 	needSync := true
