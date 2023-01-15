@@ -179,7 +179,7 @@ func parsePE(filename string, cfg config) {
 		log.Info(prettyPrint(sectionsHeaders))
 	}
 
-	if cfg.wantCLR {
+	if cfg.wantCLR && pe.FileInfo.HasCLR {
 		dotnetMetadata, _ := json.Marshal(pe.CLR)
 		log.Info(prettyPrint(dotnetMetadata))
 		if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {
@@ -219,6 +219,10 @@ func parsePE(filename string, cfg config) {
 					peparser.PrettyUnwindOpcode(uc.UnwindOp), uc.Operand)
 			}
 		}
+	}
+
+	if cfg.wantCertificates && pe.FileInfo.HasSecurity {
+		fmt.Printf("\n\nSECURITY\n***********\n")
 
 	}
 
