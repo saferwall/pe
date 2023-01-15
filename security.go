@@ -9,6 +9,7 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/binary"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -95,11 +96,27 @@ type CertInfo struct {
 	// with (i.e. the "owner" of the certificate).
 	Subject string
 
-	// The certificate won't be valid after this timestamp.
+	// The certificate won't be valid before this timestamp.
 	NotBefore time.Time
 
 	// The certificate won't be valid after this timestamp.
 	NotAfter time.Time
+
+	// The serial number MUST be a positive integer assigned by the CA to each
+	// certificate. It MUST be unique for each certificate issued by a given CA
+	// (i.e., the issuer name and serial number identify a unique certificate).
+	// CAs MUST force the serialNumber to be a non-negative integer.
+	// For convenience, we convert the big int to string.
+	SerialNumber string
+
+	// The identifier for the cryptographic algorithm used by the CA to sign
+	// this certificate.
+	SignatureAlgorithm x509.SignatureAlgorithm
+
+	// The Public Key Algorithm refers to the public key inside the certificate.
+	// This certificate is used together with the matching private key to prove
+	// the identity of the peer.
+	PublicKeyAlgorithm x509.PublicKeyAlgorithm
 }
 
 type RelRange struct {
@@ -311,6 +328,10 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 			if !reflect.DeepEqual(cert.SerialNumber, serialNumber) {
 				continue
 			}
+
+			certInfo.SerialNumber = hex.EncodeToString(cert.SerialNumber.Bytes())
+			certInfo.PublicKeyAlgorithm = cert.PublicKeyAlgorithm
+			certInfo.SignatureAlgorithm = cert.SignatureAlgorithm
 
 			certInfo.NotAfter = cert.NotAfter
 			certInfo.NotBefore = cert.NotBefore

@@ -179,7 +179,7 @@ func parsePE(filename string, cfg config) {
 		log.Info(prettyPrint(sectionsHeaders))
 	}
 
-	if cfg.wantCLR {
+	if cfg.wantCLR && pe.FileInfo.HasCLR {
 		dotnetMetadata, _ := json.Marshal(pe.CLR)
 		log.Info(prettyPrint(dotnetMetadata))
 		if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {
@@ -219,8 +219,28 @@ func parsePE(filename string, cfg config) {
 					peparser.PrettyUnwindOpcode(uc.UnwindOp), uc.Operand)
 			}
 		}
-
 	}
 
-	fmt.Println()
+	if cfg.wantCertificates && pe.FileInfo.HasSecurity {
+		fmt.Printf("\nSECURITY\n*********\n")
+
+		cert := pe.Certificates
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		fmt.Fprintln(w, "Length\tRevision\tCertificateType\t")
+		fmt.Fprintf(w, "0x%x\t0x%x\t0x%x\t\n", cert.Header.Length, cert.Header.Revision,
+			cert.Header.CertificateType)
+		w.Flush()
+		fmt.Print("\n   ---Raw Certificate dump---\n")
+		hexDump(cert.Raw)
+		fmt.Print("\n---Certificate ---\n\n")
+		fmt.Fprintf(w, "Issuer Name:\t %s\n", cert.Info.Issuer)
+		fmt.Fprintf(w, "Subject Name:\t %s\n", cert.Info.Subject)
+		fmt.Fprintf(w, "Serial Number:\t %x\n", cert.Info.SerialNumber)
+		fmt.Fprintf(w, "Validity From:\t %s to %s\n", cert.Info.NotBefore.String(), cert.Info.NotAfter.String())
+		fmt.Fprintf(w, "Signature Algorithm:\t %s\n", cert.Info.SignatureAlgorithm.String())
+		fmt.Fprintf(w, "PublicKey Algorithm:\t %s\n", cert.Info.PublicKeyAlgorithm.String())
+		w.Flush()
+	}
+
+	fmt.Print("\n")
 }

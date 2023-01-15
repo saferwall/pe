@@ -1,10 +1,11 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
 package pe
 
 import (
+	"crypto/x509"
 	"fmt"
 	"reflect"
 	"testing"
@@ -33,10 +34,13 @@ func TestParseSecurityDirectory(t *testing.T) {
 					CertificateType: 0x2,
 				},
 				Info: CertInfo{
-					Issuer:    "GB, Greater Manchester, Salford, COMODO RSA Code Signing CA",
-					Subject:   "GB, Cambridgeshire, Cambridge, Simon Tatham, Simon Tatham",
-					NotBefore: time.Date(2018, time.November, 13, 00, 00, 0, 0, time.UTC),
-					NotAfter:  time.Date(2021, time.November, 8, 23, 59, 59, 0, time.UTC),
+					Issuer:             "GB, Greater Manchester, Salford, COMODO RSA Code Signing CA",
+					Subject:            "GB, Cambridgeshire, Cambridge, Simon Tatham, Simon Tatham",
+					NotBefore:          time.Date(2018, time.November, 13, 00, 00, 0, 0, time.UTC),
+					NotAfter:           time.Date(2021, time.November, 8, 23, 59, 59, 0, time.UTC),
+					SerialNumber:       "7c1118cbbadc95da3752c46e47a27438",
+					PublicKeyAlgorithm: x509.RSA,
+					SignatureAlgorithm: x509.SHA256WithRSA,
 				},
 				Verified: true,
 				err:      nil,
@@ -51,10 +55,13 @@ func TestParseSecurityDirectory(t *testing.T) {
 					CertificateType: 0x2,
 				},
 				Info: CertInfo{
-					Issuer:    "US, VeriSign Class 3 Code Signing 2010 CA",
-					Subject:   "US, California, Mountain View, Symantec Corporation, Symantec Corporation",
-					NotBefore: time.Date(2016, time.December, 16, 00, 00, 0, 0, time.UTC),
-					NotAfter:  time.Date(2017, time.December, 17, 23, 59, 59, 0, time.UTC),
+					Issuer:             "US, VeriSign Class 3 Code Signing 2010 CA",
+					Subject:            "US, California, Mountain View, Symantec Corporation, Symantec Corporation",
+					NotBefore:          time.Date(2016, time.December, 16, 00, 00, 0, 0, time.UTC),
+					NotAfter:           time.Date(2017, time.December, 17, 23, 59, 59, 0, time.UTC),
+					SerialNumber:       "0ebfea68d677b3e26cab41c33f3e69de",
+					PublicKeyAlgorithm: x509.RSA,
+					SignatureAlgorithm: x509.SHA1WithRSA,
 				},
 				Verified: false,
 				err:      nil,
