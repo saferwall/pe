@@ -330,7 +330,7 @@ func parsePE(filename string, cfg config) {
 
 	}
 
-	if cfg.wantSections {
+	if cfg.wantSections && pe.FileInfo.HasSections {
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
 		for i, sec := range pe.Sections {
 			hdr := sec.Header
@@ -354,7 +354,29 @@ func parsePE(filename string, cfg config) {
 			fmt.Fprintf(w, "\n")
 			hexDumpSize(sec.Data(0, hdr.PointerToRawData, pe), 128)
 		}
+	}
 
+	if cfg.wantImport && pe.FileInfo.HasImport {
+		fmt.Printf("IMPORTS\n\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		for _, imp := range pe.Imports {
+			desc := imp.Descriptor
+			fmt.Printf("\n\t------[ %s ]------\n\n", imp.Name)
+			fmt.Fprintf(w, "Name:\t 0x%x\n", desc.Name)
+			fmt.Fprintf(w, "Original First Thunk:\t 0x%x\n", desc.OriginalFirstThunk)
+			fmt.Fprintf(w, "First Thunk:\t 0x%x\n", desc.FirstThunk)
+			fmt.Fprintf(w, "TimeDateStamp:\t 0x%x\n", desc.TimeDateStamp)
+			fmt.Fprintf(w, "Forwarder Chain:\t 0x%x\n", desc.ForwarderChain)
+			fmt.Fprintf(w, "\n")
+			fmt.Fprintln(w, "Name\tThunkRVA\tThunkValue\tOriginalThunkRVA\tOriginalThunkValue\tHint\t")
+			for _, impFunc := range imp.Functions {
+				fmt.Fprintf(w, "%s\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t\n",
+					impFunc.Name, impFunc.ThunkRVA, impFunc.ThunkValue, impFunc.OriginalThunkRVA,
+					 impFunc.OriginalThunkValue, impFunc.Hint)
+			}
+			w.Flush()
+
+		}
 	}
 
 	if cfg.wantCLR && pe.FileInfo.HasCLR {

@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -34,11 +34,11 @@ var (
 	AnoManyRepeatedEntries = "Import directory contains many repeated entries"
 
 	// AnoAddressOfDataBeyondLimits is reported when Thunk AddressOfData goes
-	// beyond limites.
+	// beyond limits.
 	AnoAddressOfDataBeyondLimits = "Thunk AddressOfData beyond limits"
 
 	// AnoImportNoNameNoOrdinal is reported when an import entry does not have
-	// a name neither an oridinal, most probably malformed data.
+	// a name neither an ordinal, most probably malformed data.
 	AnoImportNoNameNoOrdinal = "Must have either an ordinal or a name in an import"
 
 	// ErrDamagedImportTable is reported when the IAT and ILT table length is 0.
@@ -133,7 +133,7 @@ type ImportFunction struct {
 	OriginalThunkRVA uint32
 }
 
-// Import represents an empty entry in the emport table.
+// Import represents an empty entry in the import table.
 type Import struct {
 	Offset     uint32
 	Name       string
@@ -565,7 +565,7 @@ func (pe *File) parseImports32(importDesc interface{}, maxLen uint32) (
 		}
 
 		// This file bfe97192e8107d52dd7b4010d12b2924 has an invalid table built
-		// in a way that it's parseable but contains invalid entries that lead
+		// in a way that it's parsable but contains invalid entries that lead
 		// pefile to take extremely long amounts of time to parse. It also leads
 		// to extreme memory consumption. To prevent similar cases, if invalid
 		// entries are found in the middle of a table the parsing will be aborted.
@@ -700,7 +700,7 @@ func (pe *File) parseImports64(importDesc interface{}, maxLen uint32) ([]*Import
 		}
 
 		// This file bfe97192e8107d52dd7b4010d12b2924 has an invalid table built
-		// in a way that it's parseable but contains invalid entries that lead
+		// in a way that it's parsable but contains invalid entries that lead
 		// pefile to take extremely long amounts of time to parse. It also leads
 		// to extreme memory consumption. To prevent similar cases, if invalid
 		// entries are found in the middle of a table the parsing will be aborted.
