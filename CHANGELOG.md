@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Improve PE dumper to print PE headers [#61](https://github.com/saferwall/pe/pull/61).
+- Add `SerialNumber`, `SignatureAlgorithm` and `PubKeyAlgorithm` to the `CertInfo` [#60](https://github.com/saferwall/pe/pull/60).
+- Option to disable certificate validation [#59](https://github.com/saferwall/pe/pull/59).
+- Improve PE dumper to print exceptions [#57](https://github.com/saferwall/pe/pull/57).
 - Unit tests test debug directory [#49](https://github.com/saferwall/pe/pull/49).
 
 ### Fixed
