@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"text/tabwriter"
+	"time"
 	"unsafe"
 
 	peparser "github.com/saferwall/pe"
@@ -57,7 +58,7 @@ func hexDump(b []byte) {
 	}
 }
 
-func IntToByteArray(num uint16) []byte {
+func IntToByteArray(num uint64) []byte {
 	size := int(unsafe.Sizeof(num))
 	arr := make([]byte, size)
 	for i := 0; i < size; i++ {
@@ -153,9 +154,10 @@ func parsePE(filename string, cfg config) {
 
 	if cfg.wantDOSHeader {
 		DOSHeader := pe.DOSHeader
+		magic := string(IntToByteArray(uint64(DOSHeader.Magic)))
+		signature := string(IntToByteArray(uint64(pe.NtHeader.Signature)))
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
 		fmt.Print("\n---DOS Header ---\n\n")
-		magic := string(IntToByteArray(DOSHeader.Magic))
 		fmt.Fprintf(w, "Magic:\t 0x%x (%s)\n", DOSHeader.Magic, magic)
 		fmt.Fprintf(w, "Bytes On Last Page Of File:\t 0x%x\n", DOSHeader.BytesOnLastPageOfFile)
 		fmt.Fprintf(w, "Pages In File:\t 0x%x\n", DOSHeader.PagesInFile)
@@ -172,7 +174,7 @@ func parsePE(filename string, cfg config) {
 		fmt.Fprintf(w, "Overlay Number:\t 0x%x\n", DOSHeader.OverlayNumber)
 		fmt.Fprintf(w, "OEM Identifier:\t 0x%x\n", DOSHeader.OEMIdentifier)
 		fmt.Fprintf(w, "OEM Information:\t 0x%x\n", DOSHeader.OEMInformation)
-		fmt.Fprintf(w, "Address Of New EXE Header:\t 0x%x\n", DOSHeader.AddressOfNewEXEHeader)
+		fmt.Fprintf(w, "Address Of New EXE Header:\t 0x%x (%s)\n", DOSHeader.AddressOfNewEXEHeader, signature)
 		w.Flush()
 	}
 
@@ -195,8 +197,97 @@ func parsePE(filename string, cfg config) {
 	}
 
 	if cfg.wantNTHeader {
-		ntHeader, _ := json.Marshal(pe.NtHeader)
-		log.Info(prettyPrint(ntHeader))
+		ntHeader := pe.NtHeader.FileHeader
+		unixTimeUTC := time.Unix(int64(ntHeader.TimeDateStamp), 0)
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+
+		fmt.Print("\n\t------[ File Header ]------\n\n")
+		fmt.Fprintf(w, "Machine:\t 0x%x (%s)\n", ntHeader.Machine, pe.PrettyMachineType())
+		fmt.Fprintf(w, "Number Of Sections:\t 0x%x\n", ntHeader.NumberOfSections)
+		fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", ntHeader.TimeDateStamp, unixTimeUTC.String())
+		fmt.Fprintf(w, "Pointer To Symbol Table:\t 0x%x\n", ntHeader.PointerToSymbolTable)
+		fmt.Fprintf(w, "Number Of Symbols:\t 0x%x\n", ntHeader.NumberOfSymbols)
+		fmt.Fprintf(w, "Number Of Symbols:\t 0x%x\n", ntHeader.NumberOfSymbols)
+		fmt.Fprintf(w, "Size Of Optional Header:\t 0x%x\n", ntHeader.SizeOfOptionalHeader)
+		fmt.Fprintf(w, "Characteristics:\t 0x%x\n", ntHeader.Characteristics)
+		w.Flush()
+
+		fmt.Print("\n\t------[ Optional Header ]------\n\n")
+		if pe.Is64 {
+			oh := pe.NtHeader.OptionalHeader.(peparser.ImageOptionalHeader64)
+			dllCharacteristics := strings.Join(pe.PrettyDllCharacteristics(), " | ")
+			fmt.Fprintf(w, "Magic:\t 0x%x (%s)\n", oh.Magic, pe.PrettyOptionalHeaderMagic())
+			fmt.Fprintf(w, "Major Linker Version:\t 0x%x\n", oh.MajorLinkerVersion)
+			fmt.Fprintf(w, "Minor Linker Version:\t 0x%x\n", oh.MinorLinkerVersion)
+			fmt.Fprintf(w, "Size Of Code:\t 0x%x (%s)\n", oh.SizeOfCode, BytesSize(float64(oh.SizeOfCode)))
+			fmt.Fprintf(w, "Size Of Initialized Data:\t 0x%x (%s)\n", oh.SizeOfInitializedData,
+				BytesSize(float64(oh.SizeOfInitializedData)))
+			fmt.Fprintf(w, "Size Of Uninitialized Data:\t 0x%x (%s)\n", oh.SizeOfUninitializedData,
+				BytesSize(float64(oh.SizeOfUninitializedData)))
+			fmt.Fprintf(w, "Address Of Entry Point:\t 0x%x\n", oh.AddressOfEntryPoint)
+			fmt.Fprintf(w, "Base Of Code:\t 0x%x\n", oh.BaseOfCode)
+			fmt.Fprintf(w, "Image Base:\t 0x%x\n", oh.ImageBase)
+			fmt.Fprintf(w, "Section Alignment:\t 0x%x (%s)\n", oh.SectionAlignment,
+				BytesSize(float64(oh.SectionAlignment)))
+			fmt.Fprintf(w, "File Alignment:\t 0x%x (%s)\n", oh.FileAlignment,
+				BytesSize(float64(oh.FileAlignment)))
+			fmt.Fprintf(w, "Major OS Version:\t 0x%x\n", oh.MajorOperatingSystemVersion)
+			fmt.Fprintf(w, "Minor OS Version:\t 0x%x\n", oh.MinorOperatingSystemVersion)
+			fmt.Fprintf(w, "Major Image Version:\t 0x%x\n", oh.MajorImageVersion)
+			fmt.Fprintf(w, "Minor Image Version:\t 0x%x\n", oh.MinorImageVersion)
+			fmt.Fprintf(w, "Major Subsystem Version:\t 0x%x\n", oh.MajorSubsystemVersion)
+			fmt.Fprintf(w, "Minor Subsystem Version:\t 0x%x\n", oh.MinorSubsystemVersion)
+			fmt.Fprintf(w, "Win32 Version Value:\t 0x%x\n", oh.Win32VersionValue)
+			fmt.Fprintf(w, "Size Of Image:\t 0x%x (%s)\n", oh.SizeOfImage, BytesSize(float64(oh.SizeOfImage)))
+			fmt.Fprintf(w, "Size Of Headers:\t 0x%x (%s)\n", oh.SizeOfHeaders, BytesSize(float64(oh.SizeOfHeaders)))
+			fmt.Fprintf(w, "Checksum:\t 0x%x\n", oh.CheckSum)
+			fmt.Fprintf(w, "Subsystem:\t 0x%x (%s)\n", oh.Subsystem, pe.PrettySubsystem())
+			fmt.Fprintf(w, "Dll Characteristics:\t 0x%x (%s)\n", oh.DllCharacteristics, dllCharacteristics)
+			fmt.Fprintf(w, "Size Of Stack Reserve:\t 0x%x (%s)\n", oh.SizeOfStackReserve, BytesSize(float64(oh.SizeOfStackReserve)))
+			fmt.Fprintf(w, "Size Of Stack Commit:\t 0x%x (%s)\n", oh.SizeOfStackCommit, BytesSize(float64(oh.SizeOfStackCommit)))
+			fmt.Fprintf(w, "Size Of Heap Reserve:\t 0x%x (%s)\n", oh.SizeOfHeapReserve, BytesSize(float64(oh.SizeOfHeapReserve)))
+			fmt.Fprintf(w, "Size Of Heap Commit:\t 0x%x (%s)\n", oh.SizeOfHeapCommit, BytesSize(float64(oh.SizeOfHeapCommit)))
+			fmt.Fprintf(w, "Loader Flags:\t 0x%x\n", oh.LoaderFlags)
+			fmt.Fprintf(w, "Number Of RVA And Sizes:\t 0x%x\n", oh.NumberOfRvaAndSizes)
+		} else {
+			oh := pe.NtHeader.OptionalHeader.(peparser.ImageOptionalHeader32)
+			dllCharacteristics := strings.Join(pe.PrettyDllCharacteristics(), " | ")
+			fmt.Fprintf(w, "Magic:\t 0x%x (%s)\n", oh.Magic, pe.PrettyOptionalHeaderMagic())
+			fmt.Fprintf(w, "Major Linker Version:\t 0x%x\n", oh.MajorLinkerVersion)
+			fmt.Fprintf(w, "Minor Linker Version:\t 0x%x\n", oh.MinorLinkerVersion)
+			fmt.Fprintf(w, "Size Of Code:\t 0x%x (%s)\n", oh.SizeOfCode, BytesSize(float64(oh.SizeOfCode)))
+			fmt.Fprintf(w, "Size Of Initialized Data:\t 0x%x (%s)\n", oh.SizeOfInitializedData,
+				BytesSize(float64(oh.SizeOfInitializedData)))
+			fmt.Fprintf(w, "Size Of Uninitialized Data:\t 0x%x (%s)\n", oh.SizeOfUninitializedData,
+				BytesSize(float64(oh.SizeOfUninitializedData)))
+			fmt.Fprintf(w, "Address Of Entry Point:\t 0x%x\n", oh.AddressOfEntryPoint)
+			fmt.Fprintf(w, "Base Of Code:\t 0x%x\n", oh.BaseOfCode)
+			fmt.Fprintf(w, "Image Base:\t 0x%x\n", oh.ImageBase)
+			fmt.Fprintf(w, "Section Alignment:\t 0x%x (%s)\n", oh.SectionAlignment,
+				BytesSize(float64(oh.SectionAlignment)))
+			fmt.Fprintf(w, "File Alignment:\t 0x%x (%s)\n", oh.FileAlignment,
+				BytesSize(float64(oh.FileAlignment)))
+			fmt.Fprintf(w, "Major OS Version:\t 0x%x\n", oh.MajorOperatingSystemVersion)
+			fmt.Fprintf(w, "Minor OS Version:\t 0x%x\n", oh.MinorOperatingSystemVersion)
+			fmt.Fprintf(w, "Major Image Version:\t 0x%x\n", oh.MajorImageVersion)
+			fmt.Fprintf(w, "Minor Image Version:\t 0x%x\n", oh.MinorImageVersion)
+			fmt.Fprintf(w, "Major Subsystem Version:\t 0x%x\n", oh.MajorSubsystemVersion)
+			fmt.Fprintf(w, "Minor Subsystem Version:\t 0x%x\n", oh.MinorSubsystemVersion)
+			fmt.Fprintf(w, "Win32 Version Value:\t 0x%x\n", oh.Win32VersionValue)
+			fmt.Fprintf(w, "Size Of Image:\t 0x%x (%s)\n", oh.SizeOfImage, BytesSize(float64(oh.SizeOfImage)))
+			fmt.Fprintf(w, "Size Of Headers:\t 0x%x (%s)\n", oh.SizeOfHeaders, BytesSize(float64(oh.SizeOfHeaders)))
+			fmt.Fprintf(w, "Checksum:\t 0x%x\n", oh.CheckSum)
+			fmt.Fprintf(w, "Subsystem:\t 0x%x (%s)\n", oh.Subsystem, pe.PrettySubsystem())
+			fmt.Fprintf(w, "Dll Characteristics:\t 0x%x (%s)\n", oh.DllCharacteristics, dllCharacteristics)
+			fmt.Fprintf(w, "Size Of Stack Reserve:\t 0x%x (%s)\n", oh.SizeOfStackReserve, BytesSize(float64(oh.SizeOfStackReserve)))
+			fmt.Fprintf(w, "Size Of Stack Commit:\t 0x%x (%s)\n", oh.SizeOfStackCommit, BytesSize(float64(oh.SizeOfStackCommit)))
+			fmt.Fprintf(w, "Size Of Heap Reserve:\t 0x%x (%s)\n", oh.SizeOfHeapReserve, BytesSize(float64(oh.SizeOfHeapReserve)))
+			fmt.Fprintf(w, "Size Of Heap Commit:\t 0x%x (%s)\n", oh.SizeOfHeapCommit, BytesSize(float64(oh.SizeOfHeapCommit)))
+			fmt.Fprintf(w, "Loader Flags:\t 0x%x\n", oh.LoaderFlags)
+			fmt.Fprintf(w, "Number Of RVA And Sizes:\t 0x%x\n", oh.NumberOfRvaAndSizes)
+		}
+
+		w.Flush()
 	}
 
 	if cfg.wantSections {
