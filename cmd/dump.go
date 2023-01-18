@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"text/tabwriter"
+	"unsafe"
 
 	peparser "github.com/saferwall/pe"
 	"github.com/saferwall/pe/log"
@@ -54,6 +55,16 @@ func hexDump(b []byte) {
 			fmt.Printf("  %s\n", string(a[:]))
 		}
 	}
+}
+
+func IntToByteArray(num uint16) []byte {
+	size := int(unsafe.Sizeof(num))
+	arr := make([]byte, size)
+	for i := 0; i < size; i++ {
+		byt := *(*uint8)(unsafe.Pointer(uintptr(unsafe.Pointer(&num)) + uintptr(i)))
+		arr[i] = byt
+	}
+	return arr
 }
 
 func isDirectory(path string) bool {
@@ -141,8 +152,28 @@ func parsePE(filename string, cfg config) {
 	}
 
 	if cfg.wantDOSHeader {
-		dosHeader, _ := json.Marshal(pe.DOSHeader)
-		fmt.Print(prettyPrint(dosHeader))
+		DOSHeader := pe.DOSHeader
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		fmt.Print("\n---DOS Header ---\n\n")
+		magic := string(IntToByteArray(DOSHeader.Magic))
+		fmt.Fprintf(w, "Magic:\t 0x%x (%s)\n", DOSHeader.Magic, magic)
+		fmt.Fprintf(w, "Bytes On Last Page Of File:\t 0x%x\n", DOSHeader.BytesOnLastPageOfFile)
+		fmt.Fprintf(w, "Pages In File:\t 0x%x\n", DOSHeader.PagesInFile)
+		fmt.Fprintf(w, "Relocations:\t 0x%x\n", DOSHeader.Relocations)
+		fmt.Fprintf(w, "Size Of Header:\t 0x%x\n", DOSHeader.SizeOfHeader)
+		fmt.Fprintf(w, "Min Extra Paragraphs Needed:\t 0x%x\n", DOSHeader.MinExtraParagraphsNeeded)
+		fmt.Fprintf(w, "Max Extra Paragraphs Needed:\t 0x%x\n", DOSHeader.MaxExtraParagraphsNeeded)
+		fmt.Fprintf(w, "Initial SS:\t 0x%x\n", DOSHeader.InitialSS)
+		fmt.Fprintf(w, "Initial SP:\t 0x%x\n", DOSHeader.InitialSP)
+		fmt.Fprintf(w, "Checksum:\t 0x%x\n", DOSHeader.Checksum)
+		fmt.Fprintf(w, "Initial IP:\t 0x%x\n", DOSHeader.InitialIP)
+		fmt.Fprintf(w, "Initial CS:\t 0x%x\n", DOSHeader.InitialCS)
+		fmt.Fprintf(w, "Address Of Relocation Table:\t 0x%x\n", DOSHeader.AddressOfRelocationTable)
+		fmt.Fprintf(w, "Overlay Number:\t 0x%x\n", DOSHeader.OverlayNumber)
+		fmt.Fprintf(w, "OEM Identifier:\t 0x%x\n", DOSHeader.OEMIdentifier)
+		fmt.Fprintf(w, "OEM Information:\t 0x%x\n", DOSHeader.OEMInformation)
+		fmt.Fprintf(w, "Address Of New EXE Header:\t 0x%x\n", DOSHeader.AddressOfNewEXEHeader)
+		w.Flush()
 	}
 
 	if cfg.wantRichHeader && pe.FileInfo.HasRichHdr {
