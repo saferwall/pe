@@ -10,7 +10,7 @@ import (
 const (
 	// Decimal
 
-	KB = 1024
+	KB = 1000
 	MB = 1000 * KB
 	GB = 1000 * MB
 	TB = 1000 * GB
