@@ -58,6 +58,34 @@ func hexDump(b []byte) {
 	}
 }
 
+func hexDumpSize(b []byte, size int) {
+	var a [16]byte
+	n := (size + 15) &^ 15
+	for i := 0; i < n; i++ {
+		if i%16 == 0 {
+			fmt.Printf("%4d", i)
+		}
+		if i%8 == 0 {
+			fmt.Print(" ")
+		}
+		if i < len(b) {
+			fmt.Printf(" %02X", b[i])
+		} else {
+			fmt.Print("   ")
+		}
+		if i >= len(b) {
+			a[i%16] = ' '
+		} else if b[i] < 32 || b[i] > 126 {
+			a[i%16] = '.'
+		} else {
+			a[i%16] = b[i]
+		}
+		if i%16 == 15 {
+			fmt.Printf("  %s\n", string(a[:]))
+		}
+	}
+}
+
 func IntToByteArray(num uint64) []byte {
 	size := int(unsafe.Sizeof(num))
 	arr := make([]byte, size)
@@ -303,14 +331,30 @@ func parsePE(filename string, cfg config) {
 	}
 
 	if cfg.wantSections {
-		for _, sec := range pe.Sections {
-			log.Infof("Section Name : %s\n", sec.NameString())
-			log.Infof("Section VirtualSize : %x\n", sec.Header.VirtualSize)
-			log.Infof("Section Flags : %x, Meaning: %v\n\n",
-				sec.Header.Characteristics, sec.PrettySectionFlags())
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		for i, sec := range pe.Sections {
+			hdr := sec.Header
+			fmt.Printf("\n\t------[ Section Header #%d ]------\n\n", i)
+			fmt.Fprintf(w, "Name:\t %v (%s)\n", hdr.Name, sec.String())
+			fmt.Fprintf(w, "Virtual Size:\t 0x%x (%s)\n", hdr.VirtualSize,
+				BytesSize(float64(hdr.VirtualSize)))
+			fmt.Fprintf(w, "Virtual Address:\t 0x%x\n", hdr.VirtualAddress)
+			fmt.Fprintf(w, "Size Of Raw Data Size:\t 0x%x (%s)\n", hdr.SizeOfRawData,
+				BytesSize(float64(hdr.SizeOfRawData)))
+			fmt.Fprintf(w, "Pointer To Raw Data:\t 0x%x\n", hdr.PointerToRawData)
+			fmt.Fprintf(w, "Pointer To Relocations:\t 0x%x\n", hdr.PointerToRelocations)
+			fmt.Fprintf(w, "Pointer To Line Numbers:\t 0x%x\n", hdr.PointerToLineNumbers)
+			fmt.Fprintf(w, "Number Of Relocations:\t 0x%x\n", hdr.NumberOfRelocations)
+			fmt.Fprintf(w, "Number Of Line Numbers:\t 0x%x\n", hdr.NumberOfLineNumbers)
+			fmt.Fprintf(w, "Characteristics:\t 0x%x (%s)\n", hdr.Characteristics,
+				strings.Join(sec.PrettySectionFlags(), " | "))
+			fmt.Fprintf(w, "Entropy:\t %f\n", sec.CalculateEntropy(pe))
+			w.Flush()
+
+			fmt.Fprintf(w, "\n")
+			hexDumpSize(sec.Data(0, hdr.PointerToRawData, pe), 128)
 		}
-		sectionsHeaders, _ := json.Marshal(pe.Sections)
-		log.Info(prettyPrint(sectionsHeaders))
+
 	}
 
 	if cfg.wantCLR && pe.FileInfo.HasCLR {

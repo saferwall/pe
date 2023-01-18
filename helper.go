@@ -180,7 +180,7 @@ func (pe *File) getSectionByRva(rva uint32) *Section {
 func (pe *File) getSectionNameByRva(rva uint32) string {
 	for _, section := range pe.Sections {
 		if section.Contains(rva, pe) {
-			return section.NameString()
+			return section.String()
 		}
 	}
 	return ""
@@ -254,7 +254,7 @@ func (pe *File) GetRVAFromOffset(offset uint32) uint32 {
 
 func (pe *File) getSectionByName(secName string) (section *ImageSectionHeader) {
 	for _, section := range pe.Sections {
-		if section.NameString() == secName {
+		if section.String() == secName {
 			return &section.Header
 		}
 
@@ -509,7 +509,7 @@ func (pe *File) IsDriver() bool {
 	}
 	commonDriverSectionNames := []string{"page", "paged", "nonpage", "init"}
 	for _, section := range pe.Sections {
-		s := strings.ToLower(section.NameString())
+		s := strings.ToLower(section.String())
 		if stringInSlice(s, commonDriverSectionNames) &&
 			(subsystem&ImageSubsystemNativeWindows != 0 ||
 				subsystem&ImageSubsystemNative != 0) {
