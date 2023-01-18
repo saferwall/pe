@@ -1,3 +1,5 @@
+<a href="https://saferwall.com" target="_blank" rel="noopener noreferrer"><img align="right" width="300" src=".github/assets/logo.png" alt="Saferwall logo"></a>
+
 # Portable Executable Parser
 
 [![GoDoc](http://godoc.org/github.com/saferwall/pe?status.svg)](https://pkg.go.dev/github.com/saferwall/pe) ![Go Version](https://img.shields.io/badge/go%20version-%3E=1.15-61CFDD.svg) [![Report Card](https://goreportcard.com/badge/github.com/saferwall/pe)](https://goreportcard.com/report/github.com/saferwall/pe) [![codecov](https://codecov.io/gh/saferwall/pe/branch/main/graph/badge.svg?token=W7WTOUZLRY)](https://codecov.io/gh/saferwall/pe) ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/saferwall/pe/ci.yaml?branch=main)
