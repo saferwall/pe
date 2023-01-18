@@ -182,22 +182,22 @@ type ImageDirectoryEntry int
 // DataDirectory entries of an OptionalHeader
 const (
 	ImageDirectoryEntryExport       ImageDirectoryEntry = iota // Export Table
-	ImageDirectoryEntryImport                           = 1    // Import Table
-	ImageDirectoryEntryResource                         = 2    // Resource Table
-	ImageDirectoryEntryException                        = 3    // Exception Table
-	ImageDirectoryEntryCertificate                      = 4    // Certificate Directory
-	ImageDirectoryEntryBaseReloc                        = 5    // Base Relocation Table
-	ImageDirectoryEntryDebug                            = 6    // Debug
-	ImageDirectoryEntryArchitecture                     = 7    // Architecture Specific Data
-	ImageDirectoryEntryGlobalPtr                        = 8    // The RVA of the value to be stored in the global pointer register.
-	ImageDirectoryEntryTLS                              = 9    // The thread local storage (TLS) table
-	ImageDirectoryEntryLoadConfig                       = 10   // The load configuration table
-	ImageDirectoryEntryBoundImport                      = 11   // The bound import table
-	ImageDirectoryEntryIAT                              = 12   // Import Address Table
-	ImageDirectoryEntryDelayImport                      = 13   // Delay Import Descriptor
-	ImageDirectoryEntryCLR                              = 14   // CLR Runtime Header
-	ImageDirectoryEntryReserved                         = 15   // Must be zero
-	ImageNumberOfDirectoryEntries                       = 16   // Tables count.
+	ImageDirectoryEntryImport                                  // Import Table
+	ImageDirectoryEntryResource                                // Resource Table
+	ImageDirectoryEntryException                               // Exception Table
+	ImageDirectoryEntryCertificate                             // Certificate Directory
+	ImageDirectoryEntryBaseReloc                               // Base Relocation Table
+	ImageDirectoryEntryDebug                                   // Debug
+	ImageDirectoryEntryArchitecture                            // Architecture Specific Data
+	ImageDirectoryEntryGlobalPtr                               // The RVA of the value to be stored in the global pointer register.
+	ImageDirectoryEntryTLS                                     // The thread local storage (TLS) table
+	ImageDirectoryEntryLoadConfig                              // The load configuration table
+	ImageDirectoryEntryBoundImport                             // The bound import table
+	ImageDirectoryEntryIAT                                     // Import Address Table
+	ImageDirectoryEntryDelayImport                             // Delay Import Descriptor
+	ImageDirectoryEntryCLR                                     // CLR Runtime Header
+	ImageDirectoryEntryReserved                                // Must be zero
+	ImageNumberOfDirectoryEntries                              // Tables count.
 )
 
 // FileInfo represents the PE file information struct.

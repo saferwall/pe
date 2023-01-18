@@ -249,6 +249,12 @@ func parsePE(filename string, cfg config) {
 			fmt.Fprintf(w, "Size Of Heap Commit:\t 0x%x (%s)\n", oh.SizeOfHeapCommit, BytesSize(float64(oh.SizeOfHeapCommit)))
 			fmt.Fprintf(w, "Loader Flags:\t 0x%x\n", oh.LoaderFlags)
 			fmt.Fprintf(w, "Number Of RVA And Sizes:\t 0x%x\n", oh.NumberOfRvaAndSizes)
+			fmt.Fprintf(w, "\n")
+			for entry := peparser.ImageDirectoryEntry(0); entry < peparser.ImageNumberOfDirectoryEntries; entry++ {
+				rva := oh.DataDirectory[entry].VirtualAddress
+				size := oh.DataDirectory[entry].Size
+				fmt.Fprintf(w, "%s Table:\t RVA: 0x%0.8x\t Size:0x%0.8x\t\n", entry.String(), rva, size)
+			}
 		} else {
 			oh := pe.NtHeader.OptionalHeader.(peparser.ImageOptionalHeader32)
 			dllCharacteristics := strings.Join(pe.PrettyDllCharacteristics(), " | ")
@@ -285,9 +291,15 @@ func parsePE(filename string, cfg config) {
 			fmt.Fprintf(w, "Size Of Heap Commit:\t 0x%x (%s)\n", oh.SizeOfHeapCommit, BytesSize(float64(oh.SizeOfHeapCommit)))
 			fmt.Fprintf(w, "Loader Flags:\t 0x%x\n", oh.LoaderFlags)
 			fmt.Fprintf(w, "Number Of RVA And Sizes:\t 0x%x\n", oh.NumberOfRvaAndSizes)
+			fmt.Fprintf(w, "\n")
+			for entry := peparser.ImageDirectoryEntry(0); entry < peparser.ImageNumberOfDirectoryEntries; entry++ {
+				rva := oh.DataDirectory[entry].VirtualAddress
+				size := oh.DataDirectory[entry].Size
+				fmt.Fprintf(w, "%s Table:\t RVA: 0x%0.8x\t Size:0x%0.8x\t\n", entry.String(), rva, size)
+			}
 		}
-
 		w.Flush()
+
 	}
 
 	if cfg.wantSections {
