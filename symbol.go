@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -14,9 +14,9 @@ import (
 const (
 
 	// MaxDefaultSymbolsCount represents the default maximum number of COFF
-	// symbols to parse. Some malwares uses a fake huge NumberOfSymbols that
+	// symbols to parse. Some malware uses a fake huge NumberOfSymbols that
 	// can cause an OOM exception.
-	// Example:  0000e876c5b712b6b7b3ce97f757ddd918fb3dbdc5a3938e850716fbd841309f
+	// Example: 0000e876c5b712b6b7b3ce97f757ddd918fb3dbdc5a3938e850716fbd841309f
 	MaxDefaultCOFFSymbolsCount = 0x10000
 
 	// MaxCOFFSymStrLength represents the maximum string length of a COFF symbol
@@ -214,7 +214,7 @@ const (
 
 var (
 	errCOFFTableNotPresent = errors.New(
-		"PE image does not countains a COFF symbol table")
+		"PE image does not contains a COFF symbol table")
 	errNoCOFFStringInTable = errors.New(
 		"PE image got a PointerToSymbolTable but no string in the COFF string table")
 	errCOFFSymbolOutOfBounds = errors.New(
@@ -414,7 +414,7 @@ func (symbol *COFFSymbol) SectionNumberName(pe *File) string {
 	// and can take negative values. The following values, less than one, have
 	// special meanings.
 	if symbol.SectionNumber > 0 && symbol.SectionNumber < int16(len(pe.Sections)) {
-		return pe.Sections[symbol.SectionNumber-1].NameString()
+		return pe.Sections[symbol.SectionNumber-1].String()
 	}
 
 	switch symbol.SectionNumber {

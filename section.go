@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -228,7 +228,7 @@ type ImageSectionHeader struct {
 	Characteristics uint32
 }
 
-// Section represents a PE section header, plus additionnal data like entropy.
+// Section represents a PE section header, plus additional data like entropy.
 type Section struct {
 	Header  ImageSectionHeader
 	Entropy float64 `json:",omitempty"`
@@ -245,7 +245,7 @@ func (pe *File) ParseSectionHeader() (err error) {
 	offset := optionalHeaderOffset +
 		uint32(pe.NtHeader.FileHeader.SizeOfOptionalHeader)
 
-	// Track invalid/suspicous values while parsing sections.
+	// Track invalid/suspicious values while parsing sections.
 	maxErr := 3
 
 	secHeader := ImageSectionHeader{}
@@ -269,7 +269,7 @@ func (pe *File) ParseSectionHeader() (err error) {
 
 		countErr := 0
 		sec := Section{Header: secHeader}
-		secName := sec.NameString()
+		secName := sec.String()
 
 		if (ImageSectionHeader{}) == secHeader {
 			pe.Anomalies = append(pe.Anomalies, "Section `"+secName+"` Contents are null-bytes")
@@ -368,8 +368,8 @@ func (pe *File) ParseSectionHeader() (err error) {
 	return nil
 }
 
-// NameString returns string representation of a ImageSectionHeader.Name field.
-func (section *Section) NameString() string {
+// String stringifies the section name.
+func (section *Section) String() string {
 	return strings.Replace(string(section.Header.Name[:]), "\x00", "", -1)
 }
 
