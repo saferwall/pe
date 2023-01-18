@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -14,7 +14,7 @@ type ImageNtHeader struct {
 	// Signature is a DWORD containing the value 50h, 45h, 00h, 00h.
 	Signature uint32
 
-	// IMAGE_NT_HEADERS privdes a standard COFF header. It is located
+	// IMAGE_NT_HEADERS provides a standard COFF header. It is located
 	// immediately after the PE signature. The COFF header provides the most
 	// general characteristics of a PE/COFF file, applicable to both object and
 	// executable files. It is represented with IMAGE_FILE_HEADER structure.
@@ -341,10 +341,10 @@ type ImageOptionalHeader64 struct {
 // directory entry describes;this information is used by the operating system.
 type DataDirectory struct {
 	VirtualAddress uint32 // The RVA of the data structure.
-	Size           uint32 // The size in bytes of the data structure refered to.
+	Size           uint32 // The size in bytes of the data structure referred to.
 }
 
-// ParseNTHeader parse the PE NT header structure refered as IMAGE_NT_HEADERS.
+// ParseNTHeader parse the PE NT header structure referred as IMAGE_NT_HEADERS.
 // Its offset is given by the e_lfanew field in the IMAGE_DOS_HEADER at the
 // beginning of the file.
 func (pe *File) ParseNTHeader() (err error) {
@@ -428,16 +428,14 @@ func (pe *File) ParseNTHeader() (err error) {
 	}
 
 	// ImageBase should be multiple of 10000h.
-	if (pe.Is64 && oh64.ImageBase%0x10000 != 0) || (
-		pe.Is32 && oh32.ImageBase%0x10000 != 0) {
+	if (pe.Is64 && oh64.ImageBase%0x10000 != 0) || (pe.Is32 && oh32.ImageBase%0x10000 != 0) {
 		return ErrImageBaseNotAligned
 	}
 
 	// ImageBase can be any value as long as:
 	// ImageBase + SizeOfImage < 80000000h for PE32.
 	// ImageBase + SizeOfImage < 0xffff080000000000 for PE32+.
-	if (pe.Is32 && oh32.ImageBase+oh32.SizeOfImage >= 0x80000000) || (
-		pe.Is64 && oh64.ImageBase+uint64(oh64.SizeOfImage) >= 0xffff080000000000) {
+	if (pe.Is32 && oh32.ImageBase+oh32.SizeOfImage >= 0x80000000) || (pe.Is64 && oh64.ImageBase+uint64(oh64.SizeOfImage) >= 0xffff080000000000) {
 		pe.Anomalies = append(pe.Anomalies, AnoImageBaseOverflow)
 	}
 
@@ -545,8 +543,8 @@ func (pe *File) PrettyDllCharacteristics() []string {
 	return values
 }
 
-// PrettySubsystem returns the string representations
-// of the `Subsystem` field of ImageOptionalHeader.
+// PrettySubsystem returns the string representations of the `Subsystem` field
+// of ImageOptionalHeader.
 func (pe *File) PrettySubsystem() string {
 
 	var subsystem uint16
@@ -577,4 +575,30 @@ func (pe *File) PrettySubsystem() string {
 	}
 
 	return subsystemMap[subsystem]
+}
+
+// PrettyOptionalHeaderMagic returns the string representations of the
+// `Magic` field of ImageOptionalHeader.
+func (pe *File) PrettyOptionalHeaderMagic() string {
+
+	var magic uint16
+
+	if pe.Is64 {
+		magic =
+			pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).Magic
+	} else {
+		magic =
+			pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).Magic
+	}
+
+	switch magic {
+	case ImageNtOptionalHeader32Magic:
+		return "PE32"
+	case ImageNtOptionalHeader64Magic:
+		return "PE64"
+	case ImageROMOptionalHeaderMagic:
+		return "ROM"
+	default:
+		return "??"
+	}
 }

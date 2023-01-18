@@ -201,10 +201,9 @@ func (pe *File) Parse() error {
 	return pe.ParseDataDirectories()
 }
 
-// PrettyDataDirectory returns the string representations
-// of the data directory entry.
-func (pe *File) PrettyDataDirectory(entry int) string {
-	dataDirMap := map[int]string{
+// stringify the data directory entry.
+func (entry ImageDirectoryEntry) String() string {
+	dataDirMap := map[ImageDirectoryEntry]string{
 		ImageDirectoryEntryExport:       "Export",
 		ImageDirectoryEntryImport:       "Import",
 		ImageDirectoryEntryResource:     "Resource",
@@ -226,7 +225,7 @@ func (pe *File) PrettyDataDirectory(entry int) string {
 	return dataDirMap[entry]
 }
 
-// ParseDataDirectories parses the data directores. The DataDirectory is an
+// ParseDataDirectories parses the data directories. The DataDirectory is an
 // array of 16 structures. Each array entry has a predefined meaning for what
 // it refers to.
 func (pe *File) ParseDataDirectories() error {
@@ -243,7 +242,7 @@ func (pe *File) ParseDataDirectories() error {
 	}
 
 	// Maps data directory index to function which parses that directory.
-	funcMaps := map[int](func(uint32, uint32) error){
+	funcMaps := map[ImageDirectoryEntry](func(uint32, uint32) error){
 		ImageDirectoryEntryExport:       pe.parseExportDirectory,
 		ImageDirectoryEntryImport:       pe.parseImportDirectory,
 		ImageDirectoryEntryResource:     pe.parseResourceDirectory,
@@ -262,7 +261,7 @@ func (pe *File) ParseDataDirectories() error {
 	}
 
 	// Iterate over data directories and call the appropriate function.
-	for entryIndex := 0; entryIndex < ImageNumberOfDirectoryEntries; entryIndex++ {
+	for entryIndex := ImageDirectoryEntry(0); entryIndex < ImageNumberOfDirectoryEntries; entryIndex++ {
 
 		var va, size uint32
 		switch pe.Is64 {
@@ -282,7 +281,7 @@ func (pe *File) ParseDataDirectories() error {
 				defer func() {
 					if e := recover(); e != nil {
 						pe.logger.Errorf("unhandled exception when parsing data directory %s, reason: %v",
-							pe.PrettyDataDirectory(entryIndex), e)
+							entryIndex.String(), e)
 						foundErr = true
 					}
 				}()
@@ -296,7 +295,7 @@ func (pe *File) ParseDataDirectories() error {
 				err := funcMaps[entryIndex](va, size)
 				if err != nil {
 					pe.logger.Warnf("failed to parse data directory %s, reason: %v",
-						pe.PrettyDataDirectory(entryIndex), err)
+						entryIndex.String(), err)
 				}
 			}()
 		}
