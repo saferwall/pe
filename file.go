@@ -201,7 +201,7 @@ func (pe *File) Parse() error {
 	return pe.ParseDataDirectories()
 }
 
-// stringify the data directory entry.
+// String stringify the data directory entry.
 func (entry ImageDirectoryEntry) String() string {
 	dataDirMap := map[ImageDirectoryEntry]string{
 		ImageDirectoryEntryExport:       "Export",
