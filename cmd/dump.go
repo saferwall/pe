@@ -207,12 +207,12 @@ func parsePE(filename string, cfg config) {
 	}
 
 	if cfg.wantRichHeader && pe.FileInfo.HasRichHdr {
-		richheader := pe.RichHeader
+		richHeader := pe.RichHeader
 		fmt.Printf("RICH HEADER\n\n")
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
-		fmt.Fprintf(w, "\t0x%x\t xor Key\n", richheader.XorKey)
-		fmt.Fprintf(w, "\t0x%x\t DanS offset\n", richheader.DansOffset)
-		fmt.Fprintf(w, "\t0x%x\t checksum\n\n", pe.RichHeaderChecksum())
+		fmt.Fprintf(w, "\t0x%x\t XOR Key\n", richHeader.XORKey)
+		fmt.Fprintf(w, "\t0x%x\t DanS offset\n", richHeader.DansOffset)
+		fmt.Fprintf(w, "\t0x%x\t Checksum\n\n", pe.RichHeaderChecksum())
 		fmt.Fprintln(w, "ProductID\tMinorCV\tCount\tUnmasked\tMeaning\tVSVersion\t")
 		for _, compID := range pe.RichHeader.CompIDs {
 			fmt.Fprintf(w, "0x%x\t0x%x\t0x%x\t0x%x\t%s\t%s\t\n",
@@ -221,7 +221,7 @@ func parsePE(filename string, cfg config) {
 		}
 		w.Flush()
 		fmt.Print("\n   ---Raw header dump---\n")
-		hexDump(richheader.Raw)
+		hexDump(richHeader.Raw)
 	}
 
 	if cfg.wantNTHeader {
