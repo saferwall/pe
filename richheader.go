@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -22,7 +22,7 @@ const (
 	AnoDansSigNotFound = "Rich Header found, but could not locate DanS " +
 		"signature"
 
-	// AnoPaddingDwordNotZero is repoted when rich header signature leading
+	// AnoPaddingDwordNotZero is reported when rich header signature leading
 	// padding DWORDs are not equal to 0.
 	AnoPaddingDwordNotZero = "Rich header found: 3 leading padding DWORDs " +
 		"not found after DanS signature"
@@ -31,18 +31,18 @@ const (
 // CompID represents the `@comp.id` structure.
 type CompID struct {
 	// The minor version information for the compiler used when building the product.
-	MinorCV uint16
+	MinorCV uint16 `json:"minor_cv"`
 
 	// Provides information about the identity or type of the objects used to
 	// build the PE32.
-	ProdID uint16
+	ProdID uint16 `json:"prod_id"`
 
 	// Indicates how often the object identified by the former two fields is
 	// referenced by this PE32 file.
-	Count uint32
+	Count uint32 `json:"count"`
 
 	// The raw @comp.id structure (unmasked).
-	Unmasked uint32
+	Unmasked uint32 `json:"unmasked"`
 }
 
 // RichHeader is a structure that is written right after the MZ DOS header.
@@ -51,10 +51,10 @@ type CompID struct {
 // The data between the magic values encodes the ‘bill of materials’ that were
 // collected by the linker to produce the binary.
 type RichHeader struct {
-	XorKey     uint32
-	CompIDs    []CompID
-	DansOffset int
-	Raw        []byte
+	XorKey     uint32   `json:"xor_key"`
+	CompIDs    []CompID `json:"comp_ids"`
+	DansOffset int      `json:"dans_offset"`
+	Raw        []byte   `json:"raw"`
 }
 
 // ParseRichHeader parses the rich header struct.
