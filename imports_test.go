@@ -36,7 +36,7 @@ func TestImportDirectory(t *testing.T) {
 						Name:               0xaeeb8,
 						FirstThunk:         0x82978,
 					},
-					Functions: []*ImportFunction{
+					Functions: []ImportFunction{
 						{
 							Name:               "GetNamedPipeHandleStateW",
 							Hint:               0x6,
@@ -66,7 +66,7 @@ func TestImportDirectory(t *testing.T) {
 						Name:               0x10d0,
 						FirstThunk:         0x1058,
 					},
-					Functions: []*ImportFunction{
+					Functions: []ImportFunction{
 						{
 							Name:               "#35",
 							Hint:               0x0,
@@ -145,12 +145,12 @@ func TestImpHash(t *testing.T) {
 			if err := file.Parse(); err != nil {
 				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
 			}
-			imphash, err := file.ImpHash()
+			impHash, err := file.ImpHash()
 			if err != nil {
 				t.Fatalf("ImpHash(%s) failed, reason: %v", tt.in, err)
 			}
-			if imphash != tt.out {
-				t.Errorf("ImpHash(%s) got %v, want %v", tt.in, imphash, tt.out)
+			if impHash != tt.out {
+				t.Errorf("ImpHash(%s) got %v, want %v", tt.in, impHash, tt.out)
 			}
 		})
 	}
