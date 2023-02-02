@@ -238,37 +238,38 @@ type COFFSymbol struct {
 	//    } Name;
 	//    DWORD   LongName[2];    // PBYTE  [2]
 	// } N;
-	Name [8]byte
+	Name [8]byte `json:"name"`
 
 	// The value that is associated with the symbol. The interpretation of this
 	// field depends on SectionNumber and StorageClass. A typical meaning is
 	// the relocatable address.
-	Value uint32
+	Value uint32 `json:"value"`
 
 	// The signed integer that identifies the section, using a one-based index
 	// into the section table. Some values have special meaning.
 	// See "Section Number Values."
-	SectionNumber int16
+	SectionNumber int16 `json:"section_number"`
 
 	// A number that represents type. Microsoft tools set this field to
 	// 0x20 (function) or 0x0 (not a function). For more information,
 	// see Type Representation.
-	Type uint16
+	Type uint16 `json:"type"`
 
 	// An enumerated value that represents storage class.
 	// For more information, see Storage Class.
-	StorageClass uint8
+	StorageClass uint8 `json:"storage_class"`
 
 	// The number of auxiliary symbol table entries that follow this record.
-	NumberOfAuxSymbols uint8
+	NumberOfAuxSymbols uint8 `json:"number_of_aux_symbols"`
 }
 
 // COFF holds properties related to the COFF format.
 type COFF struct {
-	SymbolTable       []COFFSymbol
-	StringTable       []string
-	StringTableOffset uint32
-	StringTableM      map[uint32]string // Map the symbol offset => symbol name.
+	SymbolTable       []COFFSymbol `json:"symbol_table"`
+	StringTable       []string     `json:"string_table"`
+	StringTableOffset uint32       `json:"string_table_offset"`
+	// Map the symbol offset => symbol name.
+	StringTableM map[uint32]string `json:"-"`
 }
 
 // ParseCOFFSymbolTable parses the COFF symbol table. The symbol table is

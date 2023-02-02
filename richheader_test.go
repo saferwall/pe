@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import (
 )
 
 type TestRichHeader struct {
-	richheader   RichHeader
+	richHeader   RichHeader
 	compIDIndex  uint8
 	prettyProdID string
 	VSVersion    string
@@ -25,8 +25,8 @@ func TestParseRichHeader(t *testing.T) {
 	}{
 		{getAbsoluteFilePath("test/kernel32.dll"),
 			TestRichHeader{
-				richheader: RichHeader{
-					XorKey: 2796214951,
+				richHeader: RichHeader{
+					XORKey: 2796214951,
 					CompIDs: []CompID{
 						{
 							MinorCV:  27412,
@@ -113,13 +113,13 @@ func TestParseRichHeader(t *testing.T) {
 				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
 			}
 
-			richheader := file.RichHeader
-			if !reflect.DeepEqual(richheader, tt.out.richheader) {
+			richHeader := file.RichHeader
+			if !reflect.DeepEqual(richHeader, tt.out.richHeader) {
 				t.Errorf("rich header test failed, got %v, want %v",
-					richheader, tt.out)
+				richHeader, tt.out)
 			}
 
-			prodID := richheader.CompIDs[tt.out.compIDIndex].ProdID
+			prodID := richHeader.CompIDs[tt.out.compIDIndex].ProdID
 			prettyProdID := ProdIDtoStr(prodID)
 			if prettyProdID != tt.out.prettyProdID {
 				t.Errorf("rich header pretty prod ID failed, got %v, want %v",

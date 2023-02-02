@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -22,7 +22,7 @@ const (
 	AnoDansSigNotFound = "Rich Header found, but could not locate DanS " +
 		"signature"
 
-	// AnoPaddingDwordNotZero is repoted when rich header signature leading
+	// AnoPaddingDwordNotZero is reported when rich header signature leading
 	// padding DWORDs are not equal to 0.
 	AnoPaddingDwordNotZero = "Rich header found: 3 leading padding DWORDs " +
 		"not found after DanS signature"
@@ -31,18 +31,18 @@ const (
 // CompID represents the `@comp.id` structure.
 type CompID struct {
 	// The minor version information for the compiler used when building the product.
-	MinorCV uint16
+	MinorCV uint16 `json:"minor_compiler_version"`
 
 	// Provides information about the identity or type of the objects used to
 	// build the PE32.
-	ProdID uint16
+	ProdID uint16 `json:"product_id"`
 
 	// Indicates how often the object identified by the former two fields is
 	// referenced by this PE32 file.
-	Count uint32
+	Count uint32 `json:"count"`
 
 	// The raw @comp.id structure (unmasked).
-	Unmasked uint32
+	Unmasked uint32 `json:"unmasked"`
 }
 
 // RichHeader is a structure that is written right after the MZ DOS header.
@@ -51,10 +51,10 @@ type CompID struct {
 // The data between the magic values encodes the ‘bill of materials’ that were
 // collected by the linker to produce the binary.
 type RichHeader struct {
-	XorKey     uint32
-	CompIDs    []CompID
-	DansOffset int
-	Raw        []byte
+	XORKey     uint32   `json:"xor_key"`
+	CompIDs    []CompID `json:"comp_ids"`
+	DansOffset int      `json:"dans_offset"`
+	Raw        []byte   `json:"raw"`
 }
 
 // ParseRichHeader parses the rich header struct.
@@ -79,7 +79,7 @@ func (pe *File) ParseRichHeader() error {
 	// have been decrypted, but doesn't match the stored key, it can be assumed
 	// the structure had been tampered with. For those that go the extra step to
 	// recalculate the checksum/key, this simple protection mechanism can be bypassed.
-	rh.XorKey = binary.LittleEndian.Uint32(pe.data[richSigOffset+4:])
+	rh.XORKey = binary.LittleEndian.Uint32(pe.data[richSigOffset+4:])
 
 	// To decrypt the array, start with the DWORD just prior to the `Rich` sequence
 	// and XOR it with the key. Continue the loop backwards, 4 bytes at a time,
@@ -89,7 +89,7 @@ func (pe *File) ParseRichHeader() error {
 	estimatedBeginDans := richSigOffset - 4 - binary.Size(ImageDOSHeader{})
 	for it := 0; it < estimatedBeginDans; it += 4 {
 		buff := binary.LittleEndian.Uint32(pe.data[richSigOffset-4-it:])
-		res := buff ^ rh.XorKey
+		res := buff ^ rh.XORKey
 		if res == DansSignature {
 			dansSigOffset = richSigOffset - it - 4
 			break
@@ -155,7 +155,7 @@ func (pe *File) ParseRichHeader() error {
 	pe.HasRichHdr = true
 
 	checksum := pe.RichHeaderChecksum()
-	if checksum != rh.XorKey {
+	if checksum != rh.XORKey {
 		pe.Anomalies = append(pe.Anomalies, "Invalid rich header checksum")
 	}
 
@@ -203,7 +203,7 @@ func (pe *File) RichHeaderHash() string {
 	}
 
 	key := make([]byte, 4)
-	binary.LittleEndian.PutUint32(key, pe.RichHeader.XorKey)
+	binary.LittleEndian.PutUint32(key, pe.RichHeader.XORKey)
 
 	rawData := pe.RichHeader.Raw[:richIndex]
 	clearData := make([]byte, len(rawData))
@@ -213,7 +213,7 @@ func (pe *File) RichHeaderHash() string {
 	return fmt.Sprintf("%x", md5.Sum(clearData))
 }
 
-// ProdIDtoStr mapps product ids to MS internal names.
+// ProdIDtoStr maps product ids to MS internal names.
 // list from: https://github.com/kirschju/richheader
 func ProdIDtoStr(prodID uint16) string {
 

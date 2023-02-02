@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -29,7 +29,7 @@ func TestDelayImportDirectory(t *testing.T) {
 				entry: DelayImport{
 					Offset: 0x5F7C00,
 					Name:   "kernel32.dll",
-					Functions: []*ImportFunction{
+					Functions: []ImportFunction{
 						{
 							Name:               "GetLogicalProcessorInformation",
 							Hint:               0x0,

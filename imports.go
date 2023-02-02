@@ -55,22 +55,22 @@ var (
 type ImageImportDescriptor struct {
 	// The RVA of the import lookup/name table (INT). This table contains a name
 	// or ordinal for each import. The INT is an array of IMAGE_THUNK_DATA structs.
-	OriginalFirstThunk uint32
+	OriginalFirstThunk uint32 `json:"original_first_thunk"`
 
 	// The stamp that is set to zero until the image is bound. After the image
 	// is bound, this field is set to the time/data stamp of the DLL.
-	TimeDateStamp uint32
+	TimeDateStamp uint32 `json:"time_date_stamp"`
 
 	// The index of the first forwarder reference (-1 if no forwarders).
-	ForwarderChain uint32
+	ForwarderChain uint32 `json:"forwarder_chain"`
 
 	// The address of an ASCII string that contains the name of the DLL.
 	// This address is relative to the image base.
-	Name uint32
+	Name uint32 `json:"name"`
 
 	// The RVA of the import address table (IAT). The contents of this table are
 	// identical to the contents of the import lookup table until the image is bound.
-	FirstThunk uint32
+	FirstThunk uint32 `json:"first_thunk"`
 }
 
 // ImageThunkData32 corresponds to one imported function from the executable.
@@ -106,39 +106,39 @@ type ImportFunction struct {
 	// An ASCII string that contains the name to import. This is the string that
 	// must be matched to the public name in the DLL. This string is case
 	// sensitive and terminated by a null byte.
-	Name string
+	Name string `json:"name"`
 
 	// An index into the export name pointer table. A match is attempted first
 	// with this value. If it fails, a binary search is performed on the DLL's
 	// export name pointer table.
-	Hint uint16
+	Hint uint16 `json:"hint"`
 
 	// If this is true, import by ordinal. Otherwise, import by name.
-	ByOrdinal bool
+	ByOrdinal bool `json:"by_ordinal"`
 
 	// A 16-bit ordinal number. This field is used only if the Ordinal/Name Flag
 	// bit field is 1 (import by ordinal). Bits 30-15 or 62-15 must be 0.
-	Ordinal uint32
+	Ordinal uint32 `json:"ordinal"`
 
 	// Name Thunk Value (OFT)
-	OriginalThunkValue uint64
+	OriginalThunkValue uint64 `json:"original_thunk_value"`
 
 	// Address Thunk Value (FT)
-	ThunkValue uint64
+	ThunkValue uint64 `json:"thunk_value"`
 
 	// Address Thunk RVA.
-	ThunkRVA uint32
+	ThunkRVA uint32 `json:"thunk_rva"`
 
 	// Name Thunk RVA.
-	OriginalThunkRVA uint32
+	OriginalThunkRVA uint32 `json:"original_thunk_rva"`
 }
 
 // Import represents an empty entry in the import table.
 type Import struct {
-	Offset     uint32
-	Name       string
-	Functions  []*ImportFunction
-	Descriptor ImageImportDescriptor
+	Offset     uint32                `json:"offset"`
+	Name       string                `json:"name"`
+	Functions  []ImportFunction      `json:"functions"`
+	Descriptor ImageImportDescriptor `json:"descriptor"`
 }
 
 func (pe *File) parseImportDirectory(rva, size uint32) (err error) {
@@ -177,7 +177,7 @@ func (pe *File) parseImportDirectory(rva, size uint32) (err error) {
 			}
 		}
 
-		var importedFunctions []*ImportFunction
+		var importedFunctions []ImportFunction
 		if pe.Is64 {
 			importedFunctions, err = pe.parseImports64(&importDesc, maxLen)
 		} else {
@@ -209,11 +209,11 @@ func (pe *File) parseImportDirectory(rva, size uint32) (err error) {
 }
 
 func (pe *File) getImportTable32(rva uint32, maxLen uint32,
-	isOldDelayImport bool) ([]*ThunkData32, error) {
+	isOldDelayImport bool) ([]ThunkData32, error) {
 
 	// Setup variables
 	thunkTable := make(map[uint32]*ImageThunkData32)
-	retVal := make([]*ThunkData32, 0)
+	retVal := []ThunkData32{}
 	minAddressOfData := ^uint32(0)
 	maxAddressOfData := uint32(0)
 	repeatedAddress := uint32(0)
@@ -223,7 +223,7 @@ func (pe *File) getImportTable32(rva uint32, maxLen uint32,
 	startRVA := rva
 
 	if rva == 0 {
-		return []*ThunkData32{}, nil
+		return nil, nil
 	}
 
 	for {
@@ -262,12 +262,12 @@ func (pe *File) getImportTable32(rva uint32, maxLen uint32,
 			newRVA := rva - oh32.ImageBase
 			offset = pe.GetOffsetFromRva(newRVA)
 			if offset == ^uint32(0) {
-				return []*ThunkData32{}, nil
+				return nil, nil
 			}
 		} else {
 			offset = pe.GetOffsetFromRva(rva)
 			if offset == ^uint32(0) {
-				return []*ThunkData32{}, nil
+				return nil, nil
 			}
 		}
 
@@ -277,7 +277,7 @@ func (pe *File) getImportTable32(rva uint32, maxLen uint32,
 		if err != nil {
 			// pe.logger.Warnf("Error parsing the import table. " +
 			// 	"Invalid data at RVA: 0x%x", rva)
-			return []*ThunkData32{}, nil
+			return nil, nil
 		}
 
 		if thunk == (ImageThunkData32{}) {
@@ -327,18 +327,18 @@ func (pe *File) getImportTable32(rva uint32, maxLen uint32,
 
 		thunkTable[rva] = &thunk
 		thunkData := ThunkData32{ImageThunkData: thunk, Offset: rva}
-		retVal = append(retVal, &thunkData)
+		retVal = append(retVal, thunkData)
 		rva += size
 	}
 	return retVal, nil
 }
 
 func (pe *File) getImportTable64(rva uint32, maxLen uint32,
-	isOldDelayImport bool) ([]*ThunkData64, error) {
+	isOldDelayImport bool) ([]ThunkData64, error) {
 
 	// Setup variables
 	thunkTable := make(map[uint32]*ImageThunkData64)
-	retVal := make([]*ThunkData64, 0)
+	retVal := []ThunkData64{}
 	minAddressOfData := ^uint64(0)
 	maxAddressOfData := uint64(0)
 	repeatedAddress := uint64(0)
@@ -348,7 +348,7 @@ func (pe *File) getImportTable64(rva uint32, maxLen uint32,
 	startRVA := rva
 
 	if rva == 0 {
-		return []*ThunkData64{}, nil
+		return nil, nil
 	}
 
 	for {
@@ -387,12 +387,12 @@ func (pe *File) getImportTable64(rva uint32, maxLen uint32,
 			newRVA := rva - uint32(oh64.ImageBase)
 			offset = pe.GetOffsetFromRva(newRVA)
 			if offset == ^uint32(0) {
-				return []*ThunkData64{}, nil
+				return nil, nil
 			}
 		} else {
 			offset = pe.GetOffsetFromRva(rva)
 			if offset == ^uint32(0) {
-				return []*ThunkData64{}, nil
+				return nil, nil
 			}
 		}
 
@@ -402,7 +402,7 @@ func (pe *File) getImportTable64(rva uint32, maxLen uint32,
 		if err != nil {
 			// pe.logger.Warnf("Error parsing the import table. " +
 			// 	"Invalid data at RVA: 0x%x", rva)
-			return []*ThunkData64{}, nil
+			return nil, nil
 		}
 
 		if thunk == (ImageThunkData64{}) {
@@ -454,14 +454,14 @@ func (pe *File) getImportTable64(rva uint32, maxLen uint32,
 
 		thunkTable[rva] = &thunk
 		thunkData := ThunkData64{ImageThunkData: thunk, Offset: rva}
-		retVal = append(retVal, &thunkData)
+		retVal = append(retVal, thunkData)
 		rva += size
 	}
 	return retVal, nil
 }
 
 func (pe *File) parseImports32(importDesc interface{}, maxLen uint32) (
-	[]*ImportFunction, error) {
+	[]ImportFunction, error) {
 
 	var OriginalFirstThunk uint32
 	var FirstThunk uint32
@@ -482,7 +482,7 @@ func (pe *File) parseImports32(importDesc interface{}, maxLen uint32) (
 	// Import Lookup Table (OFT). Contains ordinals or pointers to strings.
 	ilt, err := pe.getImportTable32(OriginalFirstThunk, maxLen, isOldDelayImport)
 	if err != nil {
-		return []*ImportFunction{}, err
+		return nil, err
 	}
 
 	// Import Address Table (FT). May have identical content to ILT if PE file is
@@ -490,24 +490,24 @@ func (pe *File) parseImports32(importDesc interface{}, maxLen uint32) (
 	// the binary is loaded or if it is already bound.
 	iat, err := pe.getImportTable32(FirstThunk, maxLen, isOldDelayImport)
 	if err != nil {
-		return []*ImportFunction{}, err
+		return nil, err
 	}
 
 	// Some DLLs has IAT or ILT with nil type.
 	if len(iat) == 0 && len(ilt) == 0 {
-		return []*ImportFunction{}, ErrDamagedImportTable
+		return nil, ErrDamagedImportTable
 	}
 
-	var table []*ThunkData32
+	var table []ThunkData32
 	if len(ilt) > 0 {
 		table = ilt
 	} else if len(iat) > 0 {
 		table = iat
 	} else {
-		return []*ImportFunction{}, err
+		return nil, err
 	}
 
-	importedFunctions := make([]*ImportFunction, 0)
+	importedFunctions := []ImportFunction{}
 	numInvalid := uint32(0)
 	for idx := uint32(0); idx < uint32(len(table)); idx++ {
 		imp := ImportFunction{}
@@ -581,20 +581,20 @@ func (pe *File) parseImports32(importDesc interface{}, maxLen uint32) (
 		// Although if we see 1000 invalid entries and no legit ones, we abort.
 		if imp.Name == "*invalid*" {
 			if numInvalid > 1000 && numInvalid == idx {
-				return []*ImportFunction{}, errors.New(
+				return nil, errors.New(
 					`too many invalid names, aborting parsing`)
 			}
 			numInvalid++
 			continue
 		}
 
-		importedFunctions = append(importedFunctions, &imp)
+		importedFunctions = append(importedFunctions, imp)
 	}
 
 	return importedFunctions, nil
 }
 
-func (pe *File) parseImports64(importDesc interface{}, maxLen uint32) ([]*ImportFunction, error) {
+func (pe *File) parseImports64(importDesc interface{}, maxLen uint32) ([]ImportFunction, error) {
 
 	var OriginalFirstThunk uint32
 	var FirstThunk uint32
@@ -615,7 +615,7 @@ func (pe *File) parseImports64(importDesc interface{}, maxLen uint32) ([]*Import
 	// Import Lookup Table. Contains ordinals or pointers to strings.
 	ilt, err := pe.getImportTable64(OriginalFirstThunk, maxLen, isOldDelayImport)
 	if err != nil {
-		return []*ImportFunction{}, err
+		return nil, err
 	}
 
 	// Import Address Table. May have identical content to ILT if PE file is
@@ -623,24 +623,24 @@ func (pe *File) parseImports64(importDesc interface{}, maxLen uint32) ([]*Import
 	// the binary is loaded or if it is already bound.
 	iat, err := pe.getImportTable64(FirstThunk, maxLen, isOldDelayImport)
 	if err != nil {
-		return []*ImportFunction{}, err
+		return nil, err
 	}
 
 	// Would crash if IAT or ILT had nil type
 	if len(iat) == 0 && len(ilt) == 0 {
-		return []*ImportFunction{}, ErrDamagedImportTable
+		return nil, ErrDamagedImportTable
 	}
 
-	var table []*ThunkData64
+	var table []ThunkData64
 	if len(ilt) > 0 {
 		table = ilt
 	} else if len(iat) > 0 {
 		table = iat
 	} else {
-		return []*ImportFunction{}, err
+		return nil, err
 	}
 
-	importedFunctions := make([]*ImportFunction, 0)
+	importedFunctions := []ImportFunction{}
 	numInvalid := uint32(0)
 	for idx := uint32(0); idx < uint32(len(table)); idx++ {
 		imp := ImportFunction{}
@@ -715,14 +715,14 @@ func (pe *File) parseImports64(importDesc interface{}, maxLen uint32) ([]*Import
 		// Although if we see 1000 invalid entries and no legit ones, we abort.
 		if imp.Name == "*invalid*" {
 			if numInvalid > 1000 && numInvalid == idx {
-				return []*ImportFunction{}, errors.New(
+				return nil, errors.New(
 					`too many invalid names, aborting parsing`)
 			}
 			numInvalid++
 			continue
 		}
 
-		importedFunctions = append(importedFunctions, &imp)
+		importedFunctions = append(importedFunctions, imp)
 	}
 
 	return importedFunctions, nil
@@ -751,7 +751,6 @@ func md5hash(text string) string {
 
 // ImpHash calculates the import hash.
 // Algorithm:
-// ==========
 // Resolving ordinals to function names when they appear
 // Converting both DLL names and function names to all lowercase
 // Removing the file extensions from imported module names
@@ -766,29 +765,29 @@ func (pe *File) ImpHash() (string, error) {
 	var impStrs []string
 
 	for _, imp := range pe.Imports {
-		var libname string
+		var libName string
 		parts := strings.Split(imp.Name, ".")
 		if len(parts) == 2 && stringInSlice(strings.ToLower(parts[1]), extensions) {
-			libname = parts[0]
+			libName = parts[0]
 		} else {
-			libname = imp.Name
+			libName = imp.Name
 		}
 
-		libname = strings.ToLower(libname)
+		libName = strings.ToLower(libName)
 
 		for _, function := range imp.Functions {
-			var funcname string
+			var funcName string
 			if function.ByOrdinal {
-				funcname = OrdLookup(imp.Name, uint64(function.Ordinal), true)
+				funcName = OrdLookup(imp.Name, uint64(function.Ordinal), true)
 			} else {
-				funcname = function.Name
+				funcName = function.Name
 			}
 
-			if funcname == "" {
+			if funcName == "" {
 				continue
 			}
 
-			impStr := fmt.Sprintf("%s.%s", libname, strings.ToLower(funcname))
+			impStr := fmt.Sprintf("%s.%s", libName, strings.ToLower(funcName))
 			impStrs = append(impStrs, impStr)
 		}
 	}

@@ -14,29 +14,29 @@ import (
 
 // A File represents an open PE file.
 type File struct {
-	DOSHeader    ImageDOSHeader              `json:",omitempty"`
-	RichHeader   RichHeader                  `json:",omitempty"`
-	NtHeader     ImageNtHeader               `json:",omitempty"`
-	COFF         COFF                        `json:",omitempty"`
-	Sections     []Section                   `json:",omitempty"`
-	Imports      []Import                    `json:",omitempty"`
-	Export       Export                      `json:",omitempty"`
-	Debugs       []DebugEntry                `json:",omitempty"`
-	Relocations  []Relocation                `json:",omitempty"`
-	Resources    ResourceDirectory           `json:",omitempty"`
-	TLS          TLSDirectory                `json:",omitempty"`
-	LoadConfig   LoadConfig                  `json:",omitempty"`
-	Exceptions   []Exception                 `json:",omitempty"`
-	Certificates Certificate                 `json:",omitempty"`
-	DelayImports []DelayImport               `json:",omitempty"`
-	BoundImports []BoundImportDescriptorData `json:",omitempty"`
-	GlobalPtr    uint32                      `json:",omitempty"`
-	CLR          CLRData                     `json:",omitempty"`
-	IAT          []IATEntry                  `json:",omitempty"`
+	DOSHeader    ImageDOSHeader              `json:"dos_header,omitempty"`
+	RichHeader   RichHeader                  `json:"rich_header,omitempty"`
+	NtHeader     ImageNtHeader               `json:"nt_header,omitempty"`
+	COFF         COFF                        `json:"coff,omitempty"`
+	Sections     []Section                   `json:"sections,omitempty"`
+	Imports      []Import                    `json:"imports,omitempty"`
+	Export       Export                      `json:"export,omitempty"`
+	Debugs       []DebugEntry                `json:"debugs,omitempty"`
+	Relocations  []Relocation                `json:"relocations,omitempty"`
+	Resources    ResourceDirectory           `json:"resources,omitempty"`
+	TLS          TLSDirectory                `json:"tls,omitempty"`
+	LoadConfig   LoadConfig                  `json:"load_config,omitempty"`
+	Exceptions   []Exception                 `json:"exceptions,omitempty"`
+	Certificates Certificate                 `json:"certificates,omitempty"`
+	DelayImports []DelayImport               `json:"delay_imports,omitempty"`
+	BoundImports []BoundImportDescriptorData `json:"bound_imports,omitempty"`
+	GlobalPtr    uint32                      `json:"global_ptr,omitempty"`
+	CLR          CLRData                     `json:"clr,omitempty"`
+	IAT          []IATEntry                  `json:"iat,omitempty"`
+	Anomalies    []string                    `json:"anomalies,omitempty"`
 	Header       []byte
 	data         mmap.MMap
 	FileInfo
-	Anomalies     []string `json:",omitempty"`
 	size          uint32
 	OverlayOffset int64
 	f             *os.File
@@ -47,20 +47,19 @@ type File struct {
 // Options for Parsing
 type Options struct {
 
-	// Parse only the PE header.
-	// do not parse data directories, by default (false).
+	// Parse only the PE header and do not parse data directories, by default (false).
 	Fast bool
 
-	// Includes section entropy.
+	// Includes section entropy, by default (false).
 	SectionEntropy bool
 
-	// Maximum COFF symbols to parse.
+	// Maximum COFF symbols to parse, by default (MaxDefaultCOFFSymbolsCount).
 	MaxCOFFSymbolsCount uint32
 
-	// Maximum relocations to parse.
+	// Maximum relocations to parse, by default (MaxDefaultRelocEntriesCount).
 	MaxRelocEntriesCount uint32
 
-	// Disable certificate validation.
+	// Disable certificate validation, by default (false).
 	DisableCertValidation bool
 
 	// A custom logger.
