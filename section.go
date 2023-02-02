@@ -176,12 +176,12 @@ type ImageSectionHeader struct {
 	// images do not use a string table and do not support section names longer
 	// than 8 characters. Long names in object files are truncated if they are
 	// emitted to an executable file.
-	Name [8]uint8
+	Name [8]uint8 `json:"name"`
 
 	// The total size of the section when loaded into memory. If this value is
 	// greater than SizeOfRawData, the section is zero-padded. This field is
 	// valid only for executable images and should be set to zero for object files.
-	VirtualSize uint32
+	VirtualSize uint32 `json:"virtual_size"`
 
 	// For executable images, the address of the first byte of the section
 	// relative to the image base when the section is loaded into memory.
@@ -189,7 +189,7 @@ type ImageSectionHeader struct {
 	// relocation is applied; for simplicity, compilers should set this to zero.
 	// Otherwise, it is an arbitrary value that is subtracted from offsets during
 	// relocation.
-	VirtualAddress uint32
+	VirtualAddress uint32 `json:"virtual_address"`
 
 	// The size of the section (for object files) or the size of the initialized
 	// data on disk (for image files). For executable images, this must be a
@@ -198,40 +198,45 @@ type ImageSectionHeader struct {
 	// SizeOfRawData field is rounded but the VirtualSize field is not, it is
 	// possible for SizeOfRawData to be greater than VirtualSize as well. When
 	// a section contains only uninitialized data, this field should be zero.
-	SizeOfRawData uint32
+	SizeOfRawData uint32 `json:"size_of_raw_data"`
 
 	// The file pointer to the first page of the section within the COFF file.
 	// For executable images, this must be a multiple of FileAlignment from the
 	// optional header. For object files, the value should be aligned on a
 	// 4-byte boundary for best performance. When a section contains only
 	// uninitialized data, this field should be zero.
-	PointerToRawData uint32
+	PointerToRawData uint32 `json:"pointer_to_raw_data"`
 
 	// The file pointer to the beginning of relocation entries for the section.
 	// This is set to zero for executable images or if there are no relocations.
-	PointerToRelocations uint32
+	PointerToRelocations uint32 `json:"pointer_to_relocations"`
 
 	// The file pointer to the beginning of line-number entries for the section.
 	// This is set to zero if there are no COFF line numbers. This value should
 	// be zero for an image because COFF debugging information is deprecated.
-	PointerToLineNumbers uint32
+	PointerToLineNumbers uint32 `json:"pointer_to_line_numbers"`
 
 	// The number of relocation entries for the section.
 	// This is set to zero for executable images.
-	NumberOfRelocations uint16
+	NumberOfRelocations uint16 `json:"number_of_relocations"`
 
 	// The number of line-number entries for the section. This value should be
 	// zero for an image because COFF debugging information is deprecated.
-	NumberOfLineNumbers uint16
+	NumberOfLineNumbers uint16 `json:"number_of_line_numbers"`
 
 	// The flags that describe the characteristics of the section.
-	Characteristics uint32
+	Characteristics uint32 `json:"characteristics"`
 }
 
 // Section represents a PE section header, plus additional data like entropy.
 type Section struct {
-	Header  ImageSectionHeader
-	Entropy float64 `json:",omitempty"`
+	Header ImageSectionHeader `json:"header"`
+	// Entropy represents the section entropy. This field is not always populated
+	// depending on weather entropy calculation is enabled. The reason behind
+	// using a float64 pointer instead of a float64 is to distinguish between
+	// the case when the section entropy is equal to zero and the case when the
+	// entropy is equal to nil - meaning that it was never calculated.
+	Entropy *float64 `json:"entropy,omitempty"`
 }
 
 // ParseSectionHeader parses the PE section headers. Each row of the section
@@ -319,7 +324,8 @@ func (pe *File) ParseSectionHeader() (err error) {
 
 		// Append to the list of sections.
 		if pe.opts.SectionEntropy {
-			sec.Entropy = sec.CalculateEntropy(pe)
+			entropy := sec.CalculateEntropy(pe)
+			sec.Entropy = &entropy
 		}
 		pe.Sections = append(pe.Sections, sec)
 
