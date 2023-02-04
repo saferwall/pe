@@ -379,6 +379,26 @@ func parsePE(filename string, cfg config) {
 	}
 
 	if cfg.wantResource && pe.FileInfo.HasResource {
+		fmt.Printf("\n\nRESOURCES\n**********\n")
+		imgRsrcDir := pe.Resources.Struct
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		fmt.Fprintf(w, "Characteristics:\t 0x%x\n", imgRsrcDir.Characteristics)
+		fmt.Fprintf(w, "TimeDateStamp:\t 0x%x\n", imgRsrcDir.TimeDateStamp)
+		fmt.Fprintf(w, "Major Version:\t 0x%x\n", imgRsrcDir.MajorVersion)
+		fmt.Fprintf(w, "Minor Version:\t 0x%x\n", imgRsrcDir.MinorVersion)
+		fmt.Fprintf(w, "Number Of Named Entries:\t 0x%x\n", imgRsrcDir.NumberOfNamedEntries)
+		fmt.Fprintf(w, "Number Of ID Entries:\t 0x%x\n", imgRsrcDir.NumberOfIDEntries)
+		for i, entry := range pe.Resources.Entries {
+			fmt.Fprintf(w, "Resource Directory Entry %d, ID: %d", i, entry.ID)
+			if entry.ID <= peparser.RTManifest {
+				fmt.Fprintf(w, " (%s)\n", peparser.ResourceType(entry.ID).String())
+			} else {
+				fmt.Fprintf(w, "\n")
+			}
+
+		}
+		w.Flush()
+
 	}
 
 	if cfg.wantCLR && pe.FileInfo.HasCLR {

@@ -8,33 +8,36 @@ import (
 	"encoding/binary"
 )
 
+// ResourceType represents a resource type.
+type ResourceType int
+
 const (
 	maxAllowedEntries = 0x1000
 )
 
 // Predefined Resource Types.
-var (
-	RTCursor       = 1
-	RTBitmap       = 2
-	RTIcon         = 3
-	RTMenu         = 4
-	RTDialog       = 5
-	RTString       = 6
-	RTFontDir      = 7
-	RTFont         = 8
-	RTAccelerator  = 9
-	RTRCdata       = 10
-	RTMessageTable = 11
-	RTGroupCursor  = 12
-	RTGroupIcon    = 14
-	RTVersion      = 16
-	RTDlgInclude   = 17
-	RTPlugPlay     = 19
-	RTVxd          = 20
-	RTAniCursor    = 21
-	RTAniIcon      = 22
-	RTHtml         = 23
-	RTManifest     = 24
+const (
+	RTCursor       ResourceType = iota + 1      // Hardware-dependent cursor resource.
+	RTBitmap                    = 2             // Bitmap resource.
+	RTIcon                      = 3             // Hardware-dependent icon resource.
+	RTMenu                      = 4             // Menu resource.
+	RTDialog                    = 5             // Dialog box.
+	RTString                    = 6             // String-table entry.
+	RTFontDir                   = 7             // Font directory resource.
+	RTFont                      = 8             // Font resource.
+	RTAccelerator               = 9             // Accelerator table.
+	RTRCdata                    = 10            // Application-defined resource (raw data).
+	RTMessageTable              = 11            // Message-table entry.
+	RTGroupCursor               = RTCursor + 11 // Hardware-independent cursor resource.
+	RTGroupIcon                 = RTIcon + 11   // Hardware-independent icon resource.
+	RTVersion                   = 16            // Version resource.
+	RTDlgInclude                = 17            // Dialog include entry.
+	RTPlugPlay                  = 19            // Plug and Play resource.
+	RTVxD                       = 20            // VXD.
+	RTAniCursor                 = 21            // Animated cursor.
+	RTAniIcon                   = 22            // Animated icon.
+	RTHtml                      = 23            // HTML resource.
+	RTManifest                  = 24            // Side-by-Side Assembly Manifest.
 )
 
 // ImageResourceDirectory represents the IMAGE_RESOURCE_DIRECTORY.
@@ -96,10 +99,10 @@ type ImageResourceDataEntry struct {
 
 // ResourceDirectory represents resource directory information.
 type ResourceDirectory struct {
-	// IMAGE_RESOURCE_DIRECTORY structure
+	// IMAGE_RESOURCE_DIRECTORY structure.
 	Struct ImageResourceDirectory `json:"struct"`
 
-	// list of entries
+	// list of entries.
 	Entries []ResourceDirectoryEntry `json:"entries"`
 }
 
@@ -110,7 +113,7 @@ type ResourceDirectoryEntry struct {
 
 	// If the resource is identified by name this attribute will contain the
 	// name string. Empty string otherwise. If identified by id, the id is
-	// available at .Id field.
+	// available at `ID` field.
 	Name string `json:"name"`
 
 	// The resource identifier.
@@ -308,4 +311,33 @@ func (pe *File) parseResourceDirectory(rva, size uint32) error {
 	pe.Resources = Resources
 	pe.HasResource = true
 	return err
+}
+
+// String stringify the resource type.
+func (rt ResourceType) String() string {
+	rsrcTypeMap := map[ResourceType]string{
+		RTCursor:       "Cursor",
+		RTBitmap:       "Bitmap",
+		RTIcon:         "Icon",
+		RTMenu:         "Menu",
+		RTDialog:       "Dialog box",
+		RTString:       "String",
+		RTFontDir:      "Font directory",
+		RTFont:         "Font",
+		RTAccelerator:  "Accelerator",
+		RTRCdata:       "RC Data",
+		RTMessageTable: "Message Table",
+		RTGroupCursor:  "Group Cursor",
+		RTGroupIcon:    "Group Icon",
+		RTVersion:      "Version",
+		RTDlgInclude:   "Dialog Include",
+		RTPlugPlay:     "Plug & Play",
+		RTVxD:          "VxD",
+		RTAniCursor:    "Animated Cursor",
+		RTAniIcon:      "Animated Icon",
+		RTHtml:         "HTML",
+		RTManifest:     "Manifest",
+	}
+
+	return rsrcTypeMap[rt]
 }
