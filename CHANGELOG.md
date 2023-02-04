@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Improve PE dumper tp print imports and unit test parsing imports data directory[#63](https://github.com/saferwall/pe/pull/63).
+- Annotate PE structures with JSON tags during JSON encoding [#64](https://github.com/saferwall/pe/pull/64) and [#65](https://github.com/saferwall/pe/pull/65).
+- Improve PE dumper to print imports and unit test parsing imports data directory[#63](https://github.com/saferwall/pe/pull/63).
 - Improve PE dumper to print section headers [#62](https://github.com/saferwall/pe/pull/62).
 - Improve PE dumper to print PE headers [#61](https://github.com/saferwall/pe/pull/61).
 - Add `SerialNumber`, `SignatureAlgorithm` and `PubKeyAlgorithm` to the `CertInfo` [#60](https://github.com/saferwall/pe/pull/60).
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Some fields has been renamed for consistency:
   - `RichHeader.XorKey` -> `RichHeader.XORKey`.
 - Some fields used internally in imports parsing were changed from a slice of pointers to a simple slice.
+- Certificate.Content changed from `*pkcs7.PKCS7` to `pkcs7.PKCS7`.
 - `Section.Entropy` changed from float64 to float64* to distinguish between the case when the section entropy is equal to zero and the case when the entropy is equal to nil - meaning that it was never calculated.
 - Remove `cobra` dependency from cmd/pedumper [#56](https://github.com/saferwall/pe/pull/56).
 

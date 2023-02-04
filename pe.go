@@ -202,28 +202,28 @@ const (
 
 // FileInfo represents the PE file information struct.
 type FileInfo struct {
-	Is32         bool
-	Is64         bool
-	HasDOSHdr    bool
-	HasRichHdr   bool
-	HasCOFF      bool
-	HasNTHdr     bool
-	HasSections  bool
-	HasExport    bool
-	HasImport    bool
-	HasResource  bool
-	HasException bool
-	HasSecurity  bool
-	HasReloc     bool
-	HasDebug     bool
-	HasArchitect bool
-	HasGlobalPtr bool
-	HasTLS       bool
-	HasLoadCFG   bool
-	HasBoundImp  bool
-	HasIAT       bool
-	HasDelayImp  bool
-	HasCLR       bool
-	HasOverlay   bool
-	IsSigned     bool
+	Is32           bool
+	Is64           bool
+	HasDOSHdr      bool
+	HasRichHdr     bool
+	HasCOFF        bool
+	HasNTHdr       bool
+	HasSections    bool
+	HasExport      bool
+	HasImport      bool
+	HasResource    bool
+	HasException   bool
+	HasCertificate bool
+	HasReloc       bool
+	HasDebug       bool
+	HasArchitect   bool
+	HasGlobalPtr   bool
+	HasTLS         bool
+	HasLoadCFG     bool
+	HasBoundImp    bool
+	HasIAT         bool
+	HasDelayImp    bool
+	HasCLR         bool
+	HasOverlay     bool
+	IsSigned       bool
 }

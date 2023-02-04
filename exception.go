@@ -174,15 +174,15 @@ const (
 // function (for example, non-leaf functions).
 type ImageRuntimeFunctionEntry struct {
 	// The address of the start of the function.
-	BeginAddress uint32
+	BeginAddress uint32 `json:"begin_address"`
 
 	// The address of the end of the function.
-	EndAddress uint32
+	EndAddress uint32 `json:"end_address"`
 
 	// The unwind data info structure is used to record the effects a function
 	// has on the stack pointer, and where the nonvolatile registers are saved
 	// on the stack.
-	UnwindInfoAddress uint32
+	UnwindInfoAddress uint32 `json:"unwind_info_address"`
 }
 
 // ImageARMRuntimeFunctionEntry represents the function table entry for the ARM
@@ -236,17 +236,17 @@ type UnwindCode struct {
 	// Offset (from the beginning of the prolog) of the end of the instruction
 	// that performs is operation, plus 1 (that is, the offset of the start of
 	// the next instruction).
-	CodeOffset uint8
+	CodeOffset uint8 `json:"code_offset"`
 
 	// The unwind operation code.
-	UnwindOp uint8
+	UnwindOp uint8 `json:"unwind_op"`
 
 	// Operation info.
-	OpInfo uint8
+	OpInfo uint8 `json:"op_info"`
 
 	// Allocation size.
-	Operand     string
-	FrameOffset uint16
+	Operand     string `json:"operand"`
+	FrameOffset uint16 `json:"frame_offset"`
 }
 
 // UnwindInfo represents the _UNWIND_INFO structure. It is used to record the
@@ -254,22 +254,22 @@ type UnwindCode struct {
 // registers are saved on the stack.
 type UnwindInfo struct {
 	// (3 bits) Version number of the unwind data, currently 1 and 2.
-	Version uint8
+	Version uint8 `json:"version"`
 
 	// (5 bits) Three flags are currently defined above.
-	Flags uint8
+	Flags uint8 `json:"flags"`
 
 	// Length of the function prolog in bytes.
-	SizeOfProlog uint8
+	SizeOfProlog uint8 `json:"size_of_prolog"`
 
 	// The number of slots in the unwind codes array. Some unwind codes,
 	// for example, UWOP_SAVE_NONVOL, require more than one slot in the array.
-	CountOfCodes uint8
+	CountOfCodes uint8 `json:"count_of_codes"`
 
 	// If nonzero, then the function uses a frame pointer (FP), and this field
 	// is the number of the nonvolatile register used as the frame pointer,
 	// using the same encoding for the operation info field of UNWIND_CODE nodes.
-	FrameRegister uint8
+	FrameRegister uint8 `json:"frame_register"`
 
 	// If the frame register field is nonzero, this field is the scaled offset
 	// from RSP that is applied to the FP register when it's established. The
@@ -278,7 +278,7 @@ type UnwindInfo struct {
 	// middle of the local stack allocation for dynamic stack frames, allowing
 	// better code density through shorter instructions. (That is, more
 	// instructions can use the 8-bit signed offset form.)
-	FrameOffset uint8
+	FrameOffset uint8 `json:"frame_offset"`
 
 	// An array of items that explains the effect of the prolog on the
 	// nonvolatile registers and RSP. See the section on UNWIND_CODE for the
@@ -286,15 +286,15 @@ type UnwindInfo struct {
 	// has an even number of entries, and the final entry is potentially
 	// unused. In that case, the array is one longer than indicated by the
 	// count of unwind codes field.
-	UnwindCodes []UnwindCode
+	UnwindCodes []UnwindCode `json:"unwind_codes"`
 
 	// Address of exception handler when UNW_FLAG_EHANDLER is set.
-	ExceptionHandler uint32
+	ExceptionHandler uint32 `json:"exception_handler"`
 
 	// If flag UNW_FLAG_CHAININFO is set, then the UNWIND_INFO structure ends
 	// with three UWORDs. These UWORDs represent the RUNTIME_FUNCTION
 	// information for the function of the chained unwind.
-	FunctionEntry ImageRuntimeFunctionEntry
+	FunctionEntry ImageRuntimeFunctionEntry `json:"function_entry"`
 }
 
 //
@@ -314,20 +314,20 @@ type UnwindInfo struct {
 type ScopeRecord struct {
 	// This value indicates the offset of the first instruction within a __try
 	// block located in the function.
-	BeginAddress uint32
+	BeginAddress uint32 `json:"begin_address"`
 
 	// This value indicates the offset to the instruction after the last
 	// instruction within the __try block (conceptually the __except statement).
-	EndAddress uint32
+	EndAddress uint32 `json:"end_address"`
 
 	// This value indicates the offset to the function located within the
 	// parentheses of the __except() statement. In the documentation you'll
 	// find this routine called the "exception handler" or "exception filter".
-	HandlerAddress uint32
+	HandlerAddress uint32 `json:"handler_address"`
 
 	// This value indicates the offset to the first instruction in the __except
 	// block associated with the __try block.
-	JumpTarget uint32
+	JumpTarget uint32 `json:"jump_target"`
 }
 
 // ScopeTable represents a variable length structure containing a count followed
@@ -336,10 +336,10 @@ type ScopeRecord struct {
 // __try/__except blocks within the function.
 type ScopeTable struct {
 	// The count of scope records.
-	Count uint32
+	Count uint32 `json:"count"`
 
 	// A array of scope record.
-	ScopeRecords []ScopeRecord
+	ScopeRecords []ScopeRecord `json:"scope_records"`
 }
 
 //  typedef struct _SCOPE_TABLE {
@@ -355,8 +355,8 @@ type ScopeTable struct {
 
 // Exception represent an entry in the function table.
 type Exception struct {
-	RuntimeFunction ImageRuntimeFunctionEntry
-	UnwinInfo       UnwindInfo
+	RuntimeFunction ImageRuntimeFunctionEntry `json:"runtime_function"`
+	UnwinInfo       UnwindInfo                `json:"unwind_info"`
 }
 
 func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) {

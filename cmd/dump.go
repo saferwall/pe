@@ -327,7 +327,6 @@ func parsePE(filename string, cfg config) {
 			}
 		}
 		w.Flush()
-
 	}
 
 	if cfg.wantSections && pe.FileInfo.HasSections {
@@ -372,7 +371,7 @@ func parsePE(filename string, cfg config) {
 			for _, impFunc := range imp.Functions {
 				fmt.Fprintf(w, "%s\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t\n",
 					impFunc.Name, impFunc.ThunkRVA, impFunc.ThunkValue, impFunc.OriginalThunkRVA,
-					 impFunc.OriginalThunkValue, impFunc.Hint)
+					impFunc.OriginalThunkValue, impFunc.Hint)
 			}
 			w.Flush()
 
@@ -421,7 +420,7 @@ func parsePE(filename string, cfg config) {
 		}
 	}
 
-	if cfg.wantCertificates && pe.FileInfo.HasSecurity {
+	if cfg.wantCertificates && pe.FileInfo.HasCertificate {
 		fmt.Printf("\nSECURITY\n*********\n")
 
 		cert := pe.Certificates
