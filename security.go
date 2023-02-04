@@ -66,23 +66,23 @@ var (
 
 // Certificate directory.
 type Certificate struct {
-	Header   WinCertificate
-	Content  *pkcs7.PKCS7 `json:"-"`
-	Raw      []byte
-	Info     CertInfo
-	Verified bool
+	Header   WinCertificate `json:"header"`
+	Content  pkcs7.PKCS7    `json:"-"`
+	Raw      []byte         `json:"-"`
+	Info     CertInfo       `json:"info"`
+	Verified bool           `json:"verified"`
 }
 
 // WinCertificate encapsulates a signature used in verifying executable files.
 type WinCertificate struct {
 	// Specifies the length, in bytes, of the signature.
-	Length uint32
+	Length uint32 `json:"length"`
 
 	// Specifies the certificate revision.
-	Revision uint16
+	Revision uint16 `json:"revision"`
 
 	// Specifies the type of certificate.
-	CertificateType uint16
+	CertificateType uint16 `json:"certificate_type"`
 }
 
 // CertInfo wraps the important fields of the pkcs7 structure.
@@ -90,33 +90,33 @@ type WinCertificate struct {
 type CertInfo struct {
 	// The certificate authority (CA) that charges customers to issue
 	// certificates for them.
-	Issuer string
+	Issuer string `json:"issuer"`
 
 	// The subject of the certificate is the entity its public key is associated
 	// with (i.e. the "owner" of the certificate).
-	Subject string
+	Subject string `json:"subject"`
 
 	// The certificate won't be valid before this timestamp.
-	NotBefore time.Time
+	NotBefore time.Time `json:"not_before"`
 
 	// The certificate won't be valid after this timestamp.
-	NotAfter time.Time
+	NotAfter time.Time `json:"not_after"`
 
 	// The serial number MUST be a positive integer assigned by the CA to each
 	// certificate. It MUST be unique for each certificate issued by a given CA
 	// (i.e., the issuer name and serial number identify a unique certificate).
 	// CAs MUST force the serialNumber to be a non-negative integer.
 	// For convenience, we convert the big int to string.
-	SerialNumber string
+	SerialNumber string `json:"serial_number"`
 
 	// The identifier for the cryptographic algorithm used by the CA to sign
 	// this certificate.
-	SignatureAlgorithm x509.SignatureAlgorithm
+	SignatureAlgorithm x509.SignatureAlgorithm `json:"signature_algorithm"`
 
 	// The Public Key Algorithm refers to the public key inside the certificate.
 	// This certificate is used together with the matching private key to prove
 	// the identity of the peer.
-	PublicKeyAlgorithm x509.PublicKeyAlgorithm
+	PublicKeyAlgorithm x509.PublicKeyAlgorithm `json:"public_key_algorithm"`
 }
 
 type RelRange struct {
@@ -316,7 +316,7 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 		pkcs, err = pkcs7.Parse(certContent)
 		if err != nil {
 			pe.Certificates = Certificate{Header: certHeader, Raw: certContent}
-			pe.HasSecurity = true
+			pe.HasCertificate = true
 			return err
 		}
 
@@ -412,9 +412,9 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 		fileOffset = nextOffset
 	}
 
-	pe.Certificates = Certificate{Header: certHeader, Content: pkcs,
+	pe.Certificates = Certificate{Header: certHeader, Content: *pkcs,
 		Raw: certContent, Info: certInfo, Verified: isValid}
-	pe.HasSecurity = true
+	pe.HasCertificate = true
 	return nil
 }
 

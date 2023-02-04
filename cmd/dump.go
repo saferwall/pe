@@ -327,7 +327,6 @@ func parsePE(filename string, cfg config) {
 			}
 		}
 		w.Flush()
-
 	}
 
 	if cfg.wantSections && pe.FileInfo.HasSections {
