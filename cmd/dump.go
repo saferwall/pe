@@ -378,6 +378,9 @@ func parsePE(filename string, cfg config) {
 		}
 	}
 
+	if cfg.wantResource && pe.FileInfo.HasResource {
+	}
+
 	if cfg.wantCLR && pe.FileInfo.HasCLR {
 		dotnetMetadata, _ := json.Marshal(pe.CLR)
 		log.Info(prettyPrint(dotnetMetadata))
@@ -391,7 +394,7 @@ func parsePE(filename string, cfg config) {
 		}
 	}
 
-	if cfg.wantExceptions && pe.FileInfo.HasException {
+	if cfg.wantException && pe.FileInfo.HasException {
 		fmt.Printf("\n\nEXCEPTIONS\n***********\n")
 		for _, exception := range pe.Exceptions {
 			entry := exception.RuntimeFunction
@@ -420,7 +423,7 @@ func parsePE(filename string, cfg config) {
 		}
 	}
 
-	if cfg.wantCertificates && pe.FileInfo.HasCertificate {
+	if cfg.wantCertificate && pe.FileInfo.HasCertificate {
 		fmt.Printf("\nSECURITY\n*********\n")
 
 		cert := pe.Certificates
