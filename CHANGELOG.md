@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Annotate PE structures with JSON tags during JSON encoding [#64](https://github.com/saferwall/pe/pull/64).
+- Annotate PE structures with JSON tags during JSON encoding [#64](https://github.com/saferwall/pe/pull/64) and [#65](https://github.com/saferwall/pe/pull/65).
 - Improve PE dumper to print imports and unit test parsing imports data directory[#63](https://github.com/saferwall/pe/pull/63).
 - Improve PE dumper to print section headers [#62](https://github.com/saferwall/pe/pull/62).
 - Improve PE dumper to print PE headers [#61](https://github.com/saferwall/pe/pull/61).
