@@ -379,26 +379,68 @@ func parsePE(filename string, cfg config) {
 	}
 
 	if cfg.wantResource && pe.FileInfo.HasResource {
-		fmt.Printf("\n\nRESOURCES\n**********\n")
-		imgRsrcDir := pe.Resources.Struct
-		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
-		fmt.Fprintf(w, "Characteristics:\t 0x%x\n", imgRsrcDir.Characteristics)
-		fmt.Fprintf(w, "TimeDateStamp:\t 0x%x\n", imgRsrcDir.TimeDateStamp)
-		fmt.Fprintf(w, "Major Version:\t 0x%x\n", imgRsrcDir.MajorVersion)
-		fmt.Fprintf(w, "Minor Version:\t 0x%x\n", imgRsrcDir.MinorVersion)
-		fmt.Fprintf(w, "Number Of Named Entries:\t 0x%x\n", imgRsrcDir.NumberOfNamedEntries)
-		fmt.Fprintf(w, "Number Of ID Entries:\t 0x%x\n", imgRsrcDir.NumberOfIDEntries)
-		for i, entry := range pe.Resources.Entries {
-			fmt.Fprintf(w, "Resource Directory Entry %d, ID: %d", i, entry.ID)
-			if entry.ID <= peparser.RTManifest {
-				fmt.Fprintf(w, " (%s)\n", peparser.ResourceType(entry.ID).String())
-			} else {
-				fmt.Fprintf(w, "\n")
+		var printRsrcDir func(rsrcDir peparser.ResourceDirectory)
+		padding := 0
+
+		printRsrcDataEntry := func(entry peparser.ResourceDataEntry) {
+			padding++
+			w := tabwriter.NewWriter(os.Stdout, 1, 1, padding, ' ', 0)
+			imgRsrcDataEntry := entry.Struct
+			fmt.Fprintf(w, "\n\t\u27A1 Resource Data Entry\n\t")
+			fmt.Fprintf(w, "|- Offset To Data: 0x%x\n\t", imgRsrcDataEntry.OffsetToData)
+			fmt.Fprintf(w, "|- Size: 0x%x\n\t", imgRsrcDataEntry.Size)
+			fmt.Fprintf(w, "|- Code Page: 0x%x\n\t", imgRsrcDataEntry.CodePage)
+			fmt.Fprintf(w, "|- Reserved: 0x%x\n\t", imgRsrcDataEntry.Reserved)
+			fmt.Fprintf(w, "|- Language: 0x%x\n\t", entry.Lang)
+			fmt.Fprintf(w, "|- Sub-language: 0x%x\n\t", entry.SubLang)
+			w.Flush()
+			padding--
+		}
+
+		printRsrcDir = func(rsrcDir peparser.ResourceDirectory) {
+			padding++
+			w := tabwriter.NewWriter(os.Stdout, 1, 1, padding, ' ', 0)
+			imgRsrcDir := rsrcDir.Struct
+			fmt.Fprintf(w, "\n\t\u27A1 Resource Directory\n\t")
+			fmt.Fprintf(w, "|- Characteristics: 0x%x\n\t", imgRsrcDir.Characteristics)
+			fmt.Fprintf(w, "|- TimeDateStamp: 0x%x\n\t", imgRsrcDir.TimeDateStamp)
+			fmt.Fprintf(w, "|- Major Version: 0x%x\n\t", imgRsrcDir.MajorVersion)
+			fmt.Fprintf(w, "|- Minor Version: 0x%x\n\t", imgRsrcDir.MinorVersion)
+			fmt.Fprintf(w, "|- Number Of Named Entries: 0x%x\n\t", imgRsrcDir.NumberOfNamedEntries)
+			fmt.Fprintf(w, "|- Number Of ID Entries: 0x%x\n\t", imgRsrcDir.NumberOfIDEntries)
+			fmt.Fprintf(w, "|----------------------------------\n\t")
+			padding++
+			w.Flush()
+			w = tabwriter.NewWriter(os.Stdout, 1, 1, padding, ' ', 0)
+			for i, entry := range rsrcDir.Entries {
+				fmt.Fprintf(w, "\t|- \u27A1 Resource Directory Entry %d, ID: %d", i+1, entry.ID)
+
+				// Print the interpretation of a resource ID only in root node.
+				if padding == 2 {
+					if entry.ID <= peparser.RTManifest {
+						fmt.Fprintf(w, " (%s)", peparser.ResourceType(entry.ID).String())
+					}
+				}
+				fmt.Fprintf(w, "\n\t|- Name: 0x%x\n\t", entry.Struct.Name)
+				if entry.Name != "" {
+					fmt.Fprintf(w, " (%s)", entry.Name)
+				}
+				fmt.Fprintf(w, "|- Offset To Data: 0x%x\t", entry.Struct.OffsetToData)
+				fmt.Fprintf(w, "\n\t|----------------------------------\t")
+				w.Flush()
+				if entry.IsResourceDir {
+					printRsrcDir(entry.Directory)
+				} else {
+					printRsrcDataEntry(entry.Data)
+				}
+
 			}
+			padding -= 2
 
 		}
-		w.Flush()
 
+		fmt.Printf("\n\nRESOURCES\n**********\n")
+		printRsrcDir(pe.Resources)
 	}
 
 	if cfg.wantCLR && pe.FileInfo.HasCLR {
