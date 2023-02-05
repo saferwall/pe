@@ -11,6 +11,12 @@ import (
 // ResourceType represents a resource type.
 type ResourceType int
 
+// ResourceLang represents a resource language.
+type ResourceLang int
+
+// ResourceSubLang represents a resource sub language.
+type ResourceSubLang int
+
 const (
 	maxAllowedEntries = 0x1000
 )
@@ -38,6 +44,347 @@ const (
 	RTAniIcon                   = 22            // Animated icon.
 	RTHtml                      = 23            // HTML resource.
 	RTManifest                  = 24            // Side-by-Side Assembly Manifest.
+)
+
+// Predefined Resource Languages.
+const (
+	LangNeutral       ResourceLang = iota
+	LangInvariant                  = 0x7f
+	LangAfrikaans                  = 0x36
+	LangAlbanian                   = 0x1c
+	LangArabic                     = 0x01
+	LangArmenian                   = 0x2b
+	LangAssamese                   = 0x4d
+	LangAzeri                      = 0x2c
+	LangBasque                     = 0x2d
+	LangBelarusian                 = 0x23
+	LangBangla                     = 0x45
+	LangBulgarian                  = 0x02
+	LangCatalan                    = 0x03
+	LangChinese                    = 0x04
+	LangCroatian                   = 0x1a
+	LangBosnian                    = 0x1a
+	LangCzech                      = 0x05
+	LangDanish                     = 0x06
+	LangDivehi                     = 0x65
+	LangDutch                      = 0x13
+	LangEnglish                    = 0x09
+	LangEstonian                   = 0x25
+	LangFaeroese                   = 0x38
+	LangFarsi                      = 0x29
+	LangFinnish                    = 0x0b
+	LangFrench                     = 0x0c
+	LangGalician                   = 0x56
+	LangGeorgian                   = 0x37
+	LangGerman                     = 0x07
+	LangGreek                      = 0x08
+	LangGujarati                   = 0x47
+	LangHebrew                     = 0x0d
+	LangHindi                      = 0x39
+	LangHungarian                  = 0x0e
+	LangIcelandic                  = 0x0f
+	LangIndonesian                 = 0x21
+	LangItalian                    = 0x10
+	LangJapanese                   = 0x11
+	LangKannada                    = 0x4b
+	LangKashmiri                   = 0x60
+	LangKazak                      = 0x3f
+	LangKonkani                    = 0x57
+	LangKorean                     = 0x12
+	LangKyrgyz                     = 0x40
+	LangLatvian                    = 0x26
+	LangLithuanian                 = 0x27
+	LangMacedonian                 = 0x2f
+	LangMalay                      = 0x3e
+	LangMalayalam                  = 0x4c
+	LangManipuri                   = 0x58
+	LangMarathi                    = 0x4e
+	LangMongolian                  = 0x50
+	LangNepali                     = 0x61
+	LangNorwegian                  = 0x14
+	LangOriya                      = 0x48
+	LangPolish                     = 0x15
+	LangPortuguese                 = 0x16
+	LangPunjabi                    = 0x46
+	LangRomanian                   = 0x18
+	LangRussian                    = 0x19
+	LangSanskrit                   = 0x4f
+	LangSerbian                    = 0x1a
+	LangSindhi                     = 0x59
+	LangSlovak                     = 0x1b
+	LangSlovenian                  = 0x24
+	LangSpanish                    = 0x0a
+	LangSwahili                    = 0x41
+	LangSwedish                    = 0x1d
+	LangSyriac                     = 0x5a
+	LangTamil                      = 0x49
+	LangTatar                      = 0x44
+	LangTelugu                     = 0x4a
+	LangThai                       = 0x1e
+	LangTurkish                    = 0x1f
+	LangUkrainian                  = 0x22
+	LangUrdu                       = 0x20
+	LangUzbek                      = 0x43
+	LangVietnamese                 = 0x2a
+	LangGaelic                     = 0x3c
+	LangMaltese                    = 0x3a
+	LangMaori                      = 0x28
+	LangRhaetoRomance              = 0x17
+	LangSami                       = 0x3b
+	LangSorbian                    = 0x2e
+	LangSutu                       = 0x30
+	LangTsonga                     = 0x31
+	LangTswana                     = 0x32
+	LangVenda                      = 0x33
+	LangXhosa                      = 0x34
+	LangZulu                       = 0x35
+	LangEsperanto                  = 0x8f
+	LangWalon                      = 0x90
+	LangCornish                    = 0x91
+	LangWelsh                      = 0x92
+	LangBreton                     = 0x93
+	LangInuktitut                  = 0x5d
+	LangIrish                      = 0x3C
+	LangLowerSorbian               = 0x2E
+	LangPular                      = 0x67
+	LangQuechua                    = 0x6B
+	LangTamazight                  = 0x5F
+	LangTigrinya                   = 0x73
+	LangValencian                  = 0x03
+)
+
+// Predefined Resource Sub languages.
+const (
+	SubLangAfrikaansSouthAfrica ResourceSubLang = iota
+	SubLangAlbanianAlbania
+	SubLangAlsatianFrance
+	SubLangAmharicEthiopia
+	SubLangArabicAlgeria
+	SubLangArabicBahrain
+	SubLangArabicEgypt
+	SubLangArabicIraq
+	SubLangArabicJordan
+	SubLangArabicKuwait
+	SubLangArabicLebanon
+	SubLangArabicLibya
+	SubLangArabicMorocco
+	SubLangArabicOman
+	SubLangArabicQatar
+	SubLangArabicSaudiArabia
+	SubLangArabicSyria
+	SubLangArabicTunisia
+	SubLangArabicUae
+	SubLangArabicYemen
+	SubLangArmenianArmenia
+	SubLangAssameseIndia
+	SubLangAzeriCyrillic
+	SubLangAzeriLatin
+	SubLangBashkirRussia
+	SubLangBasqueBasque
+	SubLangBelarusianBelarus
+	SubLangBanglaBangladesh
+	SubLangBanglaIndia
+	SubLangBosnianBosniaHerzegovinaCyrillic
+	SubLangBosnianBosniaHerzegovinaLatin
+	SubLangBretonFrance
+	SubLangBulgarianBulgaria
+	SubLangCatalanCatalan
+	SubLangChineseHongkong
+	SubLangChineseMacau
+	SubLangChineseSimplified
+	SubLangChineseSingapore
+	SubLangChineseTraditional
+	SubLangCorsicanFrance
+	SubLangCroatianBosniaHerzegovinaLatin
+	SubLangCroatianCroatia
+	SubLangCustomDefault
+	SubLangCustomUnspecified
+	SubLangCzechCzechRepublic
+	SubLangDanishDenmark
+	SubLangDariAfghanistan
+	SubLangDefault
+	SubLangDivehiMaldives
+	SubLangDutchBelgian
+	SubLangDutch
+	SubLangEnglishAus
+	SubLangEnglishBelize
+	SubLangEnglishCan
+	SubLangEnglishCaribbean
+	SubLangEnglishEire
+	SubLangEnglishIndia
+	SubLangEnglishJamaica
+	SubLangEnglishMalaysia
+	SubLangEnglishNz
+	SubLangEnglishPhilippines
+	SubLangEnglishSingapore
+	SubLangEnglishSouthAfrica
+	SubLangEnglishTrinidad
+	SubLangEnglishUk
+	SubLangEnglishUs
+	SubLangEnglishZimbabwe
+	SubLangEnglishIreland
+	SubLangEstonianEstonia
+	SubLangFaeroeseFaroeIslands
+	SubLangFilipinoPhilippines
+	SubLangFinnishFinland
+	SubLangFrenchBelgian
+	SubLangFrenchCanadian
+	SubLangFrenchLuxembourg
+	SubLangFrenchMonaco
+	SubLangFrenchSwiss
+	SubLangFrench
+	SubLangFrisianNetherlands
+	SubLangGalicianGalician
+	SubLangGeorgianGeorgia
+	SubLangGermanAustrian
+	SubLangGermanLiechtenstein
+	SubLangGermanLuxembourg
+	SubLangGermanSwiss
+	SubLangGerman
+	SubLangGreekGreece
+	SubLangGreenlandicGreenland
+	SubLangGujaratiIndia
+	SubLangHausaNigeriaLatin
+	SubLangHebrewIsrael
+	SubLangHindiIndia
+	SubLangHungarianHungary
+	SubLangIcelandicIceland
+	SubLangIgboNigeria
+	SubLangIndonesianIndonesia
+	SubLangInuktitutCanadaLatin
+	SubLangInuktitutCanada
+	SubLangIrishIreland
+	SubLangItalianSwiss
+	SubLangItalian
+	SubLangJapaneseJapan
+	SubLangKannadaIndia
+	SubLangKashmiriIndia
+	SubLangKashmiriSasia
+	SubLangKazakKazakhstan
+	SubLangKhmerCambodia
+	SubLangKicheGuatemala
+	SubLangKinyarwandaRwanda
+	SubLangKonkaniIndia
+	SubLangKorean
+	SubLangKyrgyzKyrgyzstan
+	SubLangLaoLao
+	SubLangLatvianLatvia
+	SubLangLithuanianClassic
+	SubLangLithuanian
+	SubLangLowerSorbianGermany
+	SubLangLuxembourgishLuxembourg
+	SubLangMacedonianMacedonia
+	SubLangMalayBruneiDarussalam
+	SubLangMalayMalaysia
+	SubLangMalayalamIndia
+	SubLangMalteseMalta
+	SubLangMaoriNewZealand
+	SubLangMapudungunChile
+	SubLangMarathiIndia
+	SubLangMohawkMohawk
+	SubLangMongolianCyrillicMongolia
+	SubLangMongolianPrc
+	SubLangNepaliIndia
+	SubLangNepaliNepal
+	SubLangNeutral
+	SubLangNorwegianBokmal
+	SubLangNorwegianNynorsk
+	SubLangOccitanFrance
+	SubLangOriyaIndia
+	SubLangPashtoAfghanistan
+	SubLangPersianIran
+	SubLangPolishPoland
+	SubLangPortugueseBrazilian
+	SubLangPortuguese
+	SubLangPunjabiIndia
+	SubLangQuechuaBolivia
+	SubLangQuechuaEcuador
+	SubLangQuechuaPeru
+	SubLangRomanianRomania
+	SubLangRomanshSwitzerland
+	SubLangRussianRussia
+	SubLangSamiInariFinland
+	SubLangSamiLuleNorway
+	SubLangSamiLuleSweden
+	SubLangSamiNorthernFinland
+	SubLangSamiNorthernNorway
+	SubLangSamiNorthernSweden
+	SubLangSamiSkoltFinland
+	SubLangSamiSouthernNorway
+	SubLangSamiSouthernSweden
+	SubLangSanskritIndia
+	SubLangSerbianBosniaHerzegovinaCyrillic
+	SubLangSerbianBosniaHerzegovinaLatin
+	SubLangSerbianCroatia
+	SubLangSerbianCyrillic
+	SubLangSerbianLatin
+	SubLangSindhiAfghanistan
+	SubLangSindhiIndia
+	SubLangSindhiPakistan
+	SubLangSinhaleseSriLanka
+	SubLangSlovakSlovakia
+	SubLangSlovenianSlovenia
+	SubLangSothoNorthernSouthAfrica
+	SubLangSpanishArgentina
+	SubLangSpanishBolivia
+	SubLangSpanishChile
+	SubLangSpanishColombia
+	SubLangSpanishCostaRica
+	SubLangSpanishDominicanRepublic
+	SubLangSpanishEcuador
+	SubLangSpanishElSalvador
+	SubLangSpanishGuatemala
+	SubLangSpanishHonduras
+	SubLangSpanishMexican
+	SubLangSpanishModern
+	SubLangSpanishNicaragua
+	SubLangSpanishPanama
+	SubLangSpanishParaguay
+	SubLangSpanishPeru
+	SubLangSpanishPuertoRico
+	SubLangSpanishUruguay
+	SubLangSpanishUs
+	SubLangSpanishVenezuela
+	SubLangSpanish
+	SubLangSwahiliKenya
+	SubLangSwedishFinland
+	SubLangSwedish
+	SubLangSyriacSyria
+	SubLangSysDefault
+	SubLangTajikTajikistan
+	SubLangTamazightAlgeriaLatin
+	SubLangTamilIndia
+	SubLangTatarRussia
+	SubLangTeluguIndia
+	SubLangThaiThailand
+	SubLangTibetanPrc
+	SubLangTigrignaEritrea
+	SubLangTswanaSouthAfrica
+	SubLangTurkishTurkey
+	SubLangTurkmenTurkmenistan
+	SubLangUiCustomDefault
+	SubLangUighurPrc
+	SubLangUkrainianUkraine
+	SubLangUpperSorbianGermany
+	SubLangUrduIndia
+	SubLangUrduPakistan
+	SubLangUzbekCyrillic
+	SubLangUzbekLatin
+	SubLangVietnameseVietnam
+	SubLangWelshUnitedKingdom
+	SubLangWolofSenegal
+	SubLangXhosaSouthAfrica
+	SubLangYakutRussia
+	SubLangYiPrc
+	SubLangYorubaNigeria
+	SubLangZuluSouthAfrica
+	SubLangPularSenegal
+	SubLangPunjabiPakistan
+	SubLangTswanaBotswana
+	SubLangTamilSriLanka
+	SubLangTigrinyaEthiopia
+	SubLangTigrinyaEritrea
+	SubLangValencianValencia
 )
 
 // ImageResourceDirectory represents the IMAGE_RESOURCE_DIRECTORY.
@@ -119,6 +466,10 @@ type ResourceDirectoryEntry struct {
 	// The resource identifier.
 	ID uint32 `json:"id"`
 
+	// IsResourceDir tell us if the entry is pointing to a resource directory or
+	// a resource data entry.
+	IsResourceDir bool `json:"is_resource_dir"`
+
 	// If this entry has a lower level directory this attribute will point to
 	// the ResourceDirData instance representing it.
 	Directory ResourceDirectory `json:"directory"`
@@ -135,9 +486,11 @@ type ResourceDataEntry struct {
 	// IMAGE_RESOURCE_DATA_ENTRY structure.
 	Struct ImageResourceDataEntry `json:"struct"`
 
-	// Primary language ID
-	Lang    uint32 `json:"lang"`
-	Sublang uint32 `json:"sublang"` // Sublanguage ID
+	// Primary language ID.
+	Lang uint32 `json:"lang"`
+
+	// Sub language ID.
+	SubLang uint32 `json:"sub_lang"`
 }
 
 func (pe *File) parseResourceDataEntry(rva uint32) ImageResourceDataEntry {
@@ -269,10 +622,11 @@ func (pe *File) doParseResourceDirectory(rva, size, baseRVA, level uint32,
 				dirs)
 
 			dirEntries = append(dirEntries, ResourceDirectoryEntry{
-				Struct:    *res,
-				Name:      entryName,
-				ID:        entryID,
-				Directory: directoryEntry})
+				Struct:        *res,
+				Name:          entryName,
+				ID:            entryID,
+				IsResourceDir: true,
+				Directory:     directoryEntry})
 		} else {
 			// data is entry
 			dataEntryStruct := pe.parseResourceDataEntry(baseRVA +
@@ -280,14 +634,15 @@ func (pe *File) doParseResourceDirectory(rva, size, baseRVA, level uint32,
 			entryData := ResourceDataEntry{
 				Struct:  dataEntryStruct,
 				Lang:    res.Name & 0x3ff,
-				Sublang: res.Name >> 10,
+				SubLang: res.Name >> 10,
 			}
 
 			dirEntries = append(dirEntries, ResourceDirectoryEntry{
-				Struct: *res,
-				Name:   entryName,
-				ID:     entryID,
-				Data:   entryData})
+				Struct:        *res,
+				Name:          entryName,
+				ID:            entryID,
+				IsResourceDir: false,
+				Data:          entryData})
 		}
 
 		rva += uint32(binary.Size(res))
@@ -315,6 +670,7 @@ func (pe *File) parseResourceDirectory(rva, size uint32) error {
 
 // String stringify the resource type.
 func (rt ResourceType) String() string {
+
 	rsrcTypeMap := map[ResourceType]string{
 		RTCursor:       "Cursor",
 		RTBitmap:       "Bitmap",
