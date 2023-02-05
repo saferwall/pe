@@ -486,7 +486,7 @@ func (pe *File) PrettyImageFileCharacteristics() []string {
 		ImageFileExecutableImage:      "ExecutableImage",
 		ImageFileLineNumsStripped:     "LineNumsStripped",
 		ImageFileLocalSymsStripped:    "LocalSymsStripped",
-		ImageFileAgressibeWsTrim:      "AgressibeWsTrim",
+		ImageFileAggressiveWSTrim:     "AgressibeWsTrim",
 		ImageFileLargeAddressAware:    "LargeAddressAware",
 		ImageFileBytesReservedLow:     "BytesReservedLow",
 		ImageFile32BitMachine:         "32BitMachine",

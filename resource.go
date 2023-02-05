@@ -11,12 +11,6 @@ import (
 // ResourceType represents a resource type.
 type ResourceType int
 
-// ResourceLang represents a resource language.
-type ResourceLang int
-
-// ResourceSubLang represents a resource sub language.
-type ResourceSubLang int
-
 const (
 	maxAllowedEntries = 0x1000
 )
@@ -44,347 +38,6 @@ const (
 	RTAniIcon                   = 22            // Animated icon.
 	RTHtml                      = 23            // HTML resource.
 	RTManifest                  = 24            // Side-by-Side Assembly Manifest.
-)
-
-// Predefined Resource Languages.
-const (
-	LangNeutral       ResourceLang = iota
-	LangInvariant                  = 0x7f
-	LangAfrikaans                  = 0x36
-	LangAlbanian                   = 0x1c
-	LangArabic                     = 0x01
-	LangArmenian                   = 0x2b
-	LangAssamese                   = 0x4d
-	LangAzeri                      = 0x2c
-	LangBasque                     = 0x2d
-	LangBelarusian                 = 0x23
-	LangBangla                     = 0x45
-	LangBulgarian                  = 0x02
-	LangCatalan                    = 0x03
-	LangChinese                    = 0x04
-	LangCroatian                   = 0x1a
-	LangBosnian                    = 0x1a
-	LangCzech                      = 0x05
-	LangDanish                     = 0x06
-	LangDivehi                     = 0x65
-	LangDutch                      = 0x13
-	LangEnglish                    = 0x09
-	LangEstonian                   = 0x25
-	LangFaeroese                   = 0x38
-	LangFarsi                      = 0x29
-	LangFinnish                    = 0x0b
-	LangFrench                     = 0x0c
-	LangGalician                   = 0x56
-	LangGeorgian                   = 0x37
-	LangGerman                     = 0x07
-	LangGreek                      = 0x08
-	LangGujarati                   = 0x47
-	LangHebrew                     = 0x0d
-	LangHindi                      = 0x39
-	LangHungarian                  = 0x0e
-	LangIcelandic                  = 0x0f
-	LangIndonesian                 = 0x21
-	LangItalian                    = 0x10
-	LangJapanese                   = 0x11
-	LangKannada                    = 0x4b
-	LangKashmiri                   = 0x60
-	LangKazak                      = 0x3f
-	LangKonkani                    = 0x57
-	LangKorean                     = 0x12
-	LangKyrgyz                     = 0x40
-	LangLatvian                    = 0x26
-	LangLithuanian                 = 0x27
-	LangMacedonian                 = 0x2f
-	LangMalay                      = 0x3e
-	LangMalayalam                  = 0x4c
-	LangManipuri                   = 0x58
-	LangMarathi                    = 0x4e
-	LangMongolian                  = 0x50
-	LangNepali                     = 0x61
-	LangNorwegian                  = 0x14
-	LangOriya                      = 0x48
-	LangPolish                     = 0x15
-	LangPortuguese                 = 0x16
-	LangPunjabi                    = 0x46
-	LangRomanian                   = 0x18
-	LangRussian                    = 0x19
-	LangSanskrit                   = 0x4f
-	LangSerbian                    = 0x1a
-	LangSindhi                     = 0x59
-	LangSlovak                     = 0x1b
-	LangSlovenian                  = 0x24
-	LangSpanish                    = 0x0a
-	LangSwahili                    = 0x41
-	LangSwedish                    = 0x1d
-	LangSyriac                     = 0x5a
-	LangTamil                      = 0x49
-	LangTatar                      = 0x44
-	LangTelugu                     = 0x4a
-	LangThai                       = 0x1e
-	LangTurkish                    = 0x1f
-	LangUkrainian                  = 0x22
-	LangUrdu                       = 0x20
-	LangUzbek                      = 0x43
-	LangVietnamese                 = 0x2a
-	LangGaelic                     = 0x3c
-	LangMaltese                    = 0x3a
-	LangMaori                      = 0x28
-	LangRhaetoRomance              = 0x17
-	LangSami                       = 0x3b
-	LangSorbian                    = 0x2e
-	LangSutu                       = 0x30
-	LangTsonga                     = 0x31
-	LangTswana                     = 0x32
-	LangVenda                      = 0x33
-	LangXhosa                      = 0x34
-	LangZulu                       = 0x35
-	LangEsperanto                  = 0x8f
-	LangWalon                      = 0x90
-	LangCornish                    = 0x91
-	LangWelsh                      = 0x92
-	LangBreton                     = 0x93
-	LangInuktitut                  = 0x5d
-	LangIrish                      = 0x3C
-	LangLowerSorbian               = 0x2E
-	LangPular                      = 0x67
-	LangQuechua                    = 0x6B
-	LangTamazight                  = 0x5F
-	LangTigrinya                   = 0x73
-	LangValencian                  = 0x03
-)
-
-// Predefined Resource Sub languages.
-const (
-	SubLangAfrikaansSouthAfrica ResourceSubLang = iota
-	SubLangAlbanianAlbania
-	SubLangAlsatianFrance
-	SubLangAmharicEthiopia
-	SubLangArabicAlgeria
-	SubLangArabicBahrain
-	SubLangArabicEgypt
-	SubLangArabicIraq
-	SubLangArabicJordan
-	SubLangArabicKuwait
-	SubLangArabicLebanon
-	SubLangArabicLibya
-	SubLangArabicMorocco
-	SubLangArabicOman
-	SubLangArabicQatar
-	SubLangArabicSaudiArabia
-	SubLangArabicSyria
-	SubLangArabicTunisia
-	SubLangArabicUae
-	SubLangArabicYemen
-	SubLangArmenianArmenia
-	SubLangAssameseIndia
-	SubLangAzeriCyrillic
-	SubLangAzeriLatin
-	SubLangBashkirRussia
-	SubLangBasqueBasque
-	SubLangBelarusianBelarus
-	SubLangBanglaBangladesh
-	SubLangBanglaIndia
-	SubLangBosnianBosniaHerzegovinaCyrillic
-	SubLangBosnianBosniaHerzegovinaLatin
-	SubLangBretonFrance
-	SubLangBulgarianBulgaria
-	SubLangCatalanCatalan
-	SubLangChineseHongkong
-	SubLangChineseMacau
-	SubLangChineseSimplified
-	SubLangChineseSingapore
-	SubLangChineseTraditional
-	SubLangCorsicanFrance
-	SubLangCroatianBosniaHerzegovinaLatin
-	SubLangCroatianCroatia
-	SubLangCustomDefault
-	SubLangCustomUnspecified
-	SubLangCzechCzechRepublic
-	SubLangDanishDenmark
-	SubLangDariAfghanistan
-	SubLangDefault
-	SubLangDivehiMaldives
-	SubLangDutchBelgian
-	SubLangDutch
-	SubLangEnglishAus
-	SubLangEnglishBelize
-	SubLangEnglishCan
-	SubLangEnglishCaribbean
-	SubLangEnglishEire
-	SubLangEnglishIndia
-	SubLangEnglishJamaica
-	SubLangEnglishMalaysia
-	SubLangEnglishNz
-	SubLangEnglishPhilippines
-	SubLangEnglishSingapore
-	SubLangEnglishSouthAfrica
-	SubLangEnglishTrinidad
-	SubLangEnglishUk
-	SubLangEnglishUs
-	SubLangEnglishZimbabwe
-	SubLangEnglishIreland
-	SubLangEstonianEstonia
-	SubLangFaeroeseFaroeIslands
-	SubLangFilipinoPhilippines
-	SubLangFinnishFinland
-	SubLangFrenchBelgian
-	SubLangFrenchCanadian
-	SubLangFrenchLuxembourg
-	SubLangFrenchMonaco
-	SubLangFrenchSwiss
-	SubLangFrench
-	SubLangFrisianNetherlands
-	SubLangGalicianGalician
-	SubLangGeorgianGeorgia
-	SubLangGermanAustrian
-	SubLangGermanLiechtenstein
-	SubLangGermanLuxembourg
-	SubLangGermanSwiss
-	SubLangGerman
-	SubLangGreekGreece
-	SubLangGreenlandicGreenland
-	SubLangGujaratiIndia
-	SubLangHausaNigeriaLatin
-	SubLangHebrewIsrael
-	SubLangHindiIndia
-	SubLangHungarianHungary
-	SubLangIcelandicIceland
-	SubLangIgboNigeria
-	SubLangIndonesianIndonesia
-	SubLangInuktitutCanadaLatin
-	SubLangInuktitutCanada
-	SubLangIrishIreland
-	SubLangItalianSwiss
-	SubLangItalian
-	SubLangJapaneseJapan
-	SubLangKannadaIndia
-	SubLangKashmiriIndia
-	SubLangKashmiriSasia
-	SubLangKazakKazakhstan
-	SubLangKhmerCambodia
-	SubLangKicheGuatemala
-	SubLangKinyarwandaRwanda
-	SubLangKonkaniIndia
-	SubLangKorean
-	SubLangKyrgyzKyrgyzstan
-	SubLangLaoLao
-	SubLangLatvianLatvia
-	SubLangLithuanianClassic
-	SubLangLithuanian
-	SubLangLowerSorbianGermany
-	SubLangLuxembourgishLuxembourg
-	SubLangMacedonianMacedonia
-	SubLangMalayBruneiDarussalam
-	SubLangMalayMalaysia
-	SubLangMalayalamIndia
-	SubLangMalteseMalta
-	SubLangMaoriNewZealand
-	SubLangMapudungunChile
-	SubLangMarathiIndia
-	SubLangMohawkMohawk
-	SubLangMongolianCyrillicMongolia
-	SubLangMongolianPrc
-	SubLangNepaliIndia
-	SubLangNepaliNepal
-	SubLangNeutral
-	SubLangNorwegianBokmal
-	SubLangNorwegianNynorsk
-	SubLangOccitanFrance
-	SubLangOriyaIndia
-	SubLangPashtoAfghanistan
-	SubLangPersianIran
-	SubLangPolishPoland
-	SubLangPortugueseBrazilian
-	SubLangPortuguese
-	SubLangPunjabiIndia
-	SubLangQuechuaBolivia
-	SubLangQuechuaEcuador
-	SubLangQuechuaPeru
-	SubLangRomanianRomania
-	SubLangRomanshSwitzerland
-	SubLangRussianRussia
-	SubLangSamiInariFinland
-	SubLangSamiLuleNorway
-	SubLangSamiLuleSweden
-	SubLangSamiNorthernFinland
-	SubLangSamiNorthernNorway
-	SubLangSamiNorthernSweden
-	SubLangSamiSkoltFinland
-	SubLangSamiSouthernNorway
-	SubLangSamiSouthernSweden
-	SubLangSanskritIndia
-	SubLangSerbianBosniaHerzegovinaCyrillic
-	SubLangSerbianBosniaHerzegovinaLatin
-	SubLangSerbianCroatia
-	SubLangSerbianCyrillic
-	SubLangSerbianLatin
-	SubLangSindhiAfghanistan
-	SubLangSindhiIndia
-	SubLangSindhiPakistan
-	SubLangSinhaleseSriLanka
-	SubLangSlovakSlovakia
-	SubLangSlovenianSlovenia
-	SubLangSothoNorthernSouthAfrica
-	SubLangSpanishArgentina
-	SubLangSpanishBolivia
-	SubLangSpanishChile
-	SubLangSpanishColombia
-	SubLangSpanishCostaRica
-	SubLangSpanishDominicanRepublic
-	SubLangSpanishEcuador
-	SubLangSpanishElSalvador
-	SubLangSpanishGuatemala
-	SubLangSpanishHonduras
-	SubLangSpanishMexican
-	SubLangSpanishModern
-	SubLangSpanishNicaragua
-	SubLangSpanishPanama
-	SubLangSpanishParaguay
-	SubLangSpanishPeru
-	SubLangSpanishPuertoRico
-	SubLangSpanishUruguay
-	SubLangSpanishUs
-	SubLangSpanishVenezuela
-	SubLangSpanish
-	SubLangSwahiliKenya
-	SubLangSwedishFinland
-	SubLangSwedish
-	SubLangSyriacSyria
-	SubLangSysDefault
-	SubLangTajikTajikistan
-	SubLangTamazightAlgeriaLatin
-	SubLangTamilIndia
-	SubLangTatarRussia
-	SubLangTeluguIndia
-	SubLangThaiThailand
-	SubLangTibetanPrc
-	SubLangTigrignaEritrea
-	SubLangTswanaSouthAfrica
-	SubLangTurkishTurkey
-	SubLangTurkmenTurkmenistan
-	SubLangUiCustomDefault
-	SubLangUighurPrc
-	SubLangUkrainianUkraine
-	SubLangUpperSorbianGermany
-	SubLangUrduIndia
-	SubLangUrduPakistan
-	SubLangUzbekCyrillic
-	SubLangUzbekLatin
-	SubLangVietnameseVietnam
-	SubLangWelshUnitedKingdom
-	SubLangWolofSenegal
-	SubLangXhosaSouthAfrica
-	SubLangYakutRussia
-	SubLangYiPrc
-	SubLangYorubaNigeria
-	SubLangZuluSouthAfrica
-	SubLangPularSenegal
-	SubLangPunjabiPakistan
-	SubLangTswanaBotswana
-	SubLangTamilSriLanka
-	SubLangTigrinyaEthiopia
-	SubLangTigrinyaEritrea
-	SubLangValencianValencia
 )
 
 // ImageResourceDirectory represents the IMAGE_RESOURCE_DIRECTORY.
@@ -696,4 +349,350 @@ func (rt ResourceType) String() string {
 	}
 
 	return rsrcTypeMap[rt]
+}
+
+// String stringify the resource language.
+func (rl ResourceLang) String() string {
+
+	rsrcLangMap := map[ResourceLang]string{
+		LangNeutral:       "Neutral",
+		LangInvariant:     "Invariant",
+		LangAfrikaans:     "Afrikaans",
+		LangAlbanian:      "Albanian",
+		LangArabic:        "Arabic",
+		LangArmenian:      "Armenian",
+		LangAssamese:      "Assamese",
+		LangAzeri:         "Azeri",
+		LangBasque:        "Basque",
+		LangBelarusian:    "Belarusian",
+		LangBangla:        "Bangla",
+		LangBulgarian:     "Bulgarian",
+		LangCatalan:       "Catalan", // Same as LangValencian.
+		LangChinese:       "Chinese",
+		LangCroatian:      "Croatian", // Same as LangBosnian and LangSerbian.
+		LangCzech:         "Czech",
+		LangDanish:        "Danish",
+		LangDivehi:        "Divehi",
+		LangDutch:         "Dutch",
+		LangEnglish:       "English",
+		LangEstonian:      "Estonian",
+		LangFaeroese:      "Faeroese",
+		LangFarsi:         "Farsi",
+		LangFinnish:       "Finnish",
+		LangFrench:        "French",
+		LangGalician:      "Galician",
+		LangGeorgian:      "Georgian",
+		LangGerman:        "German",
+		LangGreek:         "Greek",
+		LangGujarati:      "Gujarati",
+		LangHebrew:        "Hebrew",
+		LangHindi:         "Hindi",
+		LangHungarian:     "Hungarian",
+		LangIcelandic:     "Icelandic",
+		LangIndonesian:    "Indonesian",
+		LangItalian:       "Italian",
+		LangJapanese:      "Japanese",
+		LangKannada:       "Kannada",
+		LangKashmiri:      "Kashmiri",
+		LangKazak:         "Kazak",
+		LangKonkani:       "Konkani",
+		LangKorean:        "Korean",
+		LangKyrgyz:        "Kyrgyz",
+		LangLatvian:       "Latvian",
+		LangLithuanian:    "Lithuanian",
+		LangMacedonian:    "Macedonian",
+		LangMalay:         "Malay",
+		LangMalayalam:     "Malayalam",
+		LangManipuri:      "Manipuri",
+		LangMarathi:       "Marathi",
+		LangMongolian:     "Mongolian",
+		LangNepali:        "Nepali",
+		LangNorwegian:     "Norwegian",
+		LangOriya:         "Oriya",
+		LangPolish:        "Polish",
+		LangPortuguese:    "Portuguese",
+		LangPunjabi:       "Punjabi",
+		LangRomanian:      "Romanian",
+		LangRussian:       "Russian",
+		LangSanskrit:      "Sanskrit",
+		LangSindhi:        "Sindhi",
+		LangSlovak:        "Slovak",
+		LangSlovenian:     "Slovenian",
+		LangSpanish:       "Spanish",
+		LangSwahili:       "Swahili",
+		LangSwedish:       "Swedish",
+		LangSyriac:        "Syriac",
+		LangTamil:         "Tamil",
+		LangTatar:         "Tatar",
+		LangTelugu:        "Telugu",
+		LangThai:          "Thai",
+		LangTurkish:       "Turkish",
+		LangUkrainian:     "Ukrainian",
+		LangUrdu:          "Urdu",
+		LangUzbek:         "Uzbek",
+		LangVietnamese:    "Vietnamese",
+		LangGaelic:        "Gaelic", // Same as LangIrish.
+		LangMaltese:       "Maltese",
+		LangMaori:         "Maori",
+		LangRhaetoRomance: "Rhaeto Romance",
+		LangSami:          "Sami",
+		LangSorbian:       "Sorbian", // Same as LangLowerSorbian
+		LangSutu:          "Sutu",
+		LangTsonga:        "Tsonga",
+		LangTswana:        "Tswana",
+		LangVenda:         "Venda",
+		LangXhosa:         "Xhosa",
+		LangZulu:          "Zulu",
+		LangEsperanto:     "Esperanto",
+		LangWalon:         "Walon",
+		LangCornish:       "Cornish",
+		LangWelsh:         "Welsh",
+		LangBreton:        "Breton",
+		LangInuktitut:     "Inuktitut",
+		LangPular:         "Pular",
+		LangQuechua:       "Quechua",
+		LangTamazight:     "Tamazight",
+		LangTigrinya:      "Tigrinya",
+	}
+
+	return rsrcLangMap[rl]
+}
+
+// String stringify the resource sub language.
+func (rsl ResourceSubLang) String() string {
+
+	rsrcSubLangMap := map[ResourceSubLang]string{
+		SubLangAfrikaansSouthAfrica:             "Afrikaans South Africa",
+		SubLangAlbanianAlbania:                  "Albanian Albania",
+		SubLangAlsatianFrance:                   "Alsatian France",
+		SubLangAmharicEthiopia:                  "Amharic Ethiopia",
+		SubLangArabicAlgeria:                    "Arabic Algeria",
+		SubLangArabicBahrain:                    "Arabic Bahrain",
+		SubLangArabicEgypt:                      "Arabic Egypt",
+		SubLangArabicIraq:                       "Arabic Iraq",
+		SubLangArabicJordan:                     "Arabic Jordan",
+		SubLangArabicKuwait:                     "Arabic Kuwait",
+		SubLangArabicLebanon:                    "Arabic Lebanon",
+		SubLangArabicLibya:                      "Arabic Libya",
+		SubLangArabicMorocco:                    "Arabic Morocco",
+		SubLangArabicOman:                       "Arabic Oman",
+		SubLangArabicQatar:                      "Arabic Qatar",
+		SubLangArabicSaudiArabia:                "Arabic Saudi Arabia",
+		SubLangArabicSyria:                      "Arabic Syria",
+		SubLangArabicTunisia:                    "Arabic Tunisia",
+		SubLangArabicUae:                        "Arabic Uae",
+		SubLangArabicYemen:                      "Arabic Yemen",
+		SubLangArmenianArmenia:                  "Armenian Armenia",
+		SubLangAssameseIndia:                    "Assamese India",
+		SubLangAzeriCyrillic:                    "Azeri Cyrillic",
+		SubLangAzeriLatin:                       "Azeri Latin",
+		SubLangBashkirRussia:                    "Bashkir Russia",
+		SubLangBasqueBasque:                     "Basque Basque",
+		SubLangBelarusianBelarus:                "Belarusian Belarus",
+		SubLangBanglaBangladesh:                 "Bangla Bangladesh",
+		SubLangBanglaIndia:                      "Bangla India",
+		SubLangBosnianBosniaHerzegovinaCyrillic: "Bosnian Bosnia Herzegovina Cyrillic",
+		SubLangBosnianBosniaHerzegovinaLatin:    "Bosnian Bosnia Herzegovina Latin",
+		SubLangBretonFrance:                     "Breton France",
+		SubLangBulgarianBulgaria:                "Bulgarian Bulgaria",
+		SubLangCatalanCatalan:                   "Catalan Catalan",
+		SubLangChineseHongkong:                  "Chinese Hongkong",
+		SubLangChineseMacau:                     "Chinese Macau",
+		SubLangChineseSimplified:                "Chinese Simplified",
+		SubLangChineseSingapore:                 "Chinese Singapore",
+		SubLangChineseTraditional:               "Chinese Traditional",
+		SubLangCorsicanFrance:                   "Corsican France",
+		SubLangCroatianBosniaHerzegovinaLatin:   "Croatian Bosnia Herzegovina Latin",
+		SubLangCroatianCroatia:                  "Croatian Croatia",
+		SubLangCustomDefault:                    "Custom Default",
+		SubLangCustomUnspecified:                "Custom Unspecified",
+		SubLangCzechCzechRepublic:               "Czech Czech Republic",
+		SubLangDanishDenmark:                    "Danish Denmark",
+		SubLangDariAfghanistan:                  "Dari Afghanistan",
+		SubLangDefault:                          "Default",
+		SubLangDivehiMaldives:                   "Divehi Maldives",
+		SubLangDutchBelgian:                     "Dutch Belgian",
+		SubLangDutch:                            "Dutch",
+		SubLangEnglishAus:                       "English Aus",
+		SubLangEnglishBelize:                    "English Belize",
+		SubLangEnglishCan:                       "English Can",
+		SubLangEnglishCaribbean:                 "English Caribbean",
+		SubLangEnglishEire:                      "English Eire",
+		SubLangEnglishIndia:                     "English India",
+		SubLangEnglishJamaica:                   "English Jamaica",
+		SubLangEnglishMalaysia:                  "English Malaysia",
+		SubLangEnglishNz:                        "English Nz",
+		SubLangEnglishPhilippines:               "English Philippines",
+		SubLangEnglishSingapore:                 "English Singapore",
+		SubLangEnglishSouthAfrica:               "English South Africa",
+		SubLangEnglishTrinidad:                  "English Trinidad",
+		SubLangEnglishUk:                        "English Uk",
+		SubLangEnglishUs:                        "English Us",
+		SubLangEnglishZimbabwe:                  "English Zimbabwe",
+		SubLangEnglishIreland:                   "English Ireland",
+		SubLangEstonianEstonia:                  "Estonian Estonia",
+		SubLangFaeroeseFaroeIslands:             "Faeroese Faroe Islands",
+		SubLangFilipinoPhilippines:              "Filipino Philippines",
+		SubLangFinnishFinland:                   "Finnish Finland",
+		SubLangFrenchBelgian:                    "French Belgian",
+		SubLangFrenchCanadian:                   "French Canadian",
+		SubLangFrenchLuxembourg:                 "French Luxembourg",
+		SubLangFrenchMonaco:                     "French Monaco",
+		SubLangFrenchSwiss:                      "French Swiss",
+		SubLangFrench:                           "French",
+		SubLangFrisianNetherlands:               "Frisian Netherlands",
+		SubLangGalicianGalician:                 "Galician Galician",
+		SubLangGeorgianGeorgia:                  "Georgian Georgia",
+		SubLangGermanAustrian:                   "German Austrian",
+		SubLangGermanLiechtenstein:              "German Liechtenstein",
+		SubLangGermanLuxembourg:                 "German Luxembourg",
+		SubLangGermanSwiss:                      "German Swiss",
+		SubLangGerman:                           "German",
+		SubLangGreekGreece:                      "Greek Greece",
+		SubLangGreenlandicGreenland:             "Greenlandic Greenland",
+		SubLangGujaratiIndia:                    "Gujarati India",
+		SubLangHausaNigeriaLatin:                "Hausa Nigeria Latin",
+		SubLangHebrewIsrael:                     "Hebrew Israel",
+		SubLangHindiIndia:                       "Hindi India",
+		SubLangHungarianHungary:                 "Hungarian Hungary",
+		SubLangIcelandicIceland:                 "Icelandic Iceland",
+		SubLangIgboNigeria:                      "Igbo Nigeria",
+		SubLangIndonesianIndonesia:              "Indonesian Indonesia",
+		SubLangInuktitutCanadaLatin:             "Inuktitut Canada Latin",
+		SubLangInuktitutCanada:                  "Inuktitut Canada",
+		SubLangIrishIreland:                     "Irish Ireland",
+		SubLangItalianSwiss:                     "Italian Swiss",
+		SubLangItalian:                          "Italian",
+		SubLangJapaneseJapan:                    "Japanese Japan",
+		SubLangKannadaIndia:                     "Kannada India",
+		SubLangKashmiriIndia:                    "Kashmiri India",
+		SubLangKashmiriSasia:                    "Kashmiri Sasia",
+		SubLangKazakKazakhstan:                  "Kazak Kazakhstan",
+		SubLangKhmerCambodia:                    "Khmer Cambodia",
+		SubLangKicheGuatemala:                   "Kiche Guatemala",
+		SubLangKinyarwandaRwanda:                "Kinyarwanda Rwanda",
+		SubLangKonkaniIndia:                     "Konkani India",
+		SubLangKorean:                           "Korean",
+		SubLangKyrgyzKyrgyzstan:                 "Kyrgyz Kyrgyzstan",
+		SubLangLaoLao:                           "Lao Lao",
+		SubLangLatvianLatvia:                    "Latvian Latvia",
+		SubLangLithuanianClassic:                "Lithuanian Classic",
+		SubLangLithuanian:                       "Lithuanian",
+		SubLangLowerSorbianGermany:              "Lower Sorbian Germany",
+		SubLangLuxembourgishLuxembourg:          "Luxembourgish Luxembourg",
+		SubLangMacedonianMacedonia:              "Macedonian Macedonia",
+		SubLangMalayBruneiDarussalam:            "Malay Brunei Darussalam",
+		SubLangMalayMalaysia:                    "Malay Malaysia",
+		SubLangMalayalamIndia:                   "Malayalam India",
+		SubLangMalteseMalta:                     "Maltese Malta",
+		SubLangMaoriNewZealand:                  "Maori New Zealand",
+		SubLangMapudungunChile:                  "Mapudungun Chile",
+		SubLangMarathiIndia:                     "Marathi India",
+		SubLangMohawkMohawk:                     "Mohawk Mohawk",
+		SubLangMongolianCyrillicMongolia:        "Mongolian Cyrillic Mongolia",
+		SubLangMongolianPrc:                     "Mongolian Prc",
+		SubLangNepaliIndia:                      "Nepali India",
+		SubLangNepaliNepal:                      "Nepali Nepal",
+		SubLangNeutral:                          "Neutral",
+		SubLangNorwegianBokmal:                  "Norwegian Bokmal",
+		SubLangNorwegianNynorsk:                 "Norwegian Nynorsk",
+		SubLangOccitanFrance:                    "Occitan France",
+		SubLangOriyaIndia:                       "Oriya India",
+		SubLangPashtoAfghanistan:                "Pashto Afghanistan",
+		SubLangPersianIran:                      "Persian Iran",
+		SubLangPolishPoland:                     "Polish Poland",
+		SubLangPortugueseBrazilian:              "Portuguese Brazilian",
+		SubLangPortuguese:                       "Portuguese",
+		SubLangPunjabiIndia:                     "Punjabi India",
+		SubLangQuechuaBolivia:                   "Quechua Bolivia",
+		SubLangQuechuaEcuador:                   "Quechua Ecuador",
+		SubLangQuechuaPeru:                      "Quechua Peru",
+		SubLangRomanianRomania:                  "Romanian Romania",
+		SubLangRomanshSwitzerland:               "Romansh Switzerland",
+		SubLangRussianRussia:                    "Russian Russia",
+		SubLangSamiInariFinland:                 "Sami Inari Finland",
+		SubLangSamiLuleNorway:                   "Sami Lule Norway",
+		SubLangSamiLuleSweden:                   "Sami Lule Sweden",
+		SubLangSamiNorthernFinland:              "Sami Northern Finland",
+		SubLangSamiNorthernNorway:               "Sami Northern Norway",
+		SubLangSamiNorthernSweden:               "Sami Northern Sweden",
+		SubLangSamiSkoltFinland:                 "Sami Skolt Finland",
+		SubLangSamiSouthernNorway:               "Sami Southern Norway",
+		SubLangSamiSouthernSweden:               "Sami Southern Sweden",
+		SubLangSanskritIndia:                    "Sanskrit India",
+		SubLangSerbianBosniaHerzegovinaCyrillic: "Serbian Bosnia Herzegovina Cyrillic",
+		SubLangSerbianBosniaHerzegovinaLatin:    "Serbian Bosnia Herzegovina Latin",
+		SubLangSerbianCroatia:                   "Serbian Croatia",
+		SubLangSerbianCyrillic:                  "Serbian Cyrillic",
+		SubLangSerbianLatin:                     "Serbian Latin",
+		SubLangSindhiAfghanistan:                "Sindhi Afghanistan",
+		SubLangSindhiIndia:                      "Sindhi India",
+		SubLangSindhiPakistan:                   "Sindhi Pakistan",
+		SubLangSinhaleseSriLanka:                "Sinhalese Sri Lanka",
+		SubLangSlovakSlovakia:                   "Slovak Slovakia",
+		SubLangSlovenianSlovenia:                "Slovenian Slovenia",
+		SubLangSothoNorthernSouthAfrica:         "Sotho Northern South Africa",
+		SubLangSpanishArgentina:                 "Spanish Argentina",
+		SubLangSpanishBolivia:                   "Spanish Bolivia",
+		SubLangSpanishChile:                     "Spanish Chile",
+		SubLangSpanishColombia:                  "Spanish Colombia",
+		SubLangSpanishCostaRica:                 "Spanish Costa Rica",
+		SubLangSpanishDominicanRepublic:         "Spanish Dominican Republic",
+		SubLangSpanishEcuador:                   "Spanish Ecuador",
+		SubLangSpanishElSalvador:                "Spanish El Salvador",
+		SubLangSpanishGuatemala:                 "Spanish Guatemala",
+		SubLangSpanishHonduras:                  "Spanish Honduras",
+		SubLangSpanishMexican:                   "Spanish Mexican",
+		SubLangSpanishModern:                    "Spanish Modern",
+		SubLangSpanishNicaragua:                 "Spanish Nicaragua",
+		SubLangSpanishPanama:                    "Spanish Panama",
+		SubLangSpanishParaguay:                  "Spanish Paraguay",
+		SubLangSpanishPeru:                      "Spanish Peru",
+		SubLangSpanishPuertoRico:                "Spanish Puerto Rico",
+		SubLangSpanishUruguay:                   "Spanish Uruguay",
+		SubLangSpanishUs:                        "Spanish Us",
+		SubLangSpanishVenezuela:                 "Spanish Venezuela",
+		SubLangSpanish:                          "Spanish",
+		SubLangSwahiliKenya:                     "Swahili Kenya",
+		SubLangSwedishFinland:                   "Swedish Finland",
+		SubLangSwedish:                          "Swedish",
+		SubLangSyriacSyria:                      "Syriac Syria",
+		SubLangSysDefault:                       "Sys Default",
+		SubLangTajikTajikistan:                  "Tajik Tajikistan",
+		SubLangTamazightAlgeriaLatin:            "Tamazight Algeria Latin",
+		SubLangTamilIndia:                       "Tamil India",
+		SubLangTatarRussia:                      "Tatar Russia",
+		SubLangTeluguIndia:                      "Telugu India",
+		SubLangThaiThailand:                     "Thai Thailand",
+		SubLangTibetanPrc:                       "Tibetan Prc",
+		SubLangTigrignaEritrea:                  "Tigrigna Eritrea",
+		SubLangTswanaSouthAfrica:                "Tswana South Africa",
+		SubLangTurkishTurkey:                    "Turkish Turkey",
+		SubLangTurkmenTurkmenistan:              "Turkmen Turkmenistan",
+		SubLangUiCustomDefault:                  "Ui Custom Default",
+		SubLangUighurPrc:                        "Uighur Prc",
+		SubLangUkrainianUkraine:                 "Ukrainian Ukraine",
+		SubLangUpperSorbianGermany:              "Upper Sorbian Germany",
+		SubLangUrduIndia:                        "Urdu India",
+		SubLangUrduPakistan:                     "Urdu Pakistan",
+		SubLangUzbekCyrillic:                    "Uzbek Cyrillic",
+		SubLangUzbekLatin:                       "Uzbek Latin",
+		SubLangVietnameseVietnam:                "Vietnamese Vietnam",
+		SubLangWelshUnitedKingdom:               "Welsh United Kingdom",
+		SubLangWolofSenegal:                     "Wolof Senegal",
+		SubLangXhosaSouthAfrica:                 "Xhosa South Africa",
+		SubLangYakutRussia:                      "Yakut Russia",
+		SubLangYiPrc:                            "Yi Prc",
+		SubLangYorubaNigeria:                    "Yoruba Nigeria",
+		SubLangZuluSouthAfrica:                  "Zulu South Africa",
+		SubLangPularSenegal:                     "Pular Senegal",
+		SubLangPunjabiPakistan:                  "Punjabi Pakistan",
+		SubLangTswanaBotswana:                   "Tswana Botswana",
+		SubLangTamilSriLanka:                    "Tamil Sri Lanka",
+		SubLangTigrinyaEthiopia:                 "Tigrinya Ethiopia",
+		SubLangTigrinyaEritrea:                  "Tigrinya Eritrea",
+		SubLangValencianValencia:                "Valencian Valencia",
+	}
+
+	return rsrcSubLangMap[rsl]
 }
