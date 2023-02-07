@@ -200,12 +200,6 @@ const (
 	ImageNumberOfDirectoryEntries                              // Tables count.
 )
 
-// ResourceLang represents a resource language.
-type ResourceLang uint32
-
-// ResourceSubLang represents a resource sub language.
-type ResourceSubLang uint32
-
 // FileInfo represents the PE file information struct.
 type FileInfo struct {
 	Is32           bool

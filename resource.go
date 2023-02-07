@@ -11,6 +11,1007 @@ import (
 // ResourceType represents a resource type.
 type ResourceType int
 
+// ResourceLang represents a resource language.
+type ResourceLang uint32
+
+// ResourceSubLang represents a resource sub language.
+type ResourceSubLang uint32
+
+// https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/70feba9f-294e-491e-b6eb-56532684c37f
+// Special resource (sub)language identifiers.
+var (
+	LangNeutral       ResourceLang = 0x00 // Default custom (MUI) locale language
+	LangUserDefault   ResourceLang = 0x01 // User default locale language
+	LangSystemDefault ResourceLang = 0x02 // System default locale language
+	LangInvariant     ResourceLang = 0x7F // Invariant locale language
+
+	SubLangNeutral           ResourceSubLang = 0x00 // Neutral sub-language
+	SubLangInvariant         ResourceSubLang = 0x00 // Invariant sub-language
+	SubLangDefault           ResourceSubLang = 0x01 // User default sub-language
+	SubLangSysDefault        ResourceSubLang = 0x02 // System default sub-language
+	SubLangCustomDefault     ResourceSubLang = 0x03 // Default custom sub-language
+	SubLangCustomUnspecified ResourceSubLang = 0x04 // Unspecified custom sub-language
+	SubLangMUICustomDefault  ResourceSubLang = 0x05 // Default custom MUI sub-language
+)
+
+// All resource (sub)language identifiers.
+var (
+
+	// Afrikaans (af)
+	LangAfrikaans ResourceLang = 0x0036
+	// Afrikaans South Africa (af-ZA)
+	SubLangAfrikaansSouthAfrica ResourceSubLang = 0x1
+
+	// Albanian (sq)
+	LangAlbanian ResourceLang = 0x001C
+	// Albanian Albania (sq-AL)
+	SubLangAlbanianAlbania ResourceSubLang = 0x1
+
+	// Alsatian (gsw)
+	LangAlsatian ResourceLang = 0x0084
+	// Alsatian France (gsw-FR)
+	SubLangAlsatianFrance ResourceSubLang = 0x1
+
+	// Amharic (am)
+	LangAmharic ResourceLang = 0x005E
+	// Amharic Ethiopia (am-ET)
+	SubLangAmharicEthiopia ResourceSubLang = 0x1
+
+	// Arabic (ar)
+	LangArabic ResourceLang = 0x0001
+	// Arabic Algeria (ar-DZ)
+	SubLangArabicAlgeria ResourceSubLang = 0x5
+	// Arabic Bahrain (ar-BH)
+	SubLangArabicBahrain ResourceSubLang = 0xf
+	// Arabic Egypt (ar-EG)
+	SubLangArabicEgypt ResourceSubLang = 0x3
+	// Arabic Iraq (ar-IQ)
+	SubLangArabicIraq ResourceSubLang = 0x2
+	// Arabic Jordan (ar-JO)
+	SubLangArabicJordan ResourceSubLang = 0xb
+	// Arabic Kuwait (ar-KW)
+	SubLangArabicKuwait ResourceSubLang = 0xd
+	// Arabic Lebanon (ar-LB)
+	SubLangArabicLebanon ResourceSubLang = 0xc
+	// Arabic Libya (ar-LY)
+	SubLangArabicLibya ResourceSubLang = 0x4
+	// Arabic Morocco (ar-MA)
+	SubLangArabicMorocco ResourceSubLang = 0x6
+	// Arabic Oman (ar-OM)
+	SubLangArabicOman ResourceSubLang = 0x8
+	// Arabic Qatar (ar-QA)
+	SubLangArabicQatar ResourceSubLang = 0x10
+	// Arabic Saudi Arabia (ar-SA)
+	SubLangArabicSaudiArabia ResourceSubLang = 0x1
+	// Arabic Syria (ar-SY)
+	SubLangArabicSyria ResourceSubLang = 0xa
+	// Arabic Tunisia (ar-TN)
+	SubLangArabicTunisia ResourceSubLang = 0x7
+	// Arabic U.a.e. (ar-AE)
+	SubLangArabicUae ResourceSubLang = 0xe
+	// Arabic Yemen (ar-YE)
+	SubLangArabicYemen ResourceSubLang = 0x9
+
+	// Armenian (hy)
+	LangArmenian ResourceLang = 0x002B
+	// Armenian Armenia (hy-AM)
+	SubLangArmenianArmenia ResourceSubLang = 0x1
+
+	// Assamese (as)
+	LangAssamese ResourceLang = 0x004D
+	// Assamese India (as-IN)
+	SubLangAssameseIndia ResourceSubLang = 0x1
+	// Azerbaijani (Cyrillic) (az-Cyrl)
+	SubLangAzerbaijaniCyrillic ResourceSubLang = 0x1d
+	// Azerbaijani (Cyrillic) Azerbaijan (az-Cyrl-AZ)
+	SubLangAzerbaijaniCyrillicAzerbaijan ResourceSubLang = 0x2
+
+	// Azerbaijani (Latin) (az)
+	LangAzerbaijaniLatin ResourceLang = 0x002C
+	// Azerbaijani (Latin) (az-Latn)
+	SubLangAzerbaijaniLatin ResourceSubLang = 0x1e
+	// Azerbaijani (Latin) Azerbaijan (az-Latn-AZ)
+	SubLangAzerbaijaniLatinAzerbaijan ResourceSubLang = 0x1
+
+	// Bangla (bn)
+	LangBangla ResourceLang = 0x0045
+	// Bangla Bangladesh (bn-BD)
+	SubLangBanglaBangladesh ResourceSubLang = 0x2
+	// Bangla India (bn-IN)
+	SubLangBanglaIndia ResourceSubLang = 0x1
+
+	// Bashkir (ba)
+	LangBashkir ResourceLang = 0x006D
+	// Bashkir Russia (ba-RU)
+	SubLangBashkirRussia ResourceSubLang = 0x1
+
+	// Basque (eu)
+	LangBasque ResourceLang = 0x002D
+	// Basque Spain (eu-ES)
+	SubLangBasqueSpain ResourceSubLang = 0x1
+
+	// Belarusian (be)
+	LangBelarusian ResourceLang = 0x0023
+	// Belarusian Belarus (be-BY)
+	SubLangBelarusianBelarus ResourceSubLang = 0x1
+	// Bosnian (Cyrillic) (bs-Cyrl)
+	SubLangBosnianCyrillic ResourceSubLang = 0x19
+	// Bosnian (Cyrillic) Bosnia And Herzegovina (bs-Cyrl-BA)
+	SubLangBosnianCyrillicBosniaAndHerzegovina ResourceSubLang = 0x8
+	// Bosnian (Latin) (bs-Latn)
+	SubLangBosnianLatin ResourceSubLang = 0x1a
+
+	// Bosnian (Latin) (bs)
+	LangBosnianLatin ResourceLang = 0x781A
+	// Bosnian (Latin) Bosnia And Herzegovina (bs-Latn-BA)
+	SubLangBosnianLatinBosniaAndHerzegovina ResourceSubLang = 0x5
+
+	// Breton (br)
+	LangBreton ResourceLang = 0x007E
+	// Breton France (br-FR)
+	SubLangBretonFrance ResourceSubLang = 0x1
+
+	// Bulgarian (bg)
+	LangBulgarian ResourceLang = 0x0002
+	// Bulgarian Bulgaria (bg-BG)
+	SubLangBulgarianBulgaria ResourceSubLang = 0x1
+
+	// Burmese (my)
+	LangBurmese ResourceLang = 0x0055
+	// Burmese Myanmar (my-MM)
+	SubLangBurmeseMyanmar ResourceSubLang = 0x1
+
+	// Catalan (ca)
+	LangCatalan ResourceLang = 0x0003
+	// Catalan Spain (ca-ES)
+	SubLangCatalanSpain ResourceSubLang = 0x1
+
+	// Central Kurdish (ku)
+	LangCentralKurdish ResourceLang = 0x0092
+	// Central Kurdish (ku-Arab)
+	SubLangCentralKurdish ResourceSubLang = 0x1f
+	// Central Kurdish Iraq (ku-Arab-IQ)
+	SubLangCentralKurdishIraq ResourceSubLang = 0x1
+
+	// Cherokee (chr)
+	LangCherokee ResourceLang = 0x005C
+	// Cherokee (chr-Cher)
+	SubLangCherokee ResourceSubLang = 0x1f
+	// Cherokee United States (chr-Cher-US)
+	SubLangCherokeeUnitedStates ResourceSubLang = 0x1
+	// Chinese (Simplified) (zh-Hans)
+	SubLangChineseSimplified ResourceSubLang = 0x0
+
+	// Chinese (Simplified) (zh)
+	LangChineseSimplified ResourceLang = 0x7804
+	// Chinese (Simplified) People's Republic Of China (zh-CN)
+	SubLangChineseSimplifiedPeoplesRepublicOfChina ResourceSubLang = 0x2
+	// Chinese (Simplified) Singapore (zh-SG)
+	SubLangChineseSimplifiedSingapore ResourceSubLang = 0x4
+	// Chinese (Traditional) (zh-Hant)
+	SubLangChineseTraditional ResourceSubLang = 0x1f
+	// Chinese (Traditional) Hong Kong S.a.r. (zh-HK)
+	SubLangChineseTraditionalHongKongSar ResourceSubLang = 0x3
+	// Chinese (Traditional) Macao S.a.r. (zh-MO)
+	SubLangChineseTraditionalMacaoSar ResourceSubLang = 0x5
+	// Chinese (Traditional) Taiwan (zh-TW)
+	SubLangChineseTraditionalTaiwan ResourceSubLang = 0x1
+
+	// Corsican (co)
+	LangCorsican ResourceLang = 0x0083
+	// Corsican France (co-FR)
+	SubLangCorsicanFrance ResourceSubLang = 0x1
+
+	// Croatian (hr)
+	LangCroatian ResourceLang = 0x001A
+	// Croatian Croatia (hr-HR)
+	SubLangCroatianCroatia ResourceSubLang = 0x1
+	// Croatian (Latin) Bosnia And Herzegovina (hr-BA)
+	SubLangCroatianLatinBosniaAndHerzegovina ResourceSubLang = 0x4
+
+	// Czech (cs)
+	LangCzech ResourceLang = 0x0005
+	// Czech Czech Republic (cs-CZ)
+	SubLangCzechCzechRepublic ResourceSubLang = 0x1
+
+	// Danish (da)
+	LangDanish ResourceLang = 0x0006
+	// Danish Denmark (da-DK)
+	SubLangDanishDenmark ResourceSubLang = 0x1
+
+	// Dari (prs)
+	LangDari ResourceLang = 0x008C
+	// Dari Afghanistan (prs-AF)
+	SubLangDariAfghanistan ResourceSubLang = 0x1
+
+	// Divehi (dv)
+	LangDivehi ResourceLang = 0x0065
+	// Divehi Maldives (dv-MV)
+	SubLangDivehiMaldives ResourceSubLang = 0x1
+
+	// Dutch (nl)
+	LangDutch ResourceLang = 0x0013
+	// Dutch Belgium (nl-BE)
+	SubLangDutchBelgium ResourceSubLang = 0x2
+	// Dutch Netherlands (nl-NL)
+	SubLangDutchNetherlands ResourceSubLang = 0x1
+	// Dzongkha Bhutan (dz-BT)
+	SubLangDzongkhaBhutan ResourceSubLang = 0x3
+
+	// English (en)
+	LangEnglish ResourceLang = 0x0009
+	// English Australia (en-AU)
+	SubLangEnglishAustralia ResourceSubLang = 0x3
+	// English Belize (en-BZ)
+	SubLangEnglishBelize ResourceSubLang = 0xa
+	// English Canada (en-CA)
+	SubLangEnglishCanada ResourceSubLang = 0x4
+	// English Caribbean (en-029)
+	SubLangEnglishCaribbean ResourceSubLang = 0x9
+	// English Hong Kong (en-HK)
+	SubLangEnglishHongKong ResourceSubLang = 0xf
+	// English India (en-IN)
+	SubLangEnglishIndia ResourceSubLang = 0x10
+	// English Ireland (en-IE)
+	SubLangEnglishIreland ResourceSubLang = 0x6
+	// English Jamaica (en-JM)
+	SubLangEnglishJamaica ResourceSubLang = 0x8
+	// English Malaysia (en-MY)
+	SubLangEnglishMalaysia ResourceSubLang = 0x11
+	// English New Zealand (en-NZ)
+	SubLangEnglishNewZealand ResourceSubLang = 0x5
+	// English Republic Of The Philippines (en-PH)
+	SubLangEnglishRepublicOfThePhilippines ResourceSubLang = 0xd
+	// English Singapore (en-SG)
+	SubLangEnglishSingapore ResourceSubLang = 0x12
+	// English South Africa (en-ZA)
+	SubLangEnglishSouthAfrica ResourceSubLang = 0x7
+	// English Trinidad And Tobago (en-TT)
+	SubLangEnglishTrinidadAndTobago ResourceSubLang = 0xb
+	// English United Arab Emirates (en-AE)
+	SubLangEnglishUnitedArabEmirates ResourceSubLang = 0x13
+	// English United Kingdom (en-GB)
+	SubLangEnglishUnitedKingdom ResourceSubLang = 0x2
+	// English United States (en-US)
+	SubLangEnglishUnitedStates ResourceSubLang = 0x1
+	// English Zimbabwe (en-ZW)
+	SubLangEnglishZimbabwe ResourceSubLang = 0xc
+
+	// Estonian (et)
+	LangEstonian ResourceLang = 0x0025
+	// Estonian Estonia (et-EE)
+	SubLangEstonianEstonia ResourceSubLang = 0x1
+
+	// Faroese (fo)
+	LangFaroese ResourceLang = 0x0038
+	// Faroese Faroe Islands (fo-FO)
+	SubLangFaroeseFaroeIslands ResourceSubLang = 0x1
+
+	// Filipino (fil)
+	LangFilipino ResourceLang = 0x0064
+	// Filipino Philippines (fil-PH)
+	SubLangFilipinoPhilippines ResourceSubLang = 0x1
+
+	// Finnish (fi)
+	LangFinnish ResourceLang = 0x000B
+	// Finnish Finland (fi-FI)
+	SubLangFinnishFinland ResourceSubLang = 0x1
+
+	// French (fr)
+	LangFrench ResourceLang = 0x000C
+	// French Belgium (fr-BE)
+	SubLangFrenchBelgium ResourceSubLang = 0x2
+	// French Cameroon (fr-CM)
+	SubLangFrenchCameroon ResourceSubLang = 0xb
+	// French Canada (fr-CA)
+	SubLangFrenchCanada ResourceSubLang = 0x3
+	// French Caribbean (fr-029)
+	SubLangFrenchCaribbean ResourceSubLang = 0x7
+	// French Congo, Drc (fr-CD)
+	SubLangFrenchCongoDrc ResourceSubLang = 0x9
+	// French Côte D'ivoire (fr-CI)
+	SubLangFrenchCôteDivoire ResourceSubLang = 0xc
+	// French France (fr-FR)
+	SubLangFrenchFrance ResourceSubLang = 0x1
+	// French Haiti (fr-HT)
+	SubLangFrenchHaiti ResourceSubLang = 0xf
+	// French Luxembourg (fr-LU)
+	SubLangFrenchLuxembourg ResourceSubLang = 0x5
+	// French Mali (fr-ML)
+	SubLangFrenchMali ResourceSubLang = 0xd
+	// French Morocco (fr-MA)
+	SubLangFrenchMorocco ResourceSubLang = 0xe
+	// French Principality Of Monaco (fr-MC)
+	SubLangFrenchPrincipalityOfMonaco ResourceSubLang = 0x6
+	// French Reunion (fr-RE)
+	SubLangFrenchReunion ResourceSubLang = 0x8
+	// French Senegal (fr-SN)
+	SubLangFrenchSenegal ResourceSubLang = 0xa
+	// French Switzerland (fr-CH)
+	SubLangFrenchSwitzerland ResourceSubLang = 0x4
+
+	// Frisian (fy)
+	LangFrisian ResourceLang = 0x0062
+	// Frisian Netherlands (fy-NL)
+	SubLangFrisianNetherlands ResourceSubLang = 0x1
+
+	// Fulah (ff)
+	LangFulah ResourceLang = 0x0067
+	// Fulah (Latin) (ff-Latn)
+	SubLangFulahLatin ResourceSubLang = 0x1f
+	// Fulah Nigeria (ff-NG)
+	SubLangFulahNigeria ResourceSubLang = 0x1
+	// Fulah (Latin) Nigeria (ff-Latn-NG)
+	SubLangFulahLatinNigeria ResourceSubLang = 0x1
+	// Fulah Senegal (ff-Latn-SN)
+	SubLangFulahSenegal ResourceSubLang = 0x2
+
+	// Galician (gl)
+	LangGalician ResourceLang = 0x0056
+	// Galician Spain (gl-ES)
+	SubLangGalicianSpain ResourceSubLang = 0x1
+
+	// Georgian (ka)
+	LangGeorgian ResourceLang = 0x0037
+	// Georgian Georgia (ka-GE)
+	SubLangGeorgianGeorgia ResourceSubLang = 0x1
+
+	// German (de)
+	LangGerman ResourceLang = 0x0007
+	// German Austria (de-AT)
+	SubLangGermanAustria ResourceSubLang = 0x3
+	// German Germany (de-DE)
+	SubLangGermanGermany ResourceSubLang = 0x1
+	// German Liechtenstein (de-LI)
+	SubLangGermanLiechtenstein ResourceSubLang = 0x5
+	// German Luxembourg (de-LU)
+	SubLangGermanLuxembourg ResourceSubLang = 0x4
+	// German Switzerland (de-CH)
+	SubLangGermanSwitzerland ResourceSubLang = 0x2
+
+	// Greek (el)
+	LangGreek ResourceLang = 0x0008
+	// Greek Greece (el-GR)
+	SubLangGreekGreece ResourceSubLang = 0x1
+
+	// Greenlandic (kl)
+	LangGreenlandic ResourceLang = 0x006F
+	// Greenlandic Greenland (kl-GL)
+	SubLangGreenlandicGreenland ResourceSubLang = 0x1
+
+	// Guarani (gn)
+	LangGuarani ResourceLang = 0x0074
+	// Guarani Paraguay (gn-PY)
+	SubLangGuaraniParaguay ResourceSubLang = 0x1
+
+	// Gujarati (gu)
+	LangGujarati ResourceLang = 0x0047
+	// Gujarati India (gu-IN)
+	SubLangGujaratiIndia ResourceSubLang = 0x1
+
+	// Hausa (Latin) (ha)
+	LangHausaLatin ResourceLang = 0x0068
+	// Hausa (Latin) (ha-Latn)
+	SubLangHausaLatin ResourceSubLang = 0x1f
+	// Hausa (Latin) Nigeria (ha-Latn-NG)
+	SubLangHausaLatinNigeria ResourceSubLang = 0x1
+
+	// Hawaiian (haw)
+	LangHawaiian ResourceLang = 0x0075
+	// Hawaiian United States (haw-US)
+	SubLangHawaiianUnitedStates ResourceSubLang = 0x1
+
+	// Hebrew (he)
+	LangHebrew ResourceLang = 0x000D
+	// Hebrew Israel (he-IL)
+	SubLangHebrewIsrael ResourceSubLang = 0x1
+
+	// Hindi (hi)
+	LangHindi ResourceLang = 0x0039
+	// Hindi India (hi-IN)
+	SubLangHindiIndia ResourceSubLang = 0x1
+
+	// Hungarian (hu)
+	LangHungarian ResourceLang = 0x000E
+	// Hungarian Hungary (hu-HU)
+	SubLangHungarianHungary ResourceSubLang = 0x1
+
+	// Icelandic (is)
+	LangIcelandic ResourceLang = 0x000F
+	// Icelandic Iceland (is-IS)
+	SubLangIcelandicIceland ResourceSubLang = 0x1
+
+	// Igbo (ig)
+	LangIgbo ResourceLang = 0x0070
+	// Igbo Nigeria (ig-NG)
+	SubLangIgboNigeria ResourceSubLang = 0x1
+
+	// Indonesian (id)
+	LangIndonesian ResourceLang = 0x0021
+	// Indonesian Indonesia (id-ID)
+	SubLangIndonesianIndonesia ResourceSubLang = 0x1
+
+	// Inuktitut (Latin) (iu)
+	LangInuktitutLatin ResourceLang = 0x005D
+	// Inuktitut (Latin) (iu-Latn)
+	SubLangInuktitutLatin ResourceSubLang = 0x1f
+	// Inuktitut (Latin) Canada (iu-Latn-CA)
+	SubLangInuktitutLatinCanada ResourceSubLang = 0x2
+	// Inuktitut (Syllabics) (iu-Cans)
+	SubLangInuktitutSyllabics ResourceSubLang = 0x1e
+	// Inuktitut (Syllabics) Canada (iu-Cans-CA)
+	SubLangInuktitutSyllabicsCanada ResourceSubLang = 0x1
+
+	// Irish (ga)
+	LangIrish ResourceLang = 0x003C
+	// Irish Ireland (ga-IE)
+	SubLangIrishIreland ResourceSubLang = 0x2
+
+	// Italian (it)
+	LangItalian ResourceLang = 0x0010
+	// Italian Italy (it-IT)
+	SubLangItalianItaly ResourceSubLang = 0x1
+	// Italian Switzerland (it-CH)
+	SubLangItalianSwitzerland ResourceSubLang = 0x2
+
+	// Japanese (ja)
+	LangJapanese ResourceLang = 0x0011
+	// Japanese Japan (ja-JP)
+	SubLangJapaneseJapan ResourceSubLang = 0x1
+
+	// Kannada (kn)
+	LangKannada ResourceLang = 0x004B
+	// Kannada India (kn-IN)
+	SubLangKannadaIndia ResourceSubLang = 0x1
+	// Kanuri (Latin) Nigeria (kr-Latn-NG)
+	SubLangKanuriLatinNigeria ResourceSubLang = 0x1
+
+	// Kashmiri (ks)
+	LangKashmiri ResourceLang = 0x0060
+	// Kashmiri Perso-Arabic (ks-Arab)
+	SubLangKashmiriPersoArabic ResourceSubLang = 0x1
+	// Kashmiri (Devanagari) India (ks-Deva-IN)
+	SubLangKashmiriDevanagariIndia ResourceSubLang = 0x2
+
+	// Kazakh (kk)
+	LangKazakh ResourceLang = 0x003F
+	// Kazakh Kazakhstan (kk-KZ)
+	SubLangKazakhKazakhstan ResourceSubLang = 0x1
+
+	// Khmer (km)
+	LangKhmer ResourceLang = 0x0053
+	// Khmer Cambodia (km-KH)
+	SubLangKhmerCambodia ResourceSubLang = 0x1
+
+	// K'iche (quc)
+	LangKiche ResourceLang = 0x0086
+	// K'iche Guatemala (quc-Latn-GT)
+	SubLangKicheGuatemala ResourceSubLang = 0x1
+
+	// Kinyarwanda (rw)
+	LangKinyarwanda ResourceLang = 0x0087
+	// Kinyarwanda Rwanda (rw-RW)
+	SubLangKinyarwandaRwanda ResourceSubLang = 0x1
+
+	// Kiswahili (sw)
+	LangKiswahili ResourceLang = 0x0041
+	// Kiswahili Kenya (sw-KE)
+	SubLangKiswahiliKenya ResourceSubLang = 0x1
+
+	// Konkani (kok)
+	LangKonkani ResourceLang = 0x0057
+	// Konkani India (kok-IN)
+	SubLangKonkaniIndia ResourceSubLang = 0x1
+
+	// Korean (ko)
+	LangKorean ResourceLang = 0x0012
+	// Korean Korea (ko-KR)
+	SubLangKoreanKorea ResourceSubLang = 0x1
+
+	// Kyrgyz (ky)
+	LangKyrgyz ResourceLang = 0x0040
+	// Kyrgyz Kyrgyzstan (ky-KG)
+	SubLangKyrgyzKyrgyzstan ResourceSubLang = 0x1
+
+	// Lao (lo)
+	LangLao ResourceLang = 0x0054
+	// Lao Lao P.d.r. (lo-LA)
+	SubLangLaoLaoPdr ResourceSubLang = 0x1
+	// Latin Vatican City (la-VA)
+	SubLangLatinVaticanCity ResourceSubLang = 0x1
+
+	// Latvian (lv)
+	LangLatvian ResourceLang = 0x0026
+	// Latvian Latvia (lv-LV)
+	SubLangLatvianLatvia ResourceSubLang = 0x1
+
+	// Lithuanian (lt)
+	LangLithuanian ResourceLang = 0x0027
+	// Lithuanian Lithuania (lt-LT)
+	SubLangLithuanianLithuania ResourceSubLang = 0x1
+
+	// Lower Sorbian (dsb)
+	LangLowerSorbian ResourceLang = 0x7C2E
+	// Lower Sorbian Germany (dsb-DE)
+	SubLangLowerSorbianGermany ResourceSubLang = 0x2
+
+	// Luxembourgish (lb)
+	LangLuxembourgish ResourceLang = 0x006E
+	// Luxembourgish Luxembourg (lb-LU)
+	SubLangLuxembourgishLuxembourg ResourceSubLang = 0x1
+
+	// Macedonian (mk)
+	LangMacedonian ResourceLang = 0x002F
+	// Macedonian North Macedonia (mk-MK)
+	SubLangMacedonianNorthMacedonia ResourceSubLang = 0x1
+
+	// Malay (ms)
+	LangMalay ResourceLang = 0x003E
+	// Malay Brunei Darussalam (ms-BN)
+	SubLangMalayBruneiDarussalam ResourceSubLang = 0x2
+	// Malay Malaysia (ms-MY)
+	SubLangMalayMalaysia ResourceSubLang = 0x1
+
+	// Malayalam (ml)
+	LangMalayalam ResourceLang = 0x004C
+	// Malayalam India (ml-IN)
+	SubLangMalayalamIndia ResourceSubLang = 0x1
+
+	// Maltese (mt)
+	LangMaltese ResourceLang = 0x003A
+	// Maltese Malta (mt-MT)
+	SubLangMalteseMalta ResourceSubLang = 0x1
+
+	// Maori (mi)
+	LangMaori ResourceLang = 0x0081
+	// Maori New Zealand (mi-NZ)
+	SubLangMaoriNewZealand ResourceSubLang = 0x1
+
+	// Mapudungun (arn)
+	LangMapudungun ResourceLang = 0x007A
+	// Mapudungun Chile (arn-CL)
+	SubLangMapudungunChile ResourceSubLang = 0x1
+
+	// Marathi (mr)
+	LangMarathi ResourceLang = 0x004E
+	// Marathi India (mr-IN)
+	SubLangMarathiIndia ResourceSubLang = 0x1
+
+	// Mohawk (moh)
+	LangMohawk ResourceLang = 0x007C
+	// Mohawk Canada (moh-CA)
+	SubLangMohawkCanada ResourceSubLang = 0x1
+
+	// Mongolian (Cyrillic) (mn)
+	LangMongolianCyrillic ResourceLang = 0x0050
+	// Mongolian (Cyrillic) (mn-Cyrl)
+	SubLangMongolianCyrillic ResourceSubLang = 0x1e
+	// Mongolian (Cyrillic) Mongolia (mn-MN)
+	SubLangMongolianCyrillicMongolia ResourceSubLang = 0x1
+	// Mongolian (Traditional Mongolian) (mn-Mong)
+	SubLangMongolianTraditionalMongolian ResourceSubLang = 0x1f
+	// Mongolian (Traditional Mongolian) People's Republic Of China (mn-MongCN)
+	SubLangMongolianTraditionalMongolianPeoplesRepublicOfChina ResourceSubLang = 0x2
+	// Mongolian (Traditional Mongolian) Mongolia (mn-MongMN)
+	SubLangMongolianTraditionalMongolianMongolia ResourceSubLang = 0x3
+
+	// Nepali (ne)
+	LangNepali ResourceLang = 0x0061
+	// Nepali India (ne-IN)
+	SubLangNepaliIndia ResourceSubLang = 0x2
+	// Nepali Nepal (ne-NP)
+	SubLangNepaliNepal ResourceSubLang = 0x1
+
+	// Norwegian (Bokmal) (no)
+	LangNorwegianBokmal1 ResourceLang = 0x0014
+
+	// Norwegian (Bokmal) (nb)
+	LangNorwegianBokmal ResourceLang = 0x7C14
+	// Norwegian (Bokmal) Norway (nb-NO)
+	SubLangNorwegianBokmalNorway ResourceSubLang = 0x1
+
+	// Norwegian (Nynorsk) (nn)
+	LangNorwegianNynorsk ResourceLang = 0x7814
+	// Norwegian (Nynorsk) Norway (nn-NO)
+	SubLangNorwegianNynorskNorway ResourceSubLang = 0x2
+
+	// Occitan (oc)
+	LangOccitan ResourceLang = 0x0082
+	// Occitan France (oc-FR)
+	SubLangOccitanFrance ResourceSubLang = 0x1
+
+	// Odia (or)
+	LangOdia ResourceLang = 0x0048
+	// Odia India (or-IN)
+	SubLangOdiaIndia ResourceSubLang = 0x1
+
+	// Oromo (om)
+	LangOromo ResourceLang = 0x0072
+	// Oromo Ethiopia (om-ET)
+	SubLangOromoEthiopia ResourceSubLang = 0x1
+
+	// Pashto (ps)
+	LangPashto ResourceLang = 0x0063
+	// Pashto Afghanistan (ps-AF)
+	SubLangPashtoAfghanistan ResourceSubLang = 0x1
+
+	// Persian (fa)
+	LangPersian ResourceLang = 0x0029
+	// Persian Iran (fa-IR)
+	SubLangPersianIran ResourceSubLang = 0x1
+
+	// Polish (pl)
+	LangPolish ResourceLang = 0x0015
+	// Polish Poland (pl-PL)
+	SubLangPolishPoland ResourceSubLang = 0x1
+
+	// Portuguese (pt)
+	LangPortuguese ResourceLang = 0x0016
+	// Portuguese Brazil (pt-BR)
+	SubLangPortugueseBrazil ResourceSubLang = 0x1
+	// Portuguese Portugal (pt-PT)
+	SubLangPortuguesePortugal ResourceSubLang = 0x2
+	// Pseudo Language Pseudo Locale For East Asian/complex Script Localization Testing (qps-ploca)
+	SubLangPseudoLanguagePseudoLocaleForEastAsianComplexScriptLocalizationTesting ResourceSubLang = 0x1
+	// Pseudo Language Pseudo Locale Used For Localization Testing (qps-ploc)
+	SubLangPseudoLanguagePseudoLocaleUsedForLocalizationTesting ResourceSubLang = 0x1
+	// Pseudo Language Pseudo Locale Used For Localization Testing Of Mirrored Locales (qps-plocm)
+	SubLangPseudoLanguagePseudoLocaleUsedForLocalizationTestingOfMirroredLocales ResourceSubLang = 0x2
+
+	// Punjabi (pa)
+	LangPunjabi ResourceLang = 0x0046
+	// Punjabi (pa-Arab)
+	SubLangPunjabi ResourceSubLang = 0x1f
+	// Punjabi India (pa-IN)
+	SubLangPunjabiIndia ResourceSubLang = 0x1
+	// Punjabi Islamic Republic Of Pakistan (pa-Arab-PK)
+	SubLangPunjabiIslamicRepublicOfPakistan ResourceSubLang = 0x2
+
+	// Quechua (quz)
+	LangQuechua ResourceLang = 0x006B
+	// Quechua Bolivia (quz-BO)
+	SubLangQuechuaBolivia ResourceSubLang = 0x1
+	// Quechua Ecuador (quz-EC)
+	SubLangQuechuaEcuador ResourceSubLang = 0x2
+	// Quechua Peru (quz-PE)
+	SubLangQuechuaPeru ResourceSubLang = 0x3
+
+	// Romanian (ro)
+	LangRomanian ResourceLang = 0x0018
+	// Romanian Moldova (ro-MD)
+	SubLangRomanianMoldova ResourceSubLang = 0x2
+	// Romanian Romania (ro-RO)
+	SubLangRomanianRomania ResourceSubLang = 0x1
+
+	// Romansh (rm)
+	LangRomansh ResourceLang = 0x0017
+	// Romansh Switzerland (rm-CH)
+	SubLangRomanshSwitzerland ResourceSubLang = 0x1
+
+	// Russian (ru)
+	LangRussian ResourceLang = 0x0019
+	// Russian Moldova (ru-MD)
+	SubLangRussianMoldova ResourceSubLang = 0x2
+	// Russian Russia (ru-RU)
+	SubLangRussianRussia ResourceSubLang = 0x1
+
+	// Sakha (sah)
+	LangSakha ResourceLang = 0x0085
+	// Sakha Russia (sah-RU)
+	SubLangSakhaRussia ResourceSubLang = 0x1
+
+	// Sami (Inari) (smn)
+	LangSamiInari ResourceLang = 0x703B
+	// Sami (Inari) Finland (smn-FI)
+	SubLangSamiInariFinland ResourceSubLang = 0x9
+
+	// Sami (Lule) (smj)
+	LangSamiLule ResourceLang = 0x7C3B
+	// Sami (Lule) Norway (smj-NO)
+	SubLangSamiLuleNorway ResourceSubLang = 0x4
+	// Sami (Lule) Sweden (smj-SE)
+	SubLangSamiLuleSweden ResourceSubLang = 0x5
+
+	// Sami (Northern) (se)
+	LangSamiNorthern ResourceLang = 0x003B
+	// Sami (Northern) Finland (se-FI)
+	SubLangSamiNorthernFinland ResourceSubLang = 0x3
+	// Sami (Northern) Norway (se-NO)
+	SubLangSamiNorthernNorway ResourceSubLang = 0x1
+	// Sami (Northern) Sweden (se-SE)
+	SubLangSamiNorthernSweden ResourceSubLang = 0x2
+
+	// Sami (Skolt) (sms)
+	LangSamiSkolt ResourceLang = 0x743B
+	// Sami (Skolt) Finland (sms-FI)
+	SubLangSamiSkoltFinland ResourceSubLang = 0x8
+
+	// Sami (Southern) (sma)
+	LangSamiSouthern ResourceLang = 0x783B
+	// Sami (Southern) Norway (sma-NO)
+	SubLangSamiSouthernNorway ResourceSubLang = 0x6
+	// Sami (Southern) Sweden (sma-SE)
+	SubLangSamiSouthernSweden ResourceSubLang = 0x7
+
+	// Sanskrit (sa)
+	LangSanskrit ResourceLang = 0x004F
+	// Sanskrit India (sa-IN)
+	SubLangSanskritIndia ResourceSubLang = 0x1
+
+	// Scottish Gaelic (gd)
+	LangScottishGaelic ResourceLang = 0x0091
+	// Scottish Gaelic United Kingdom (gd-GB)
+	SubLangScottishGaelicUnitedKingdom ResourceSubLang = 0x1
+	// Serbian (Cyrillic) (sr-Cyrl)
+	SubLangSerbianCyrillic ResourceSubLang = 0x1b
+	// Serbian (Cyrillic) Bosnia And Herzegovina (sr-Cyrl-BA)
+	SubLangSerbianCyrillicBosniaAndHerzegovina ResourceSubLang = 0x7
+	// Serbian (Cyrillic) Montenegro (sr-Cyrl-ME)
+	SubLangSerbianCyrillicMontenegro ResourceSubLang = 0xc
+	// Serbian (Cyrillic) Serbia (sr-Cyrl-RS)
+	SubLangSerbianCyrillicSerbia ResourceSubLang = 0xa
+	// Serbian (Cyrillic) Serbia And Montenegro (former) (sr-Cyrl-CS)
+	SubLangSerbianCyrillicSerbiaAndMontenegroFormer ResourceSubLang = 0x3
+	// Serbian (Latin) (sr-Latn)
+	SubLangSerbianLatin ResourceSubLang = 0x1c
+
+	// Serbian (Latin) (sr)
+	LangSerbianLatin ResourceLang = 0x7C1A
+	// Serbian (Latin) Bosnia And Herzegovina (sr-Latn-BA)
+	SubLangSerbianLatinBosniaAndHerzegovina ResourceSubLang = 0x6
+	// Serbian (Latin) Montenegro (sr-Latn-ME)
+	SubLangSerbianLatinMontenegro ResourceSubLang = 0xb
+	// Serbian (Latin) Serbia (sr-Latn-RS)
+	SubLangSerbianLatinSerbia ResourceSubLang = 0x9
+	// Serbian (Latin) Serbia And Montenegro (former) (sr-Latn-CS)
+	SubLangSerbianLatinSerbiaAndMontenegroFormer ResourceSubLang = 0x2
+
+	// Sesotho Sa Leboa (nso)
+	LangSesothoSaLeboa ResourceLang = 0x006C
+	// Sesotho Sa Leboa South Africa (nso-ZA)
+	SubLangSesothoSaLeboaSouthAfrica ResourceSubLang = 0x1
+
+	// Setswana (tn)
+	LangSetswana ResourceLang = 0x0032
+	// Setswana Botswana (tn-BW)
+	SubLangSetswanaBotswana ResourceSubLang = 0x2
+	// Setswana South Africa (tn-ZA)
+	SubLangSetswanaSouthAfrica ResourceSubLang = 0x1
+
+	// Sindhi (sd)
+	LangSindhi ResourceLang = 0x0059
+	// Sindhi (sd-Arab)
+	SubLangSindhi ResourceSubLang = 0x1f
+	// Sindhi Islamic Republic Of Pakistan (sd-Arab-PK)
+	SubLangSindhiIslamicRepublicOfPakistan ResourceSubLang = 0x2
+
+	// Sinhala (si)
+	LangSinhala ResourceLang = 0x005B
+	// Sinhala Sri Lanka (si-LK)
+	SubLangSinhalaSriLanka ResourceSubLang = 0x1
+
+	// Slovak (sk)
+	LangSlovak ResourceLang = 0x001B
+	// Slovak Slovakia (sk-SK)
+	SubLangSlovakSlovakia ResourceSubLang = 0x1
+
+	// Slovenian (sl)
+	LangSlovenian ResourceLang = 0x0024
+	// Slovenian Slovenia (sl-SI)
+	SubLangSlovenianSlovenia ResourceSubLang = 0x1
+
+	// Somali (so)
+	LangSomali ResourceLang = 0x0077
+	// Somali Somalia (so-SO)
+	SubLangSomaliSomalia ResourceSubLang = 0x1
+
+	// Sotho (st)
+	LangSotho ResourceLang = 0x0030
+	// Sotho South Africa (st-ZA)
+	SubLangSothoSouthAfrica ResourceSubLang = 0x1
+
+	// Spanish (es)
+	LangSpanish ResourceLang = 0x000A
+	// Spanish Argentina (es-AR)
+	SubLangSpanishArgentina ResourceSubLang = 0xb
+	// Spanish Bolivarian Republic Of Venezuela (es-VE)
+	SubLangSpanishBolivarianRepublicOfVenezuela ResourceSubLang = 0x8
+	// Spanish Bolivia (es-BO)
+	SubLangSpanishBolivia ResourceSubLang = 0x10
+	// Spanish Chile (es-CL)
+	SubLangSpanishChile ResourceSubLang = 0xd
+	// Spanish Colombia (es-CO)
+	SubLangSpanishColombia ResourceSubLang = 0x9
+	// Spanish Costa Rica (es-CR)
+	SubLangSpanishCostaRica ResourceSubLang = 0x5
+	// Spanish Cuba (es-CU)
+	SubLangSpanishCuba ResourceSubLang = 0x17
+	// Spanish Dominican Republic (es-DO)
+	SubLangSpanishDominicanRepublic ResourceSubLang = 0x7
+	// Spanish Ecuador (es-EC)
+	SubLangSpanishEcuador ResourceSubLang = 0xc
+	// Spanish El Salvador (es-SV)
+	SubLangSpanishElSalvador ResourceSubLang = 0x11
+	// Spanish Guatemala (es-GT)
+	SubLangSpanishGuatemala ResourceSubLang = 0x4
+	// Spanish Honduras (es-HN)
+	SubLangSpanishHonduras ResourceSubLang = 0x12
+	// Spanish Latin America (es-419)
+	SubLangSpanishLatinAmerica ResourceSubLang = 0x16
+	// Spanish Mexico (es-MX)
+	SubLangSpanishMexico ResourceSubLang = 0x2
+	// Spanish Nicaragua (es-NI)
+	SubLangSpanishNicaragua ResourceSubLang = 0x13
+	// Spanish Panama (es-PA)
+	SubLangSpanishPanama ResourceSubLang = 0x6
+	// Spanish Paraguay (es-PY)
+	SubLangSpanishParaguay ResourceSubLang = 0xf
+	// Spanish Peru (es-PE)
+	SubLangSpanishPeru ResourceSubLang = 0xa
+	// Spanish Puerto Rico (es-PR)
+	SubLangSpanishPuertoRico ResourceSubLang = 0x14
+	// Spanish Spain (es-ES_tradnl)
+	SubLangSpanishSpainTraditional ResourceSubLang = 0x1
+	// Spanish Spain (es-ES)
+	SubLangSpanishSpain ResourceSubLang = 0x3
+	// Spanish United States (es-US)
+	SubLangSpanishUnitedStates ResourceSubLang = 0x15
+	// Spanish Uruguay (es-UY)
+	SubLangSpanishUruguay ResourceSubLang = 0xe
+
+	// Swedish (sv)
+	LangSwedish ResourceLang = 0x001D
+	// Swedish Finland (sv-FI)
+	SubLangSwedishFinland ResourceSubLang = 0x2
+	// Swedish Sweden (sv-SE)
+	SubLangSwedishSweden ResourceSubLang = 0x1
+
+	// Syriac (syr)
+	LangSyriac ResourceLang = 0x005A
+	// Syriac Syria (syr-SY)
+	SubLangSyriacSyria ResourceSubLang = 0x1
+
+	// Tajik (Cyrillic) (tg)
+	LangTajikCyrillic ResourceLang = 0x0028
+	// Tajik (Cyrillic) (tg-Cyrl)
+	SubLangTajikCyrillic ResourceSubLang = 0x1f
+	// Tajik (Cyrillic) Tajikistan (tg-Cyrl-TJ)
+	SubLangTajikCyrillicTajikistan ResourceSubLang = 0x1
+
+	// Tamazight (Latin) (tzm)
+	LangTamazightLatin ResourceLang = 0x005F
+	// Tamazight (Latin) (tzm-Latn)
+	SubLangTamazightLatin ResourceSubLang = 0x1f
+	// Tamazight (Latin) Algeria (tzm-Latn-DZ)
+	SubLangTamazightLatinAlgeria ResourceSubLang = 0x2
+
+	// Tamil (ta)
+	LangTamil ResourceLang = 0x0049
+	// Tamil India (ta-IN)
+	SubLangTamilIndia ResourceSubLang = 0x1
+	// Tamil Sri Lanka (ta-LK)
+	SubLangTamilSriLanka ResourceSubLang = 0x2
+
+	// Tatar (tt)
+	LangTatar ResourceLang = 0x0044
+	// Tatar Russia (tt-RU)
+	SubLangTatarRussia ResourceSubLang = 0x1
+
+	// Telugu (te)
+	LangTelugu ResourceLang = 0x004A
+	// Telugu India (te-IN)
+	SubLangTeluguIndia ResourceSubLang = 0x1
+
+	// Thai (th)
+	LangThai ResourceLang = 0x001E
+	// Thai Thailand (th-TH)
+	SubLangThaiThailand ResourceSubLang = 0x1
+
+	// Tibetan (bo)
+	LangTibetan ResourceLang = 0x0051
+	// Tibetan People's Republic Of China (bo-CN)
+	SubLangTibetanPeoplesRepublicOfChina ResourceSubLang = 0x1
+
+	// Tigrinya (ti)
+	LangTigrinya ResourceLang = 0x0073
+	// Tigrinya Eritrea (ti-ER)
+	SubLangTigrinyaEritrea ResourceSubLang = 0x2
+	// Tigrinya Ethiopia (ti-ET)
+	SubLangTigrinyaEthiopia ResourceSubLang = 0x1
+
+	// Tsonga (ts)
+	LangTsonga ResourceLang = 0x0031
+	// Tsonga South Africa (ts-ZA)
+	SubLangTsongaSouthAfrica ResourceSubLang = 0x1
+
+	// Turkish (tr)
+	LangTurkish ResourceLang = 0x001F
+	// Turkish Turkey (tr-TR)
+	SubLangTurkishTurkey ResourceSubLang = 0x1
+
+	// Turkmen (tk)
+	LangTurkmen ResourceLang = 0x0042
+	// Turkmen Turkmenistan (tk-TM)
+	SubLangTurkmenTurkmenistan ResourceSubLang = 0x1
+
+	// Ukrainian (uk)
+	LangUkrainian ResourceLang = 0x0022
+	// Ukrainian Ukraine (uk-UA)
+	SubLangUkrainianUkraine ResourceSubLang = 0x1
+
+	// Upper Sorbian (hsb)
+	LangUpperSorbian ResourceLang = 0x002E
+	// Upper Sorbian Germany (hsb-DE)
+	SubLangUpperSorbianGermany ResourceSubLang = 0x1
+
+	// Urdu (ur)
+	LangUrdu ResourceLang = 0x0020
+	// Urdu India (ur-IN)
+	SubLangUrduIndia ResourceSubLang = 0x2
+	// Urdu Islamic Republic Of Pakistan (ur-PK)
+	SubLangUrduIslamicRepublicOfPakistan ResourceSubLang = 0x1
+
+	// Uyghur (ug)
+	LangUyghur ResourceLang = 0x0080
+	// Uyghur People's Republic Of China (ug-CN)
+	SubLangUyghurPeoplesRepublicOfChina ResourceSubLang = 0x1
+	// Uzbek (Cyrillic) (uz-Cyrl)
+	SubLangUzbekCyrillic ResourceSubLang = 0x1e
+	// Uzbek (Cyrillic) Uzbekistan (uz-Cyrl-UZ)
+	SubLangUzbekCyrillicUzbekistan ResourceSubLang = 0x2
+
+	// Uzbek (Latin) (uz)
+	LangUzbekLatin ResourceLang = 0x0043
+	// Uzbek (Latin) (uz-Latn)
+	SubLangUzbekLatin ResourceSubLang = 0x1f
+	// Uzbek (Latin) Uzbekistan (uz-Latn-UZ)
+	SubLangUzbekLatinUzbekistan ResourceSubLang = 0x1
+	// Valencian Spain (ca-ESvalencia)
+	SubLangValencianSpain ResourceSubLang = 0x2
+
+	// Venda (ve)
+	LangVenda ResourceLang = 0x0033
+	// Venda South Africa (ve-ZA)
+	SubLangVendaSouthAfrica ResourceSubLang = 0x1
+
+	// Vietnamese (vi)
+	LangVietnamese ResourceLang = 0x002A
+	// Vietnamese Vietnam (vi-VN)
+	SubLangVietnameseVietnam ResourceSubLang = 0x1
+
+	// Welsh (cy)
+	LangWelsh ResourceLang = 0x0052
+	// Welsh United Kingdom (cy-GB)
+	SubLangWelshUnitedKingdom ResourceSubLang = 0x1
+
+	// Wolof (wo)
+	LangWolof ResourceLang = 0x0088
+	// Wolof Senegal (wo-SN)
+	SubLangWolofSenegal ResourceSubLang = 0x1
+
+	// Xhosa (xh)
+	LangXhosa ResourceLang = 0x0034
+	// Xhosa South Africa (xh-ZA)
+	SubLangXhosaSouthAfrica ResourceSubLang = 0x1
+
+	// Yi (ii)
+	LangYi ResourceLang = 0x0078
+	// Yi People's Republic Of China (ii-CN)
+	SubLangYiPeoplesRepublicOfChina ResourceSubLang = 0x1
+	// Yiddish World (yi-001)
+	SubLangYiddishWorld ResourceSubLang = 0x1
+
+	// Yoruba (yo)
+	LangYoruba ResourceLang = 0x006A
+	// Yoruba Nigeria (yo-NG)
+	SubLangYorubaNigeria ResourceSubLang = 0x1
+
+	// Zulu (zu)
+	LangZulu ResourceLang = 0x0035
+	// Zulu South Africa (zu-ZA)
+	SubLangZuluSouthAfrica ResourceSubLang = 0x1
+)
+
 const (
 	maxAllowedEntries = 0x1000
 )
@@ -355,237 +1356,144 @@ func (rt ResourceType) String() string {
 func (lang ResourceLang) String() string {
 
 	rsrcLangMap := map[ResourceLang]string{
-		LangNeutral:                   "Neutral",
-		LangInvariant:                 "Invariant",
-		LangAfar:                      "Afar (aa)",
-		LangAfrikaans:                 "Afrikaans (af)",
-		LangAghem:                     "Aghem (agq)",
-		LangAkan:                      "Akan (ak)",
-		LangAlbanian:                  "Albanian (sq)",
-		LangAlsatian:                  "Alsatian (gsw)",
-		LangAmharic:                   "Amharic (am)",
-		LangArabic:                    "Arabic (ar)",
-		LangArmenian:                  "Armenian (hy)",
-		LangAssamese:                  "Assamese (as)",
-		LangAsturian:                  "Asturian (ast)",
-		LangAsu:                       "Asu (asa)",
-		LangAzerbaijaniLatin:          "Azerbaijani (Latin) (az)",
-		LangBafia:                     "Bafia (ksf)",
-		LangBamanankan:                "Bamanankan (bm)",
-		LangBangla:                    "Bangla (bn)",
-		LangBasaa:                     "Basaa (bas)",
-		LangBashkir:                   "Bashkir (ba)",
-		LangBasque:                    "Basque (eu)",
-		LangBelarusian:                "Belarusian (be)",
-		LangBemba:                     "Bemba (bem)",
-		LangBena:                      "Bena (bez)",
-		LangBlin:                      "Blin (byn)",
-		LangBodo:                      "Bodo (brx)",
-		LangBosnianLatin:              "Bosnian (Latin) (bs)",
-		LangBreton:                    "Breton (br)",
-		LangBulgarian:                 "Bulgarian (bg)",
-		LangBurmese:                   "Burmese (my)",
-		LangCatalan:                   "Catalan (ca)",
-		LangCebuano:                   "Cebuano (ceb)",
-		LangCentralKurdish:            "Central Kurdish (ku)",
-		LangChakma:                    "Chakma (ccp)",
-		LangCherokee:                  "Cherokee (chr)",
-		LangChiga:                     "Chiga (cgg)",
-		LangChineseSimplified:         "Chinese (Simplified) (zh)",
-		LangCongoSwahili:              "Congo Swahili (swc)",
-		LangCornish:                   "Cornish (kw)",
-		LangCorsican:                  "Corsican (co)",
-		LangCroatian:                  "Croatian (hr)",
-		LangCzech:                     "Czech (cs)",
-		LangDanish:                    "Danish (da)",
-		LangDari:                      "Dari (prs)",
-		LangDivehi:                    "Divehi (dv)",
-		LangDuala:                     "Duala (dua)",
-		LangDutch:                     "Dutch (nl)",
-		LangDzongkha:                  "Dzongkha (dz)",
-		LangEmbu:                      "Embu (ebu)",
-		LangEnglish:                   "English (en)",
-		LangEsperanto:                 "Esperanto (eo)",
-		LangEstonian:                  "Estonian (et)",
-		LangEwe:                       "Ewe (ee)",
-		LangEwondo:                    "Ewondo (ewo)",
-		LangFaroese:                   "Faroese (fo)",
-		LangFilipino:                  "Filipino (fil)",
-		LangFinnish:                   "Finnish (fi)",
-		LangFrench:                    "French (fr)",
-		LangFrisian:                   "Frisian (fy)",
-		LangFriulian:                  "Friulian (fur)",
-		LangFulah:                     "Fulah (ff)",
-		LangGalician:                  "Galician (gl)",
-		LangGanda:                     "Ganda (lg)",
-		LangGeorgian:                  "Georgian (ka)",
-		LangGerman:                    "German (de)",
-		LangGreek:                     "Greek (el)",
-		LangGreenlandic:               "Greenlandic (kl)",
-		LangGuarani:                   "Guarani (gn)",
-		LangGujarati:                  "Gujarati (gu)",
-		LangGusii:                     "Gusii (guz)",
-		LangHausaLatin:                "Hausa (Latin) (ha)",
-		LangHawaiian:                  "Hawaiian (haw)",
-		LangHebrew:                    "Hebrew (he)",
-		LangHindi:                     "Hindi (hi)",
-		LangHungarian:                 "Hungarian (hu)",
-		LangIcelandic:                 "Icelandic (is)",
-		LangIgbo:                      "Igbo (ig)",
-		LangIndonesian:                "Indonesian (id)",
-		LangInterlingua:               "Interlingua (ia)",
-		LangInuktitutLatin:            "Inuktitut (Latin) (iu)",
-		LangIrish:                     "Irish (ga)",
-		LangItalian:                   "Italian (it)",
-		LangJapanese:                  "Japanese (ja)",
-		LangJavanese:                  "Javanese (jv)",
-		LangJolaFonyi:                 "Jola-Fonyi (dyo)",
-		LangKabuverdianu:              "Kabuverdianu (kea)",
-		LangKabyle:                    "Kabyle (kab)",
-		LangKako:                      "Kako (kkj)",
-		LangKalenjin:                  "Kalenjin (kln)",
-		LangKamba:                     "Kamba (kam)",
-		LangKannada:                   "Kannada (kn)",
-		LangKashmiri:                  "Kashmiri (ks)",
-		LangKazakh:                    "Kazakh (kk)",
-		LangKhmer:                     "Khmer (km)",
-		LangKiche:                     "K'iche (quc)",
-		LangKikuyu:                    "Kikuyu (ki)",
-		LangKinyarwanda:               "Kinyarwanda (rw)",
-		LangKiswahili:                 "Kiswahili (sw)",
-		LangKonkani:                   "Konkani (kok)",
-		LangKorean:                    "Korean (ko)",
-		LangKoyraChiini:               "Koyra Chiini (khq)",
-		LangKoyraboroSenni:            "Koyraboro Senni (ses)",
-		LangKwasio:                    "Kwasio (nmg)",
-		LangKyrgyz:                    "Kyrgyz (ky)",
-		LangLakota:                    "Lakota (lkt)",
-		LangLangi:                     "Langi (lag)",
-		LangLao:                       "Lao (lo)",
-		LangLatvian:                   "Latvian (lv)",
-		LangLingala:                   "Lingala (ln)",
-		LangLithuanian:                "Lithuanian (lt)",
-		LangLowGerman:                 "Low German (nds)",
-		LangLowerSorbian:              "Lower Sorbian (dsb)",
-		LangLubaKatanga:               "Luba-Katanga (lu)",
-		LangLuo:                       "Luo (luo)",
-		LangLuxembourgish:             "Luxembourgish (lb)",
-		LangLuyia:                     "Luyia (luy)",
-		LangMacedonian:                "Macedonian (mk)",
-		LangMachame:                   "Machame (jmc)",
-		LangMakhuwaMeetto:             "Makhuwa-Meetto (mgh)",
-		LangMakonde:                   "Makonde (kde)",
-		LangMalagasy:                  "Malagasy (mg)",
-		LangMalay:                     "Malay (ms)",
-		LangMalayalam:                 "Malayalam (ml)",
-		LangMaltese:                   "Maltese (mt)",
-		LangManx:                      "Manx (gv)",
-		LangMaori:                     "Maori (mi)",
-		LangMapudungun:                "Mapudungun (arn)",
-		LangMarathi:                   "Marathi (mr)",
-		LangMasai:                     "Masai (mas)",
-		LangMeru:                      "Meru (mer)",
-		LangMeta:                      "Meta' (mgo)",
-		LangMohawk:                    "Mohawk (moh)",
-		LangMongolianCyrillic:         "Mongolian (Cyrillic) (mn)",
-		LangMorisyen:                  "Morisyen (mfe)",
-		LangMundang:                   "Mundang (mua)",
-		LangNko:                       "N'ko (nqo)",
-		LangNama:                      "Nama (naq)",
-		LangNepali:                    "Nepali (ne)",
-		LangNgiemboon:                 "Ngiemboon (nnh)",
-		LangNgomba:                    "Ngomba (jgo)",
-		LangNorthNdebele:              "North Ndebele (nd)",
-		LangNorwegianBokmal:           "Norwegian (Bokmal) (no)",
-		LangNorwegianBokmal:           "Norwegian (Bokmal) (nb)",
-		LangNorwegianNynorsk:          "Norwegian (Nynorsk) (nn)",
-		LangNuer:                      "Nuer (nus)",
-		LangNyankole:                  "Nyankole (nyn)",
-		LangOccitan:                   "Occitan (oc)",
-		LangOdia:                      "Odia (or)",
-		LangOromo:                     "Oromo (om)",
-		LangOssetian:                  "Ossetian (os)",
-		LangPashto:                    "Pashto (ps)",
-		LangPersian:                   "Persian (fa)",
-		LangPolish:                    "Polish (pl)",
-		LangPortuguese:                "Portuguese (pt)",
-		LangPunjabi:                   "Punjabi (pa)",
-		LangQuechua:                   "Quechua (quz)",
-		LangRipuarian:                 "Ripuarian (ksh)",
-		LangRomanian:                  "Romanian (ro)",
-		LangRomansh:                   "Romansh (rm)",
-		LangRombo:                     "Rombo (rof)",
-		LangRundi:                     "Rundi (rn)",
-		LangRussian:                   "Russian (ru)",
-		LangRwa:                       "Rwa (rwk)",
-		LangSaho:                      "Saho (ssy)",
-		LangSakha:                     "Sakha (sah)",
-		LangSamburu:                   "Samburu (saq)",
-		LangSamiInari:                 "Sami (Inari) (smn)",
-		LangSamiLule:                  "Sami (Lule) (smj)",
-		LangSamiNorthern:              "Sami (Northern) (se)",
-		LangSamiSkolt:                 "Sami (Skolt) (sms)",
-		LangSamiSouthern:              "Sami (Southern) (sma)",
-		LangSango:                     "Sango (sg)",
-		LangSangu:                     "Sangu (sbp)",
-		LangSanskrit:                  "Sanskrit (sa)",
-		LangScottishGaelic:            "Scottish Gaelic (gd)",
-		LangSena:                      "Sena (seh)",
-		LangSerbianLatin:              "Serbian (Latin) (sr)",
-		LangSesothoSaLeboa:            "Sesotho Sa Leboa (nso)",
-		LangSetswana:                  "Setswana (tn)",
-		LangShambala:                  "Shambala (ksb)",
-		LangShona:                     "Shona (sn)",
-		LangSindhi:                    "Sindhi (sd)",
-		LangSinhala:                   "Sinhala (si)",
-		LangSlovak:                    "Slovak (sk)",
-		LangSlovenian:                 "Slovenian (sl)",
-		LangSoga:                      "Soga (xog)",
-		LangSomali:                    "Somali (so)",
-		LangSotho:                     "Sotho (st)",
-		LangSouthNdebele:              "South Ndebele (nr)",
-		LangSpanish:                   "Spanish (es)",
-		LangStandardMoroccanTamazight: "Standard Moroccan Tamazight (zgh)",
-		LangSwati:                     "Swati (ss)",
-		LangSwedish:                   "Swedish (sv)",
-		LangSyriac:                    "Syriac (syr)",
-		LangTachelhit:                 "Tachelhit (shi)",
-		LangTaita:                     "Taita (dav)",
-		LangTajikCyrillic:             "Tajik (Cyrillic) (tg)",
-		LangTamazightLatin:            "Tamazight (Latin) (tzm)",
-		LangTamil:                     "Tamil (ta)",
-		LangTasawaq:                   "Tasawaq (twq)",
-		LangTatar:                     "Tatar (tt)",
-		LangTelugu:                    "Telugu (te)",
-		LangTeso:                      "Teso (teo)",
-		LangThai:                      "Thai (th)",
-		LangTibetan:                   "Tibetan (bo)",
-		LangTigre:                     "Tigre (tig)",
-		LangTigrinya:                  "Tigrinya (ti)",
-		LangTongan:                    "Tongan (to)",
-		LangTsonga:                    "Tsonga (ts)",
-		LangTurkish:                   "Turkish (tr)",
-		LangTurkmen:                   "Turkmen (tk)",
-		LangUkrainian:                 "Ukrainian (uk)",
-		LangUpperSorbian:              "Upper Sorbian (hsb)",
-		LangUrdu:                      "Urdu (ur)",
-		LangUyghur:                    "Uyghur (ug)",
-		LangUzbekLatin:                "Uzbek (Latin) (uz)",
-		LangVai:                       "Vai (vai)",
-		LangVenda:                     "Venda (ve)",
-		LangVietnamese:                "Vietnamese (vi)",
-		LangVolapük:                   "Volapük (vo)",
-		LangVunjo:                     "Vunjo (vun)",
-		LangWalser:                    "Walser (wae)",
-		LangWelsh:                     "Welsh (cy)",
-		LangWolaytta:                  "Wolaytta (wal)",
-		LangWolof:                     "Wolof (wo)",
-		LangXhosa:                     "Xhosa (xh)",
-		LangYangben:                   "Yangben (yav)",
-		LangYi:                        "Yi (ii)",
-		LangYoruba:                    "Yoruba (yo)",
-		LangZarma:                     "Zarma (dje)",
-		LangZulu:                      "Zulu (zu)",
+		LangAfrikaans:         "Afrikaans (af)",
+		LangAlbanian:          "Albanian (sq)",
+		LangAlsatian:          "Alsatian (gsw)",
+		LangAmharic:           "Amharic (am)",
+		LangArabic:            "Arabic (ar)",
+		LangArmenian:          "Armenian (hy)",
+		LangAssamese:          "Assamese (as)",
+		LangAzerbaijaniLatin:  "Azerbaijani (Latin) (az)",
+		LangBangla:            "Bangla (bn)",
+		LangBashkir:           "Bashkir (ba)",
+		LangBasque:            "Basque (eu)",
+		LangBelarusian:        "Belarusian (be)",
+		LangBosnianLatin:      "Bosnian (Latin) (bs)",
+		LangBreton:            "Breton (br)",
+		LangBulgarian:         "Bulgarian (bg)",
+		LangBurmese:           "Burmese (my)",
+		LangCatalan:           "Catalan (ca)",
+		LangCentralKurdish:    "Central Kurdish (ku)",
+		LangCherokee:          "Cherokee (chr)",
+		LangChineseSimplified: "Chinese (Simplified) (zh)",
+		LangCorsican:          "Corsican (co)",
+		LangCroatian:          "Croatian (hr)",
+		LangCzech:             "Czech (cs)",
+		LangDanish:            "Danish (da)",
+		LangDari:              "Dari (prs)",
+		LangDivehi:            "Divehi (dv)",
+		LangDutch:             "Dutch (nl)",
+		LangEnglish:           "English (en)",
+		LangEstonian:          "Estonian (et)",
+		LangFaroese:           "Faroese (fo)",
+		LangFilipino:          "Filipino (fil)",
+		LangFinnish:           "Finnish (fi)",
+		LangFrench:            "French (fr)",
+		LangFrisian:           "Frisian (fy)",
+		LangFulah:             "Fulah (ff)",
+		LangGalician:          "Galician (gl)",
+		LangGeorgian:          "Georgian (ka)",
+		LangGerman:            "German (de)",
+		LangGreek:             "Greek (el)",
+		LangGreenlandic:       "Greenlandic (kl)",
+		LangGuarani:           "Guarani (gn)",
+		LangGujarati:          "Gujarati (gu)",
+		LangHausaLatin:        "Hausa (Latin) (ha)",
+		LangHawaiian:          "Hawaiian (haw)",
+		LangHebrew:            "Hebrew (he)",
+		LangHindi:             "Hindi (hi)",
+		LangHungarian:         "Hungarian (hu)",
+		LangIcelandic:         "Icelandic (is)",
+		LangIgbo:              "Igbo (ig)",
+		LangIndonesian:        "Indonesian (id)",
+		LangInuktitutLatin:    "Inuktitut (Latin) (iu)",
+		LangIrish:             "Irish (ga)",
+		LangItalian:           "Italian (it)",
+		LangJapanese:          "Japanese (ja)",
+		LangKannada:           "Kannada (kn)",
+		LangKashmiri:          "Kashmiri (ks)",
+		LangKazakh:            "Kazakh (kk)",
+		LangKhmer:             "Khmer (km)",
+		LangKiche:             "K'iche (quc)",
+		LangKinyarwanda:       "Kinyarwanda (rw)",
+		LangKiswahili:         "Kiswahili (sw)",
+		LangKonkani:           "Konkani (kok)",
+		LangKorean:            "Korean (ko)",
+		LangKyrgyz:            "Kyrgyz (ky)",
+		LangLao:               "Lao (lo)",
+		LangLatvian:           "Latvian (lv)",
+		LangLithuanian:        "Lithuanian (lt)",
+		LangLowerSorbian:      "Lower Sorbian (dsb)",
+		LangLuxembourgish:     "Luxembourgish (lb)",
+		LangMacedonian:        "Macedonian (mk)",
+		LangMalay:             "Malay (ms)",
+		LangMalayalam:         "Malayalam (ml)",
+		LangMaltese:           "Maltese (mt)",
+		LangMaori:             "Maori (mi)",
+		LangMapudungun:        "Mapudungun (arn)",
+		LangMarathi:           "Marathi (mr)",
+		LangMohawk:            "Mohawk (moh)",
+		LangMongolianCyrillic: "Mongolian (Cyrillic) (mn)",
+		LangNepali:            "Nepali (ne)",
+		LangNorwegianBokmal:   "Norwegian (Bokmal) (no)",
+		LangNorwegianBokmal:   "Norwegian (Bokmal) (nb)",
+		LangNorwegianNynorsk:  "Norwegian (Nynorsk) (nn)",
+		LangOccitan:           "Occitan (oc)",
+		LangOdia:              "Odia (or)",
+		LangOromo:             "Oromo (om)",
+		LangPashto:            "Pashto (ps)",
+		LangPersian:           "Persian (fa)",
+		LangPolish:            "Polish (pl)",
+		LangPortuguese:        "Portuguese (pt)",
+		LangPunjabi:           "Punjabi (pa)",
+		LangQuechua:           "Quechua (quz)",
+		LangRomanian:          "Romanian (ro)",
+		LangRomansh:           "Romansh (rm)",
+		LangRussian:           "Russian (ru)",
+		LangSakha:             "Sakha (sah)",
+		LangSamiInari:         "Sami (Inari) (smn)",
+		LangSamiLule:          "Sami (Lule) (smj)",
+		LangSamiNorthern:      "Sami (Northern) (se)",
+		LangSamiSkolt:         "Sami (Skolt) (sms)",
+		LangSamiSouthern:      "Sami (Southern) (sma)",
+		LangSanskrit:          "Sanskrit (sa)",
+		LangScottishGaelic:    "Scottish Gaelic (gd)",
+		LangSerbianLatin:      "Serbian (Latin) (sr)",
+		LangSesothoSaLeboa:    "Sesotho Sa Leboa (nso)",
+		LangSetswana:          "Setswana (tn)",
+		LangSindhi:            "Sindhi (sd)",
+		LangSinhala:           "Sinhala (si)",
+		LangSlovak:            "Slovak (sk)",
+		LangSlovenian:         "Slovenian (sl)",
+		LangSomali:            "Somali (so)",
+		LangSotho:             "Sotho (st)",
+		LangSpanish:           "Spanish (es)",
+		LangSwedish:           "Swedish (sv)",
+		LangSyriac:            "Syriac (syr)",
+		LangTajikCyrillic:     "Tajik (Cyrillic) (tg)",
+		LangTamazightLatin:    "Tamazight (Latin) (tzm)",
+		LangTamil:             "Tamil (ta)",
+		LangTatar:             "Tatar (tt)",
+		LangTelugu:            "Telugu (te)",
+		LangThai:              "Thai (th)",
+		LangTibetan:           "Tibetan (bo)",
+		LangTigrinya:          "Tigrinya (ti)",
+		LangTsonga:            "Tsonga (ts)",
+		LangTurkish:           "Turkish (tr)",
+		LangTurkmen:           "Turkmen (tk)",
+		LangUkrainian:         "Ukrainian (uk)",
+		LangUpperSorbian:      "Upper Sorbian (hsb)",
+		LangUrdu:              "Urdu (ur)",
+		LangUyghur:            "Uyghur (ug)",
+		LangUzbekLatin:        "Uzbek (Latin) (uz)",
+		LangVenda:             "Venda (ve)",
+		LangVietnamese:        "Vietnamese (vi)",
+		LangWelsh:             "Welsh (cy)",
+		LangWolof:             "Wolof (wo)",
+		LangXhosa:             "Xhosa (xh)",
+		LangYi:                "Yi (ii)",
+		LangYoruba:            "Yoruba (yo)",
+		LangZulu:              "Zulu (zu)",
 	}
 
 	if val, ok := rsrcLangMap[lang]; ok {
@@ -599,66 +1507,37 @@ func (lang ResourceLang) String() string {
 func (subLang ResourceSubLang) String() string {
 
 	rsrcSubLangMap := map[ResourceSubLang]string{
-		SubLangAfarDjibouti:                            "Afar Djibouti (aa-DJ)",
-		SubLangAfarEritrea:                             "Afar Eritrea (aa-ER)",
-		SubLangAfarEthiopia:                            "Afar Ethiopia (aa-ET)",
-		SubLangAfrikaansNamibia:                        "Afrikaans Namibia (af-NA)",
 		SubLangAfrikaansSouthAfrica:                    "Afrikaans South Africa (af-ZA)",
-		SubLangAghemCameroon:                           "Aghem Cameroon (agq-CM)",
-		SubLangAkanGhana:                               "Akan Ghana (ak-GH)",
 		SubLangAlbanianAlbania:                         "Albanian Albania (sq-AL)",
-		SubLangAlbanianNorthMacedonia:                  "Albanian North Macedonia (sq-MK)",
 		SubLangAlsatianFrance:                          "Alsatian France (gsw-FR)",
-		SubLangAlsatianLiechtenstein:                   "Alsatian Liechtenstein (gsw-LI)",
-		SubLangAlsatianSwitzerland:                     "Alsatian Switzerland (gsw-CH)",
 		SubLangAmharicEthiopia:                         "Amharic Ethiopia (am-ET)",
 		SubLangArabicAlgeria:                           "Arabic Algeria (ar-DZ)",
 		SubLangArabicBahrain:                           "Arabic Bahrain (ar-BH)",
-		SubLangArabicChad:                              "Arabic Chad (ar-TD)",
-		SubLangArabicComoros:                           "Arabic Comoros (ar-KM)",
-		SubLangArabicDjibouti:                          "Arabic Djibouti (ar-DJ)",
 		SubLangArabicEgypt:                             "Arabic Egypt (ar-EG)",
-		SubLangArabicEritrea:                           "Arabic Eritrea (ar-ER)",
 		SubLangArabicIraq:                              "Arabic Iraq (ar-IQ)",
-		SubLangArabicIsrael:                            "Arabic Israel (ar-IL)",
 		SubLangArabicJordan:                            "Arabic Jordan (ar-JO)",
 		SubLangArabicKuwait:                            "Arabic Kuwait (ar-KW)",
 		SubLangArabicLebanon:                           "Arabic Lebanon (ar-LB)",
 		SubLangArabicLibya:                             "Arabic Libya (ar-LY)",
-		SubLangArabicMauritania:                        "Arabic Mauritania (ar-MR)",
 		SubLangArabicMorocco:                           "Arabic Morocco (ar-MA)",
 		SubLangArabicOman:                              "Arabic Oman (ar-OM)",
-		SubLangArabicPalestinianAuthority:              "Arabic Palestinian Authority (ar-PS)",
 		SubLangArabicQatar:                             "Arabic Qatar (ar-QA)",
 		SubLangArabicSaudiArabia:                       "Arabic Saudi Arabia (ar-SA)",
-		SubLangArabicSomalia:                           "Arabic Somalia (ar-SO)",
-		SubLangArabicSouthSudan:                        "Arabic South Sudan (ar-SS)",
-		SubLangArabicSudan:                             "Arabic Sudan (ar-SD)",
 		SubLangArabicSyria:                             "Arabic Syria (ar-SY)",
 		SubLangArabicTunisia:                           "Arabic Tunisia (ar-TN)",
 		SubLangArabicUae:                               "Arabic U.a.e. (ar-AE)",
-		SubLangArabicWorld:                             "Arabic World (ar-001)",
 		SubLangArabicYemen:                             "Arabic Yemen (ar-YE)",
 		SubLangArmenianArmenia:                         "Armenian Armenia (hy-AM)",
 		SubLangAssameseIndia:                           "Assamese India (as-IN)",
-		SubLangAsturianSpain:                           "Asturian Spain (ast-ES)",
-		SubLangAsuTanzania:                             "Asu Tanzania (asa-TZ)",
 		SubLangAzerbaijaniCyrillic:                     "Azerbaijani (Cyrillic) (az-Cyrl)",
 		SubLangAzerbaijaniCyrillicAzerbaijan:           "Azerbaijani (Cyrillic) Azerbaijan (az-Cyrl-AZ)",
 		SubLangAzerbaijaniLatin:                        "Azerbaijani (Latin) (az-Latn)",
 		SubLangAzerbaijaniLatinAzerbaijan:              "Azerbaijani (Latin) Azerbaijan (az-Latn-AZ)",
-		SubLangBafiaCameroon:                           "Bafia Cameroon (ksf-CM)",
-		SubLangBamanankanLatinMali:                     "Bamanankan (Latin) Mali (bm-Latn-ML)",
 		SubLangBanglaBangladesh:                        "Bangla Bangladesh (bn-BD)",
 		SubLangBanglaIndia:                             "Bangla India (bn-IN)",
-		SubLangBasaaCameroon:                           "Basaa Cameroon (bas-CM)",
 		SubLangBashkirRussia:                           "Bashkir Russia (ba-RU)",
 		SubLangBasqueSpain:                             "Basque Spain (eu-ES)",
 		SubLangBelarusianBelarus:                       "Belarusian Belarus (be-BY)",
-		SubLangBembaZambia:                             "Bemba Zambia (bem-ZM)",
-		SubLangBenaTanzania:                            "Bena Tanzania (bez-TZ)",
-		SubLangBlinEritrea:                             "Blin Eritrea (byn-ER)",
-		SubLangBodoIndia:                               "Bodo India (brx-IN)",
 		SubLangBosnianCyrillic:                         "Bosnian (Cyrillic) (bs-Cyrl)",
 		SubLangBosnianCyrillicBosniaAndHerzegovina:     "Bosnian (Cyrillic) Bosnia And Herzegovina (bs-Cyrl-BA)",
 		SubLangBosnianLatin:                            "Bosnian (Latin) (bs-Latn)",
@@ -666,23 +1545,11 @@ func (subLang ResourceSubLang) String() string {
 		SubLangBretonFrance:                            "Breton France (br-FR)",
 		SubLangBulgarianBulgaria:                       "Bulgarian Bulgaria (bg-BG)",
 		SubLangBurmeseMyanmar:                          "Burmese Myanmar (my-MM)",
-		SubLangCatalanAndorra:                          "Catalan Andorra (ca-AD)",
-		SubLangCatalanFrance:                           "Catalan France (ca-FR)",
-		SubLangCatalanItaly:                            "Catalan Italy (ca-IT)",
 		SubLangCatalanSpain:                            "Catalan Spain (ca-ES)",
-		SubLangCebuanLatin:                             "Cebuan (Latin) (ceb-Latn)",
-		SubLangCebuanLatinPhilippines:                  "Cebuan (Latin) Philippines (ceb-Latn-PH)",
-		SubLangCentralAtlasTamazightArabicMorocco:      "Central Atlas Tamazight (Arabic) Morocco (tzm-ArabMA)",
-		SubLangCentralAtlasTamazightLatinMorocco:       "Central Atlas Tamazight (Latin) Morocco (tzm-LatnMA)",
 		SubLangCentralKurdish:                          "Central Kurdish (ku-Arab)",
 		SubLangCentralKurdishIraq:                      "Central Kurdish Iraq (ku-Arab-IQ)",
-		SubLangChakmaChakma:                            "Chakma Chakma (ccp-Cakm)",
-		SubLangChakmaBangladesh:                        "Chakma Bangladesh (ccp-CakmBD)",
-		SubLangChakmaIndia:                             "Chakma India (ccp-CakmIN)",
-		SubLangChechenRussia:                           "Chechen Russia (ce-RU)",
 		SubLangCherokee:                                "Cherokee (chr-Cher)",
 		SubLangCherokeeUnitedStates:                    "Cherokee United States (chr-Cher-US)",
-		SubLangChigaUganda:                             "Chiga Uganda (cgg-UG)",
 		SubLangChineseSimplified:                       "Chinese (Simplified) (zh-Hans)",
 		SubLangChineseSimplifiedPeoplesRepublicOfChina: "Chinese (Simplified) People's Republic Of China (zh-CN)",
 		SubLangChineseSimplifiedSingapore:              "Chinese (Simplified) Singapore (zh-SG)",
@@ -690,226 +1557,70 @@ func (subLang ResourceSubLang) String() string {
 		SubLangChineseTraditionalHongKongSar:           "Chinese (Traditional) Hong Kong S.a.r. (zh-HK)",
 		SubLangChineseTraditionalMacaoSar:              "Chinese (Traditional) Macao S.a.r. (zh-MO)",
 		SubLangChineseTraditionalTaiwan:                "Chinese (Traditional) Taiwan (zh-TW)",
-		SubLangChurchSlavicRussia:                      "Church Slavic Russia (cu-RU)",
-		SubLangCongoSwahiliCongoDrc:                    "Congo Swahili Congo Drc (swc-CD)",
-		SubLangCornishUnitedKingdom:                    "Cornish United Kingdom (kw-GB)",
 		SubLangCorsicanFrance:                          "Corsican France (co-FR)",
 		SubLangCroatianCroatia:                         "Croatian Croatia (hr-HR)",
 		SubLangCroatianLatinBosniaAndHerzegovina:       "Croatian (Latin) Bosnia And Herzegovina (hr-BA)",
 		SubLangCzechCzechRepublic:                      "Czech Czech Republic (cs-CZ)",
 		SubLangDanishDenmark:                           "Danish Denmark (da-DK)",
-		SubLangDanishGreenland:                         "Danish Greenland (da-GL)",
 		SubLangDariAfghanistan:                         "Dari Afghanistan (prs-AF)",
 		SubLangDivehiMaldives:                          "Divehi Maldives (dv-MV)",
-		SubLangDualaCameroon:                           "Duala Cameroon (dua-CM)",
-		SubLangDutchAruba:                              "Dutch Aruba (nl-AW)",
 		SubLangDutchBelgium:                            "Dutch Belgium (nl-BE)",
-		SubLangDutchBonaireSintEustatiusAndSaba:        "Dutch Bonaire, Sint Eustatius And Saba (nl-BQ)",
-		SubLangDutchCuraçao:                            "Dutch Curaçao (nl-CW)",
 		SubLangDutchNetherlands:                        "Dutch Netherlands (nl-NL)",
-		SubLangDutchSintMaarten:                        "Dutch Sint Maarten (nl-SX)",
-		SubLangDutchSuriname:                           "Dutch Suriname (nl-SR)",
 		SubLangDzongkhaBhutan:                          "Dzongkha Bhutan (dz-BT)",
-		SubLangEmbuKenya:                               "Embu Kenya (ebu-KE)",
-		SubLangEnglishAmericanSamoa:                    "English American Samoa (en-AS)",
-		SubLangEnglishAnguilla:                         "English Anguilla (en-AI)",
-		SubLangEnglishAntiguaAndBarbuda:                "English Antigua And Barbuda (en-AG)",
 		SubLangEnglishAustralia:                        "English Australia (en-AU)",
-		SubLangEnglishAustria:                          "English Austria (en-AT)",
-		SubLangEnglishBahamas:                          "English Bahamas (en-BS)",
-		SubLangEnglishBarbados:                         "English Barbados (en-BB)",
-		SubLangEnglishBelgium:                          "English Belgium (en-BE)",
 		SubLangEnglishBelize:                           "English Belize (en-BZ)",
-		SubLangEnglishBermuda:                          "English Bermuda (en-BM)",
-		SubLangEnglishBotswana:                         "English Botswana (en-BW)",
-		SubLangEnglishBritishIndianOceanTerritory:      "English British Indian Ocean Territory (en-IO)",
-		SubLangEnglishBritishVirginIslands:             "English British Virgin Islands (en-VG)",
-		SubLangEnglishBurundi:                          "English Burundi (en-BI)",
-		SubLangEnglishCameroon:                         "English Cameroon (en-CM)",
 		SubLangEnglishCanada:                           "English Canada (en-CA)",
 		SubLangEnglishCaribbean:                        "English Caribbean (en-029)",
-		SubLangEnglishCaymanIslands:                    "English Cayman Islands (en-KY)",
-		SubLangEnglishChristmasIsland:                  "English Christmas Island (en-CX)",
-		SubLangEnglishCocosKeelingIslands:              "English Cocos [Keeling] Islands (en-CC)",
-		SubLangEnglishCookIslands:                      "English Cook Islands (en-CK)",
-		SubLangEnglishCyprus:                           "English Cyprus (en-CY)",
-		SubLangEnglishDenmark:                          "English Denmark (en-DK)",
-		SubLangEnglishDominica:                         "English Dominica (en-DM)",
-		SubLangEnglishEritrea:                          "English Eritrea (en-ER)",
-		SubLangEnglishEurope:                           "English Europe (en-150)",
-		SubLangEnglishFalklandIslands:                  "English Falkland Islands (en-FK)",
-		SubLangEnglishFinland:                          "English Finland (en-FI)",
-		SubLangEnglishFiji:                             "English Fiji (en-FJ)",
-		SubLangEnglishGambia:                           "English Gambia (en-GM)",
-		SubLangEnglishGermany:                          "English Germany (en-DE)",
-		SubLangEnglishGhana:                            "English Ghana (en-GH)",
-		SubLangEnglishGibraltar:                        "English Gibraltar (en-GI)",
-		SubLangEnglishGrenada:                          "English Grenada (en-GD)",
-		SubLangEnglishGuam:                             "English Guam (en-GU)",
-		SubLangEnglishGuernsey:                         "English Guernsey (en-GG)",
-		SubLangEnglishGuyana:                           "English Guyana (en-GY)",
 		SubLangEnglishHongKong:                         "English Hong Kong (en-HK)",
 		SubLangEnglishIndia:                            "English India (en-IN)",
 		SubLangEnglishIreland:                          "English Ireland (en-IE)",
-		SubLangEnglishIsleOfMan:                        "English Isle Of Man (en-IM)",
-		SubLangEnglishIsrael:                           "English Israel (en-IL)",
 		SubLangEnglishJamaica:                          "English Jamaica (en-JM)",
-		SubLangEnglishJersey:                           "English Jersey (en-JE)",
-		SubLangEnglishKenya:                            "English Kenya (en-KE)",
-		SubLangEnglishKiribati:                         "English Kiribati (en-KI)",
-		SubLangEnglishLesotho:                          "English Lesotho (en-LS)",
-		SubLangEnglishLiberia:                          "English Liberia (en-LR)",
-		SubLangEnglishMacaoSar:                         "English Macao Sar (en-MO)",
-		SubLangEnglishMadagascar:                       "English Madagascar (en-MG)",
-		SubLangEnglishMalawi:                           "English Malawi (en-MW)",
 		SubLangEnglishMalaysia:                         "English Malaysia (en-MY)",
-		SubLangEnglishMalta:                            "English Malta (en-MT)",
-		SubLangEnglishMarshallIslands:                  "English Marshall Islands (en-MH)",
-		SubLangEnglishMauritius:                        "English Mauritius (en-MU)",
-		SubLangEnglishMicronesia:                       "English Micronesia (en-FM)",
-		SubLangEnglishMontserrat:                       "English Montserrat (en-MS)",
-		SubLangEnglishNamibia:                          "English Namibia (en-NA)",
-		SubLangEnglishNauru:                            "English Nauru (en-NR)",
-		SubLangEnglishNetherlands:                      "English Netherlands (en-NL)",
 		SubLangEnglishNewZealand:                       "English New Zealand (en-NZ)",
-		SubLangEnglishNigeria:                          "English Nigeria (en-NG)",
-		SubLangEnglishNiue:                             "English Niue (en-NU)",
-		SubLangEnglishNorfolkIsland:                    "English Norfolk Island (en-NF)",
-		SubLangEnglishNorthernMarianaIslands:           "English Northern Mariana Islands (en-MP)",
-		SubLangEnglishPakistan:                         "English Pakistan (en-PK)",
-		SubLangEnglishPalau:                            "English Palau (en-PW)",
-		SubLangEnglishPapuaNewGuinea:                   "English Papua New Guinea (en-PG)",
-		SubLangEnglishPitcairnIslands:                  "English Pitcairn Islands (en-PN)",
-		SubLangEnglishPuertoRico:                       "English Puerto Rico (en-PR)",
 		SubLangEnglishRepublicOfThePhilippines:         "English Republic Of The Philippines (en-PH)",
-		SubLangEnglishRwanda:                           "English Rwanda (en-RW)",
-		SubLangEnglishSaintKittsAndNevis:               "English Saint Kitts And Nevis (en-KN)",
-		SubLangEnglishSaintLucia:                       "English Saint Lucia (en-LC)",
-		SubLangEnglishSaintVincentAndTheGrenadines:     "English Saint Vincent And The Grenadines (en-VC)",
-		SubLangEnglishSamoa:                            "English Samoa (en-WS)",
-		SubLangEnglishSeychelles:                       "English Seychelles (en-SC)",
-		SubLangEnglishSierraLeone:                      "English Sierra Leone (en-SL)",
 		SubLangEnglishSingapore:                        "English Singapore (en-SG)",
-		SubLangEnglishSintMaarten:                      "English Sint Maarten (en-SX)",
-		SubLangEnglishSlovenia:                         "English Slovenia (en-SI)",
-		SubLangEnglishSolomonIslands:                   "English Solomon Islands (en-SB)",
 		SubLangEnglishSouthAfrica:                      "English South Africa (en-ZA)",
-		SubLangEnglishSouthSudan:                       "English South Sudan (en-SS)",
-		SubLangEnglishStHelenaAscensionTristanDaCunha:  "English St Helena, Ascension, Tristan Da Cunha (en-SH)",
-		SubLangEnglishSudan:                            "English Sudan (en-SD)",
-		SubLangEnglishSwaziland:                        "English Swaziland (en-SZ)",
-		SubLangEnglishSweden:                           "English Sweden (en-SE)",
-		SubLangEnglishSwitzerland:                      "English Switzerland (en-CH)",
-		SubLangEnglishTanzania:                         "English Tanzania (en-TZ)",
-		SubLangEnglishTokelau:                          "English Tokelau (en-TK)",
-		SubLangEnglishTonga:                            "English Tonga (en-TO)",
 		SubLangEnglishTrinidadAndTobago:                "English Trinidad And Tobago (en-TT)",
-		SubLangEnglishTurksAndCaicosIslands:            "English Turks And Caicos Islands (en-TC)",
-		SubLangEnglishTuvalu:                           "English Tuvalu (en-TV)",
-		SubLangEnglishUganda:                           "English Uganda (en-UG)",
 		SubLangEnglishUnitedArabEmirates:               "English United Arab Emirates (en-AE)",
 		SubLangEnglishUnitedKingdom:                    "English United Kingdom (en-GB)",
 		SubLangEnglishUnitedStates:                     "English United States (en-US)",
-		SubLangEnglishUsMinorOutlyingIslands:           "English Us Minor Outlying Islands (en-UM)",
-		SubLangEnglishUsVirginIslands:                  "English Us Virgin Islands (en-VI)",
-		SubLangEnglishVanuatu:                          "English Vanuatu (en-VU)",
-		SubLangEnglishWorld:                            "English World (en-001)",
-		SubLangEnglishZambia:                           "English Zambia (en-ZM)",
 		SubLangEnglishZimbabwe:                         "English Zimbabwe (en-ZW)",
-		SubLangEsperantoWorld:                          "Esperanto World (eo-001)",
 		SubLangEstonianEstonia:                         "Estonian Estonia (et-EE)",
-		SubLangEweGhana:                                "Ewe Ghana (ee-GH)",
-		SubLangEweTogo:                                 "Ewe Togo (ee-TG)",
-		SubLangEwondoCameroon:                          "Ewondo Cameroon (ewo-CM)",
-		SubLangFaroeseDenmark:                          "Faroese Denmark (fo-DK)",
 		SubLangFaroeseFaroeIslands:                     "Faroese Faroe Islands (fo-FO)",
 		SubLangFilipinoPhilippines:                     "Filipino Philippines (fil-PH)",
 		SubLangFinnishFinland:                          "Finnish Finland (fi-FI)",
-		SubLangFrenchAlgeria:                           "French Algeria (fr-DZ)",
 		SubLangFrenchBelgium:                           "French Belgium (fr-BE)",
-		SubLangFrenchBenin:                             "French Benin (fr-BJ)",
-		SubLangFrenchBurkinaFaso:                       "French Burkina Faso (fr-BF)",
-		SubLangFrenchBurundi:                           "French Burundi (fr-BI)",
 		SubLangFrenchCameroon:                          "French Cameroon (fr-CM)",
 		SubLangFrenchCanada:                            "French Canada (fr-CA)",
 		SubLangFrenchCaribbean:                         "French Caribbean (fr-029)",
-		SubLangFrenchCentralAfricanRepublic:            "French Central African Republic (fr-CF)",
-		SubLangFrenchChad:                              "French Chad (fr-TD)",
-		SubLangFrenchComoros:                           "French Comoros (fr-KM)",
-		SubLangFrenchCongo:                             "French Congo (fr-CG)",
 		SubLangFrenchCongoDrc:                          "French Congo, Drc (fr-CD)",
 		SubLangFrenchCôteDivoire:                       "French Côte D'ivoire (fr-CI)",
-		SubLangFrenchDjibouti:                          "French Djibouti (fr-DJ)",
-		SubLangFrenchEquatorialGuinea:                  "French Equatorial Guinea (fr-GQ)",
 		SubLangFrenchFrance:                            "French France (fr-FR)",
-		SubLangFrenchFrenchGuiana:                      "French French Guiana (fr-GF)",
-		SubLangFrenchFrenchPolynesia:                   "French French Polynesia (fr-PF)",
-		SubLangFrenchGabon:                             "French Gabon (fr-GA)",
-		SubLangFrenchGuadeloupe:                        "French Guadeloupe (fr-GP)",
-		SubLangFrenchGuinea:                            "French Guinea (fr-GN)",
 		SubLangFrenchHaiti:                             "French Haiti (fr-HT)",
 		SubLangFrenchLuxembourg:                        "French Luxembourg (fr-LU)",
-		SubLangFrenchMadagascar:                        "French Madagascar (fr-MG)",
 		SubLangFrenchMali:                              "French Mali (fr-ML)",
-		SubLangFrenchMartinique:                        "French Martinique (fr-MQ)",
-		SubLangFrenchMauritania:                        "French Mauritania (fr-MR)",
-		SubLangFrenchMauritius:                         "French Mauritius (fr-MU)",
-		SubLangFrenchMayotte:                           "French Mayotte (fr-YT)",
 		SubLangFrenchMorocco:                           "French Morocco (fr-MA)",
-		SubLangFrenchNewCaledonia:                      "French New Caledonia (fr-NC)",
-		SubLangFrenchNiger:                             "French Niger (fr-NE)",
 		SubLangFrenchPrincipalityOfMonaco:              "French Principality Of Monaco (fr-MC)",
 		SubLangFrenchReunion:                           "French Reunion (fr-RE)",
-		SubLangFrenchRwanda:                            "French Rwanda (fr-RW)",
-		SubLangFrenchSaintBarthélemy:                   "French Saint Barthélemy (fr-BL)",
-		SubLangFrenchSaintMartin:                       "French Saint Martin (fr-MF)",
-		SubLangFrenchSaintPierreAndMiquelon:            "French Saint Pierre And Miquelon (fr-PM)",
 		SubLangFrenchSenegal:                           "French Senegal (fr-SN)",
-		SubLangFrenchSeychelles:                        "French Seychelles (fr-SC)",
 		SubLangFrenchSwitzerland:                       "French Switzerland (fr-CH)",
-		SubLangFrenchSyria:                             "French Syria (fr-SY)",
-		SubLangFrenchTogo:                              "French Togo (fr-TG)",
-		SubLangFrenchTunisia:                           "French Tunisia (fr-TN)",
-		SubLangFrenchVanuatu:                           "French Vanuatu (fr-VU)",
-		SubLangFrenchWallisAndFutuna:                   "French Wallis And Futuna (fr-WF)",
 		SubLangFrisianNetherlands:                      "Frisian Netherlands (fy-NL)",
-		SubLangFriulianItaly:                           "Friulian Italy (fur-IT)",
 		SubLangFulahLatin:                              "Fulah (Latin) (ff-Latn)",
-		SubLangFulahLatinBurkinaFaso:                   "Fulah (Latin) Burkina Faso (ff-Latn-BF)",
-		SubLangFulahCameroon:                           "Fulah Cameroon (ff-CM)",
-		SubLangFulahLatinCameroon:                      "Fulah (Latin) Cameroon (ff-Latn-CM)",
-		SubLangFulahLatinGambia:                        "Fulah (Latin) Gambia (ff-Latn-GM)",
-		SubLangFulahLatinGhana:                         "Fulah (Latin) Ghana (ff-Latn-GH)",
-		SubLangFulahGuinea:                             "Fulah Guinea (ff-GN)",
-		SubLangFulahLatinGuinea:                        "Fulah (Latin) Guinea (ff-Latn-GN)",
-		SubLangFulahLatinGuineaBissau:                  "Fulah (Latin) Guinea-Bissau (ff-Latn-GW)",
-		SubLangFulahLatinLiberia:                       "Fulah (Latin) Liberia (ff-Latn-LR)",
-		SubLangFulahMauritania:                         "Fulah Mauritania (ff-MR)",
-		SubLangFulahLatinMauritania:                    "Fulah (Latin) Mauritania (ff-Latn-MR)",
-		SubLangFulahLatinNiger:                         "Fulah (Latin) Niger (ff-Latn-NE)",
 		SubLangFulahNigeria:                            "Fulah Nigeria (ff-NG)",
 		SubLangFulahLatinNigeria:                       "Fulah (Latin) Nigeria (ff-Latn-NG)",
 		SubLangFulahSenegal:                            "Fulah Senegal (ff-Latn-SN)",
-		SubLangFulahLatinSierraLeone:                   "Fulah (Latin) Sierra Leone (ff-Latn-SL)",
 		SubLangGalicianSpain:                           "Galician Spain (gl-ES)",
-		SubLangGandaUganda:                             "Ganda Uganda (lg-UG)",
 		SubLangGeorgianGeorgia:                         "Georgian Georgia (ka-GE)",
 		SubLangGermanAustria:                           "German Austria (de-AT)",
-		SubLangGermanBelgium:                           "German Belgium (de-BE)",
 		SubLangGermanGermany:                           "German Germany (de-DE)",
-		SubLangGermanItaly:                             "German Italy (de-IT)",
 		SubLangGermanLiechtenstein:                     "German Liechtenstein (de-LI)",
 		SubLangGermanLuxembourg:                        "German Luxembourg (de-LU)",
 		SubLangGermanSwitzerland:                       "German Switzerland (de-CH)",
-		SubLangGreekCyprus:                             "Greek Cyprus (el-CY)",
 		SubLangGreekGreece:                             "Greek Greece (el-GR)",
 		SubLangGreenlandicGreenland:                    "Greenlandic Greenland (kl-GL)",
 		SubLangGuaraniParaguay:                         "Guarani Paraguay (gn-PY)",
 		SubLangGujaratiIndia:                           "Gujarati India (gu-IN)",
-		SubLangGusiiKenya:                              "Gusii Kenya (guz-KE)",
 		SubLangHausaLatin:                              "Hausa (Latin) (ha-Latn)",
-		SubLangHausaLatinGhana:                         "Hausa (Latin) Ghana (ha-Latn-GH)",
-		SubLangHausaLatinNiger:                         "Hausa (Latin) Niger (ha-Latn-NE)",
 		SubLangHausaLatinNigeria:                       "Hausa (Latin) Nigeria (ha-Latn-NG)",
 		SubLangHawaiianUnitedStates:                    "Hawaiian United States (haw-US)",
 		SubLangHebrewIsrael:                            "Hebrew Israel (he-IL)",
@@ -918,130 +1629,59 @@ func (subLang ResourceSubLang) String() string {
 		SubLangIcelandicIceland:                        "Icelandic Iceland (is-IS)",
 		SubLangIgboNigeria:                             "Igbo Nigeria (ig-NG)",
 		SubLangIndonesianIndonesia:                     "Indonesian Indonesia (id-ID)",
-		SubLangInterlinguaFrance:                       "Interlingua France (ia-FR)",
-		SubLangInterlinguaWorld:                        "Interlingua World (ia-001)",
 		SubLangInuktitutLatin:                          "Inuktitut (Latin) (iu-Latn)",
 		SubLangInuktitutLatinCanada:                    "Inuktitut (Latin) Canada (iu-Latn-CA)",
 		SubLangInuktitutSyllabics:                      "Inuktitut (Syllabics) (iu-Cans)",
 		SubLangInuktitutSyllabicsCanada:                "Inuktitut (Syllabics) Canada (iu-Cans-CA)",
 		SubLangIrishIreland:                            "Irish Ireland (ga-IE)",
 		SubLangItalianItaly:                            "Italian Italy (it-IT)",
-		SubLangItalianSanMarino:                        "Italian San Marino (it-SM)",
 		SubLangItalianSwitzerland:                      "Italian Switzerland (it-CH)",
-		SubLangItalianVaticanCity:                      "Italian Vatican City (it-VA)",
 		SubLangJapaneseJapan:                           "Japanese Japan (ja-JP)",
-		SubLangJavaneseLatin:                           "Javanese Latin (jv-Latn)",
-		SubLangJavaneseLatinIndonesia:                  "Javanese Latin, Indonesia (jv-Latn-ID)",
-		SubLangJolaFonyiSenegal:                        "Jola-Fonyi Senegal (dyo-SN)",
-		SubLangKabuverdianuCaboVerde:                   "Kabuverdianu Cabo Verde (kea-CV)",
-		SubLangKabyleAlgeria:                           "Kabyle Algeria (kab-DZ)",
-		SubLangKakoCameroon:                            "Kako Cameroon (kkj-CM)",
-		SubLangKalenjinKenya:                           "Kalenjin Kenya (kln-KE)",
-		SubLangKambaKenya:                              "Kamba Kenya (kam-KE)",
 		SubLangKannadaIndia:                            "Kannada India (kn-IN)",
 		SubLangKanuriLatinNigeria:                      "Kanuri (Latin) Nigeria (kr-Latn-NG)",
 		SubLangKashmiriPersoArabic:                     "Kashmiri Perso-Arabic (ks-Arab)",
-		SubLangKashmiriPersoArabic:                     "Kashmiri Perso-Arabic (ks-Arab-IN)",
 		SubLangKashmiriDevanagariIndia:                 "Kashmiri (Devanagari) India (ks-Deva-IN)",
 		SubLangKazakhKazakhstan:                        "Kazakh Kazakhstan (kk-KZ)",
 		SubLangKhmerCambodia:                           "Khmer Cambodia (km-KH)",
 		SubLangKicheGuatemala:                          "K'iche Guatemala (quc-Latn-GT)",
-		SubLangKikuyuKenya:                             "Kikuyu Kenya (ki-KE)",
 		SubLangKinyarwandaRwanda:                       "Kinyarwanda Rwanda (rw-RW)",
 		SubLangKiswahiliKenya:                          "Kiswahili Kenya (sw-KE)",
-		SubLangKiswahiliTanzania:                       "Kiswahili Tanzania (sw-TZ)",
-		SubLangKiswahiliUganda:                         "Kiswahili Uganda (sw-UG)",
 		SubLangKonkaniIndia:                            "Konkani India (kok-IN)",
 		SubLangKoreanKorea:                             "Korean Korea (ko-KR)",
-		SubLangKoreanNorthKorea:                        "Korean North Korea (ko-KP)",
-		SubLangKoyraChiiniMali:                         "Koyra Chiini Mali (khq-ML)",
-		SubLangKoyraboroSenniMali:                      "Koyraboro Senni Mali (ses-ML)",
-		SubLangKwasioCameroon:                          "Kwasio Cameroon (nmg-CM)",
 		SubLangKyrgyzKyrgyzstan:                        "Kyrgyz Kyrgyzstan (ky-KG)",
-		SubLangKurdishPersoArabicIran:                  "Kurdish Perso-Arabic, Iran (ku-Arab-IR)",
-		SubLangLakotaUnitedStates:                      "Lakota United States (lkt-US)",
-		SubLangLangiTanzania:                           "Langi Tanzania (lag-TZ)",
 		SubLangLaoLaoPdr:                               "Lao Lao P.d.r. (lo-LA)",
 		SubLangLatinVaticanCity:                        "Latin Vatican City (la-VA)",
 		SubLangLatvianLatvia:                           "Latvian Latvia (lv-LV)",
-		SubLangLingalaAngola:                           "Lingala Angola (ln-AO)",
-		SubLangLingalaCentralAfricanRepublic:           "Lingala Central African Republic (ln-CF)",
-		SubLangLingalaCongo:                            "Lingala Congo (ln-CG)",
-		SubLangLingalaCongoDrc:                         "Lingala Congo Drc (ln-CD)",
 		SubLangLithuanianLithuania:                     "Lithuanian Lithuania (lt-LT)",
-		SubLangLowGermanGermany:                        "Low German Germany (nds-DE)",
-		SubLangLowGermanNetherlands:                    "Low German Netherlands (nds-NL)",
 		SubLangLowerSorbianGermany:                     "Lower Sorbian Germany (dsb-DE)",
-		SubLangLubaKatangaCongoDrc:                     "Luba-Katanga Congo Drc (lu-CD)",
-		SubLangLuoKenya:                                "Luo Kenya (luo-KE)",
 		SubLangLuxembourgishLuxembourg:                 "Luxembourgish Luxembourg (lb-LU)",
-		SubLangLuyiaKenya:                              "Luyia Kenya (luy-KE)",
 		SubLangMacedonianNorthMacedonia:                "Macedonian North Macedonia (mk-MK)",
-		SubLangMachameTanzania:                         "Machame Tanzania (jmc-TZ)",
-		SubLangMakhuwaMeettoMozambique:                 "Makhuwa-Meetto Mozambique (mgh-MZ)",
-		SubLangMakondeTanzania:                         "Makonde Tanzania (kde-TZ)",
-		SubLangMalagasyMadagascar:                      "Malagasy Madagascar (mg-MG)",
 		SubLangMalayBruneiDarussalam:                   "Malay Brunei Darussalam (ms-BN)",
 		SubLangMalayMalaysia:                           "Malay Malaysia (ms-MY)",
 		SubLangMalayalamIndia:                          "Malayalam India (ml-IN)",
 		SubLangMalteseMalta:                            "Maltese Malta (mt-MT)",
-		SubLangManxIsleOfMan:                           "Manx Isle Of Man (gv-IM)",
 		SubLangMaoriNewZealand:                         "Maori New Zealand (mi-NZ)",
 		SubLangMapudungunChile:                         "Mapudungun Chile (arn-CL)",
 		SubLangMarathiIndia:                            "Marathi India (mr-IN)",
-		SubLangMasaiKenya:                              "Masai Kenya (mas-KE)",
-		SubLangMasaiTanzania:                           "Masai Tanzania (mas-TZ)",
-		SubLangMazanderaniIran:                         "Mazanderani Iran (mzn-IR)",
-		SubLangMeruKenya:                               "Meru Kenya (mer-KE)",
-		SubLangMetaCameroon:                            "Meta' Cameroon (mgo-CM)",
 		SubLangMohawkCanada:                            "Mohawk Canada (moh-CA)",
 		SubLangMongolianCyrillic:                       "Mongolian (Cyrillic) (mn-Cyrl)",
 		SubLangMongolianCyrillicMongolia:               "Mongolian (Cyrillic) Mongolia (mn-MN)",
-		SubLangMongolianTraditionalmongolian:           "Mongolian (Traditional mongolian) (mn-Mong)",
-		SubLangMongolianTraditionalmongolianPeoplesRepublicOfChina: "Mongolian (Traditional mongolian) People's Republic Of China (mn-MongCN)",
-		SubLangMongolianTraditionalmongolianMongolia:               "Mongolian (Traditional mongolian) Mongolia (mn-MongMN)",
-		SubLangMorisyenMauritius:                                   "Morisyen Mauritius (mfe-MU)",
-		SubLangMundangCameroon:                                     "Mundang Cameroon (mua-CM)",
-		SubLangNkoGuinea:                                           "N'ko Guinea (nqo-GN)",
-		SubLangNamaNamibia:                                         "Nama Namibia (naq-NA)",
-		SubLangNepaliIndia:                                         "Nepali India (ne-IN)",
-		SubLangNepaliNepal:                                         "Nepali Nepal (ne-NP)",
-		SubLangNgiemboonCameroon:                                   "Ngiemboon Cameroon (nnh-CM)",
-		SubLangNgombaCameroon:                                      "Ngomba Cameroon (jgo-CM)",
-		SubLangNorthernLuriIraq:                                    "Northern Luri Iraq (lrc-IQ)",
-		SubLangNorthernLuriIran:                                    "Northern Luri Iran (lrc-IR)",
-		SubLangNorthNdebeleZimbabwe:                                "North Ndebele Zimbabwe (nd-ZW)",
-		SubLangNorwegianBokmalNorway:                               "Norwegian (Bokmal) Norway (nb-NO)",
-		SubLangNorwegianNynorskNorway:                              "Norwegian (Nynorsk) Norway (nn-NO)",
-		SubLangNorwegianBokmålSvalbardAndJanMayen:                  "Norwegian Bokmål Svalbard And Jan Mayen (nb-SJ)",
-		SubLangNuerSudan:                                           "Nuer Sudan (nus-SD)",
-		SubLangNuerSouthSudan:                                      "Nuer South Sudan (nus-SS)",
-		SubLangNyankoleUganda:                                      "Nyankole Uganda (nyn-UG)",
-		SubLangOccitanFrance:                                       "Occitan France (oc-FR)",
-		SubLangOdiaIndia:                                           "Odia India (or-IN)",
-		SubLangOromoEthiopia:                                       "Oromo Ethiopia (om-ET)",
-		SubLangOromoKenya:                                          "Oromo Kenya (om-KE)",
-		SubLangOssetianCyrillicGeorgia:                             "Ossetian Cyrillic, Georgia (os-GE)",
-		SubLangOssetianCyrillicRussia:                              "Ossetian Cyrillic, Russia (os-RU)",
-		SubLangPashtoAfghanistan:                                   "Pashto Afghanistan (ps-AF)",
-		SubLangPashtoPakistan:                                      "Pashto Pakistan (ps-PK)",
-		SubLangPersianAfghanistan:                                  "Persian Afghanistan (fa-AF)",
-		SubLangPersianIran:                                         "Persian Iran (fa-IR)",
-		SubLangPolishPoland:                                        "Polish Poland (pl-PL)",
-		SubLangPortugueseAngola:                                    "Portuguese Angola (pt-AO)",
-		SubLangPortugueseBrazil:                                    "Portuguese Brazil (pt-BR)",
-		SubLangPortugueseCaboVerde:                                 "Portuguese Cabo Verde (pt-CV)",
-		SubLangPortugueseEquatorialGuinea:                          "Portuguese Equatorial Guinea (pt-GQ)",
-		SubLangPortugueseGuineaBissau:                              "Portuguese Guinea-Bissau (pt-GW)",
-		SubLangPortugueseLuxembourg:                                "Portuguese Luxembourg (pt-LU)",
-		SubLangPortugueseMacaoSar:                                  "Portuguese Macao Sar (pt-MO)",
-		SubLangPortugueseMozambique:                                "Portuguese Mozambique (pt-MZ)",
-		SubLangPortuguesePortugal:                                  "Portuguese Portugal (pt-PT)",
-		SubLangPortugueseSãoToméAndPríncipe:                        "Portuguese São Tomé And Príncipe (pt-ST)",
-		SubLangPortugueseSwitzerland:                               "Portuguese Switzerland (pt-CH)",
-		SubLangPortugueseTimorLeste:                                "Portuguese Timor-Leste (pt-TL)",
-		SubLangPrussian:                                            "Prussian (prg-001)",
-		SubLangPseudoLanguagePseudoLocaleForEastAsiancomplexScriptLocalizationTesting: "Pseudo Language Pseudo Locale For East Asian/complex Script Localization Testing (qps-ploca)",
+		SubLangMongolianTraditionalMongolian:           "Mongolian (Traditional Mongolian) (mn-Mong)",
+		SubLangMongolianTraditionalMongolianPeoplesRepublicOfChina: "Mongolian (Traditional Mongolian) People's Republic Of China (mn-MongCN)",
+		SubLangMongolianTraditionalMongolianMongolia:               "Mongolian (Traditional Mongolian) Mongolia (mn-MongMN)",
+		SubLangNepaliIndia:            "Nepali India (ne-IN)",
+		SubLangNepaliNepal:            "Nepali Nepal (ne-NP)",
+		SubLangNorwegianBokmalNorway:  "Norwegian (Bokmal) Norway (nb-NO)",
+		SubLangNorwegianNynorskNorway: "Norwegian (Nynorsk) Norway (nn-NO)",
+		SubLangOccitanFrance:          "Occitan France (oc-FR)",
+		SubLangOdiaIndia:              "Odia India (or-IN)",
+		SubLangOromoEthiopia:          "Oromo Ethiopia (om-ET)",
+		SubLangPashtoAfghanistan:      "Pashto Afghanistan (ps-AF)",
+		SubLangPersianIran:            "Persian Iran (fa-IR)",
+		SubLangPolishPoland:           "Polish Poland (pl-PL)",
+		SubLangPortugueseBrazil:       "Portuguese Brazil (pt-BR)",
+		SubLangPortuguesePortugal:     "Portuguese Portugal (pt-PT)",
+		SubLangPseudoLanguagePseudoLocaleForEastAsianComplexScriptLocalizationTesting: "Pseudo Language Pseudo Locale For East Asian/Complex Script Localization Testing (qps-ploca)",
 		SubLangPseudoLanguagePseudoLocaleUsedForLocalizationTesting:                   "Pseudo Language Pseudo Locale Used For Localization Testing (qps-ploc)",
 		SubLangPseudoLanguagePseudoLocaleUsedForLocalizationTestingOfMirroredLocales:  "Pseudo Language Pseudo Locale Used For Localization Testing Of Mirrored Locales (qps-plocm)",
 		SubLangPunjabi:                                  "Punjabi (pa-Arab)",
@@ -1050,22 +1690,12 @@ func (subLang ResourceSubLang) String() string {
 		SubLangQuechuaBolivia:                           "Quechua Bolivia (quz-BO)",
 		SubLangQuechuaEcuador:                           "Quechua Ecuador (quz-EC)",
 		SubLangQuechuaPeru:                              "Quechua Peru (quz-PE)",
-		SubLangRipuarianGermany:                         "Ripuarian Germany (ksh-DE)",
 		SubLangRomanianMoldova:                          "Romanian Moldova (ro-MD)",
 		SubLangRomanianRomania:                          "Romanian Romania (ro-RO)",
 		SubLangRomanshSwitzerland:                       "Romansh Switzerland (rm-CH)",
-		SubLangRomboTanzania:                            "Rombo Tanzania (rof-TZ)",
-		SubLangRundiBurundi:                             "Rundi Burundi (rn-BI)",
-		SubLangRussianBelarus:                           "Russian Belarus (ru-BY)",
-		SubLangRussianKazakhstan:                        "Russian Kazakhstan (ru-KZ)",
-		SubLangRussianKyrgyzstan:                        "Russian Kyrgyzstan (ru-KG)",
 		SubLangRussianMoldova:                           "Russian Moldova (ru-MD)",
 		SubLangRussianRussia:                            "Russian Russia (ru-RU)",
-		SubLangRussianUkraine:                           "Russian Ukraine (ru-UA)",
-		SubLangRwaTanzania:                              "Rwa Tanzania (rwk-TZ)",
-		SubLangSahoEritrea:                              "Saho Eritrea (ssy-ER)",
 		SubLangSakhaRussia:                              "Sakha Russia (sah-RU)",
-		SubLangSamburuKenya:                             "Samburu Kenya (saq-KE)",
 		SubLangSamiInariFinland:                         "Sami (Inari) Finland (smn-FI)",
 		SubLangSamiLuleNorway:                           "Sami (Lule) Norway (smj-NO)",
 		SubLangSamiLuleSweden:                           "Sami (Lule) Sweden (smj-SE)",
@@ -1075,45 +1705,31 @@ func (subLang ResourceSubLang) String() string {
 		SubLangSamiSkoltFinland:                         "Sami (Skolt) Finland (sms-FI)",
 		SubLangSamiSouthernNorway:                       "Sami (Southern) Norway (sma-NO)",
 		SubLangSamiSouthernSweden:                       "Sami (Southern) Sweden (sma-SE)",
-		SubLangSangoCentralAfricanRepublic:              "Sango Central African Republic (sg-CF)",
-		SubLangSanguTanzania:                            "Sangu Tanzania (sbp-TZ)",
 		SubLangSanskritIndia:                            "Sanskrit India (sa-IN)",
 		SubLangScottishGaelicUnitedKingdom:              "Scottish Gaelic United Kingdom (gd-GB)",
-		SubLangSenaMozambique:                           "Sena Mozambique (seh-MZ)",
 		SubLangSerbianCyrillic:                          "Serbian (Cyrillic) (sr-Cyrl)",
 		SubLangSerbianCyrillicBosniaAndHerzegovina:      "Serbian (Cyrillic) Bosnia And Herzegovina (sr-Cyrl-BA)",
 		SubLangSerbianCyrillicMontenegro:                "Serbian (Cyrillic) Montenegro (sr-Cyrl-ME)",
 		SubLangSerbianCyrillicSerbia:                    "Serbian (Cyrillic) Serbia (sr-Cyrl-RS)",
-		SubLangSerbianCyrillicSerbiaAndMontenegroformer: "Serbian (Cyrillic) Serbia And Montenegro (former) (sr-Cyrl-CS)",
+		SubLangSerbianCyrillicSerbiaAndMontenegroFormer: "Serbian (Cyrillic) Serbia And Montenegro (former) (sr-Cyrl-CS)",
 		SubLangSerbianLatin:                             "Serbian (Latin) (sr-Latn)",
 		SubLangSerbianLatinBosniaAndHerzegovina:         "Serbian (Latin) Bosnia And Herzegovina (sr-Latn-BA)",
 		SubLangSerbianLatinMontenegro:                   "Serbian (Latin) Montenegro (sr-Latn-ME)",
 		SubLangSerbianLatinSerbia:                       "Serbian (Latin) Serbia (sr-Latn-RS)",
-		SubLangSerbianLatinSerbiaAndMontenegroformer:    "Serbian (Latin) Serbia And Montenegro (former) (sr-Latn-CS)",
+		SubLangSerbianLatinSerbiaAndMontenegroFormer:    "Serbian (Latin) Serbia And Montenegro (former) (sr-Latn-CS)",
 		SubLangSesothoSaLeboaSouthAfrica:                "Sesotho Sa Leboa South Africa (nso-ZA)",
 		SubLangSetswanaBotswana:                         "Setswana Botswana (tn-BW)",
 		SubLangSetswanaSouthAfrica:                      "Setswana South Africa (tn-ZA)",
-		SubLangShambalaTanzania:                         "Shambala Tanzania (ksb-TZ)",
-		SubLangShonaLatin:                               "Shona Latin (sn-Latn)",
-		SubLangShonaZimbabwe:                            "Shona Zimbabwe (sn-Latn-ZW)",
 		SubLangSindhi:                                   "Sindhi (sd-Arab)",
 		SubLangSindhiIslamicRepublicOfPakistan:          "Sindhi Islamic Republic Of Pakistan (sd-Arab-PK)",
 		SubLangSinhalaSriLanka:                          "Sinhala Sri Lanka (si-LK)",
 		SubLangSlovakSlovakia:                           "Slovak Slovakia (sk-SK)",
 		SubLangSlovenianSlovenia:                        "Slovenian Slovenia (sl-SI)",
-		SubLangSogaUganda:                               "Soga Uganda (xog-UG)",
-		SubLangSomaliDjibouti:                           "Somali Djibouti (so-DJ)",
-		SubLangSomaliEthiopia:                           "Somali Ethiopia (so-ET)",
-		SubLangSomaliKenya:                              "Somali Kenya (so-KE)",
 		SubLangSomaliSomalia:                            "Somali Somalia (so-SO)",
 		SubLangSothoSouthAfrica:                         "Sotho South Africa (st-ZA)",
-		SubLangSouthNdebeleSouthAfrica:                  "South Ndebele South Africa (nr-ZA)",
-		SubLangSouthernSothoLesotho:                     "Southern Sotho Lesotho (st-LS)",
 		SubLangSpanishArgentina:                         "Spanish Argentina (es-AR)",
-		SubLangSpanishBelize:                            "Spanish Belize (es-BZ)",
 		SubLangSpanishBolivarianRepublicOfVenezuela:     "Spanish Bolivarian Republic Of Venezuela (es-VE)",
 		SubLangSpanishBolivia:                           "Spanish Bolivia (es-BO)",
-		SubLangSpanishBrazil:                            "Spanish Brazil (es-BR)",
 		SubLangSpanishChile:                             "Spanish Chile (es-CL)",
 		SubLangSpanishColombia:                          "Spanish Colombia (es-CO)",
 		SubLangSpanishCostaRica:                         "Spanish Costa Rica (es-CR)",
@@ -1121,7 +1737,6 @@ func (subLang ResourceSubLang) String() string {
 		SubLangSpanishDominicanRepublic:                 "Spanish Dominican Republic (es-DO)",
 		SubLangSpanishEcuador:                           "Spanish Ecuador (es-EC)",
 		SubLangSpanishElSalvador:                        "Spanish El Salvador (es-SV)",
-		SubLangSpanishEquatorialGuinea:                  "Spanish Equatorial Guinea (es-GQ)",
 		SubLangSpanishGuatemala:                         "Spanish Guatemala (es-GT)",
 		SubLangSpanishHonduras:                          "Spanish Honduras (es-HN)",
 		SubLangSpanishLatinAmerica:                      "Spanish Latin America (es-419)",
@@ -1130,47 +1745,27 @@ func (subLang ResourceSubLang) String() string {
 		SubLangSpanishPanama:                            "Spanish Panama (es-PA)",
 		SubLangSpanishParaguay:                          "Spanish Paraguay (es-PY)",
 		SubLangSpanishPeru:                              "Spanish Peru (es-PE)",
-		SubLangSpanishPhilippines:                       "Spanish Philippines (es-PH)",
 		SubLangSpanishPuertoRico:                        "Spanish Puerto Rico (es-PR)",
 		SubLangSpanishSpain:                             "Spanish Spain (es-ES_tradnl)",
 		SubLangSpanishSpain:                             "Spanish Spain (es-ES)",
 		SubLangSpanishUnitedStates:                      "Spanish United States (es-US)",
 		SubLangSpanishUruguay:                           "Spanish Uruguay (es-UY)",
-		SubLangStandardMoroccanTamazightMorocco:         "Standard Moroccan Tamazight Morocco (zgh-Tfng-MA)",
-		SubLangStandardMoroccanTamazightTifinagh:        "Standard Moroccan Tamazight Tifinagh (zgh-Tfng)",
-		SubLangSwatiSouthAfrica:                         "Swati South Africa (ss-ZA)",
-		SubLangSwatiSwaziland:                           "Swati Swaziland (ss-SZ)",
-		SubLangSwedishÅlandIslands:                      "Swedish Åland Islands (sv-AX)",
 		SubLangSwedishFinland:                           "Swedish Finland (sv-FI)",
 		SubLangSwedishSweden:                            "Swedish Sweden (sv-SE)",
 		SubLangSyriacSyria:                              "Syriac Syria (syr-SY)",
-		SubLangTachelhitTifinagh:                        "Tachelhit Tifinagh (shi-Tfng)",
-		SubLangTachelhitTifinaghMorocco:                 "Tachelhit Tifinagh, Morocco (shi-Tfng-MA)",
-		SubLangTachelhitLatin:                           "Tachelhit (Latin) (shi-Latn)",
-		SubLangTachelhitLatinMorocco:                    "Tachelhit (Latin) Morocco (shi-Latn-MA)",
-		SubLangTaitaKenya:                               "Taita Kenya (dav-KE)",
 		SubLangTajikCyrillic:                            "Tajik (Cyrillic) (tg-Cyrl)",
 		SubLangTajikCyrillicTajikistan:                  "Tajik (Cyrillic) Tajikistan (tg-Cyrl-TJ)",
 		SubLangTamazightLatin:                           "Tamazight (Latin) (tzm-Latn)",
 		SubLangTamazightLatinAlgeria:                    "Tamazight (Latin) Algeria (tzm-Latn-DZ)",
 		SubLangTamilIndia:                               "Tamil India (ta-IN)",
-		SubLangTamilMalaysia:                            "Tamil Malaysia (ta-MY)",
-		SubLangTamilSingapore:                           "Tamil Singapore (ta-SG)",
 		SubLangTamilSriLanka:                            "Tamil Sri Lanka (ta-LK)",
-		SubLangTasawaqNiger:                             "Tasawaq Niger (twq-NE)",
 		SubLangTatarRussia:                              "Tatar Russia (tt-RU)",
 		SubLangTeluguIndia:                              "Telugu India (te-IN)",
-		SubLangTesoKenya:                                "Teso Kenya (teo-KE)",
-		SubLangTesoUganda:                               "Teso Uganda (teo-UG)",
 		SubLangThaiThailand:                             "Thai Thailand (th-TH)",
-		SubLangTibetanIndia:                             "Tibetan India (bo-IN)",
 		SubLangTibetanPeoplesRepublicOfChina:            "Tibetan People's Republic Of China (bo-CN)",
-		SubLangTigreEritrea:                             "Tigre Eritrea (tig-ER)",
 		SubLangTigrinyaEritrea:                          "Tigrinya Eritrea (ti-ER)",
 		SubLangTigrinyaEthiopia:                         "Tigrinya Ethiopia (ti-ET)",
-		SubLangTonganTonga:                              "Tongan Tonga (to-TO)",
 		SubLangTsongaSouthAfrica:                        "Tsonga South Africa (ts-ZA)",
-		SubLangTurkishCyprus:                            "Turkish Cyprus (tr-CY)",
 		SubLangTurkishTurkey:                            "Turkish Turkey (tr-TR)",
 		SubLangTurkmenTurkmenistan:                      "Turkmen Turkmenistan (tk-TM)",
 		SubLangUkrainianUkraine:                         "Ukrainian Ukraine (uk-UA)",
@@ -1178,32 +1773,19 @@ func (subLang ResourceSubLang) String() string {
 		SubLangUrduIndia:                                "Urdu India (ur-IN)",
 		SubLangUrduIslamicRepublicOfPakistan:            "Urdu Islamic Republic Of Pakistan (ur-PK)",
 		SubLangUyghurPeoplesRepublicOfChina:             "Uyghur People's Republic Of China (ug-CN)",
-		SubLangUzbekPersoArabic:                         "Uzbek Perso-Arabic (uz-Arab)",
-		SubLangUzbekPersoArabicAfghanistan:              "Uzbek Perso-Arabic, Afghanistan (uz-Arab-AF)",
 		SubLangUzbekCyrillic:                            "Uzbek (Cyrillic) (uz-Cyrl)",
 		SubLangUzbekCyrillicUzbekistan:                  "Uzbek (Cyrillic) Uzbekistan (uz-Cyrl-UZ)",
 		SubLangUzbekLatin:                               "Uzbek (Latin) (uz-Latn)",
 		SubLangUzbekLatinUzbekistan:                     "Uzbek (Latin) Uzbekistan (uz-Latn-UZ)",
-		SubLangVai:                                      "Vai (vai-Vaii)",
-		SubLangVaiLiberia:                               "Vai Liberia (vai-Vaii-LR)",
-		SubLangVaiLatinLiberia:                          "Vai (Latin) Liberia (vai-Latn-LR)",
-		SubLangVaiLatin:                                 "Vai (Latin) (vai-Latn)",
 		SubLangValencianSpain:                           "Valencian Spain (ca-ESvalencia)",
 		SubLangVendaSouthAfrica:                         "Venda South Africa (ve-ZA)",
 		SubLangVietnameseVietnam:                        "Vietnamese Vietnam (vi-VN)",
-		SubLangVolapükWorld:                             "Volapük World (vo-001)",
-		SubLangVunjoTanzania:                            "Vunjo Tanzania (vun-TZ)",
-		SubLangWalserSwitzerland:                        "Walser Switzerland (wae-CH)",
 		SubLangWelshUnitedKingdom:                       "Welsh United Kingdom (cy-GB)",
-		SubLangWolayttaEthiopia:                         "Wolaytta Ethiopia (wal-ET)",
 		SubLangWolofSenegal:                             "Wolof Senegal (wo-SN)",
 		SubLangXhosaSouthAfrica:                         "Xhosa South Africa (xh-ZA)",
-		SubLangYangbenCameroon:                          "Yangben Cameroon (yav-CM)",
 		SubLangYiPeoplesRepublicOfChina:                 "Yi People's Republic Of China (ii-CN)",
 		SubLangYiddishWorld:                             "Yiddish World (yi-001)",
-		SubLangYorubaBenin:                              "Yoruba Benin (yo-BJ)",
 		SubLangYorubaNigeria:                            "Yoruba Nigeria (yo-NG)",
-		SubLangZarmaNiger:                               "Zarma Niger (dje-NE)",
 		SubLangZuluSouthAfrica:                          "Zulu South Africa (zu-ZA)",
 	}
 
@@ -1217,73 +1799,41 @@ func (subLang ResourceSubLang) String() string {
 // PrettyResourceLang prettifies the resource lang and sub lang.
 func PrettyResourceLang(lang ResourceLang, subLang int) string {
 	m := map[ResourceLang]map[int]ResourceSubLang{
-		LangAfar: {
-			0x4: SubLangAfarDjibouti,
-			// 0x4: SubLangAfarEritrea,
-			// 0x4: SubLangAfarEthiopia,
-		},
 		LangAfrikaans: {
-			0x4: SubLangAfrikaansNamibia,
 			0x1: SubLangAfrikaansSouthAfrica,
-		},
-		LangAghem: {
-			0x4: SubLangAghemCameroon,
-		},
-		LangAkan: {
-			0x4: SubLangAkanGhana,
 		},
 		LangAlbanian: {
 			0x1: SubLangAlbanianAlbania,
-			0x4: SubLangAlbanianNorthMacedonia,
 		},
 		LangAlsatian: {
 			0x1: SubLangAlsatianFrance,
-			0x4: SubLangAlsatianLiechtenstein,
-			// 0x4: SubLangAlsatianSwitzerland,
 		},
 		LangAmharic: {
 			0x1: SubLangAmharicEthiopia,
 		},
 		LangArabic: {
-			0x5: SubLangArabicAlgeria,
-			0xf: SubLangArabicBahrain,
-			// 0x4:  SubLangArabicChad,
-			// 0x4:  SubLangArabicComoros,
-			// 0x4:  SubLangArabicDjibouti,
-			0x3: SubLangArabicEgypt,
-			// 0x4:  SubLangArabicEritrea,
-			0x2: SubLangArabicIraq,
-			// 0x4:  SubLangArabicIsrael,
-			0xb: SubLangArabicJordan,
-			0xd: SubLangArabicKuwait,
-			0xc: SubLangArabicLebanon,
-			// 0x4:  SubLangArabicLibya,
-			// 0x4:  SubLangArabicMauritania,
-			0x6: SubLangArabicMorocco,
-			0x8: SubLangArabicOman,
-			// 0x4:  SubLangArabicPalestinianAuthority,
+			0x5:  SubLangArabicAlgeria,
+			0xf:  SubLangArabicBahrain,
+			0x3:  SubLangArabicEgypt,
+			0x2:  SubLangArabicIraq,
+			0xb:  SubLangArabicJordan,
+			0xd:  SubLangArabicKuwait,
+			0xc:  SubLangArabicLebanon,
+			0x4:  SubLangArabicLibya,
+			0x6:  SubLangArabicMorocco,
+			0x8:  SubLangArabicOman,
 			0x10: SubLangArabicQatar,
 			0x1:  SubLangArabicSaudiArabia,
-			// 0x4:  SubLangArabicSomalia,
-			// 0x4:  SubLangArabicSouthSudan,
-			// 0x4:  SubLangArabicSudan,
-			0xa: SubLangArabicSyria,
-			0x7: SubLangArabicTunisia,
-			0xe: SubLangArabicUae,
-			0x4: SubLangArabicWorld,
-			0x9: SubLangArabicYemen,
+			0xa:  SubLangArabicSyria,
+			0x7:  SubLangArabicTunisia,
+			0xe:  SubLangArabicUae,
+			0x9:  SubLangArabicYemen,
 		},
 		LangArmenian: {
 			0x1: SubLangArmenianArmenia,
 		},
 		LangAssamese: {
-			0x1: SubLangAssameseIndia,
-		},
-		LangAsturian: {
-			0x4: SubLangAsturianSpain,
-		},
-		LangAsu: {
-			0x4:  SubLangAsuTanzania,
+			0x1:  SubLangAssameseIndia,
 			0x1d: SubLangAzerbaijaniCyrillic,
 			0x2:  SubLangAzerbaijaniCyrillicAzerbaijan,
 		},
@@ -1291,18 +1841,9 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 			0x1e: SubLangAzerbaijaniLatin,
 			0x1:  SubLangAzerbaijaniLatinAzerbaijan,
 		},
-		LangBafia: {
-			0x4: SubLangBafiaCameroon,
-		},
-		LangBamanankan: {
-			0x4: SubLangBamanankanLatinMali,
-		},
 		LangBangla: {
 			0x2: SubLangBanglaBangladesh,
 			0x1: SubLangBanglaIndia,
-		},
-		LangBasaa: {
-			0x4: SubLangBasaaCameroon,
 		},
 		LangBashkir: {
 			0x1: SubLangBashkirRussia,
@@ -1311,19 +1852,7 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 			0x1: SubLangBasqueSpain,
 		},
 		LangBelarusian: {
-			0x1: SubLangBelarusianBelarus,
-		},
-		LangBemba: {
-			0x4: SubLangBembaZambia,
-		},
-		LangBena: {
-			0x4: SubLangBenaTanzania,
-		},
-		LangBlin: {
-			0x4: SubLangBlinEritrea,
-		},
-		LangBodo: {
-			0x4:  SubLangBodoIndia,
+			0x1:  SubLangBelarusianBelarus,
 			0x19: SubLangBosnianCyrillic,
 			0x8:  SubLangBosnianCyrillicBosniaAndHerzegovina,
 			0x1a: SubLangBosnianLatin,
@@ -1341,34 +1870,16 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 			0x1: SubLangBurmeseMyanmar,
 		},
 		LangCatalan: {
-			0x4: SubLangCatalanAndorra,
-			// 0x4: SubLangCatalanFrance,
-			// 0x4: SubLangCatalanItaly,
 			0x1: SubLangCatalanSpain,
-		},
-		LangCebuano: {
-			0x4: SubLangCebuanLatin,
-			// 0x4: SubLangCebuanLatinPhilippines,
-			0x1: SubLangCentralAtlasTamazightArabicMorocco,
-			// 0x4: SubLangCentralAtlasTamazightLatinMorocco,
 		},
 		LangCentralKurdish: {
 			0x1f: SubLangCentralKurdish,
 			0x1:  SubLangCentralKurdishIraq,
 		},
-		LangChakma: {
-			0x4: SubLangChakmaChakma,
-			// 0x4: SubLangChakmaBangladesh,
-			// 0x4: SubLangChakmaIndia,
-			0x4: SubLangChechenRussia,
-		},
 		LangCherokee: {
 			0x1f: SubLangCherokee,
 			0x1:  SubLangCherokeeUnitedStates,
-		},
-		LangChiga: {
-			0x4: SubLangChigaUganda,
-			0x0: SubLangChineseSimplified,
+			0x0:  SubLangChineseSimplified,
 		},
 		LangChineseSimplified: {
 			0x2:  SubLangChineseSimplifiedPeoplesRepublicOfChina,
@@ -1377,13 +1888,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 			0x3:  SubLangChineseTraditionalHongKongSar,
 			0x5:  SubLangChineseTraditionalMacaoSar,
 			0x1:  SubLangChineseTraditionalTaiwan,
-			0x4:  SubLangChurchSlavicRussia,
-		},
-		LangCongoSwahili: {
-			0x4: SubLangCongoSwahiliCongoDrc,
-		},
-		LangCornish: {
-			0x4: SubLangCornishUnitedKingdom,
 		},
 		LangCorsican: {
 			0x1: SubLangCorsicanFrance,
@@ -1397,7 +1901,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		},
 		LangDanish: {
 			0x1: SubLangDanishDenmark,
-			0x4: SubLangDanishGreenland,
 		},
 		LangDari: {
 			0x1: SubLangDariAfghanistan,
@@ -1405,143 +1908,35 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangDivehi: {
 			0x1: SubLangDivehiMaldives,
 		},
-		LangDuala: {
-			0x4: SubLangDualaCameroon,
-		},
 		LangDutch: {
-			0x4: SubLangDutchAruba,
 			0x2: SubLangDutchBelgium,
-			0x4: SubLangDutchBonaireSintEustatiusAndSaba,
-			0x4: SubLangDutchCuraçao,
 			0x1: SubLangDutchNetherlands,
-			0x4: SubLangDutchSintMaarten,
-			0x4: SubLangDutchSuriname,
-		},
-		LangDzongkha: {
 			0x3: SubLangDzongkhaBhutan,
 		},
-		LangEmbu: {
-			0x4: SubLangEmbuKenya,
-		},
 		LangEnglish: {
-
-			0x3: SubLangEnglishAustralia,
-			// 0x4:  SubLangEnglishBahamas,
-			// 0x4:  SubLangEnglishBarbados,
-			// 0x4:  SubLangEnglishBelgium,
-			0xa: SubLangEnglishBelize,
-			// 0x4:  SubLangEnglishBermuda,
-			// 0x4:  SubLangEnglishBotswana,
-			// 0x4:  SubLangEnglishBritishIndianOceanTerritory,
-			// 0x4:  SubLangEnglishBritishVirginIslands,
-			// 0x4:  SubLangEnglishBurundi,
-			// 0x4:  SubLangEnglishCameroon,
-			// 0x4:  SubLangEnglishCanada,
-			0x9: SubLangEnglishCaribbean,
-			// 0x4:  SubLangEnglishCaymanIslands,
-			// 0x4:  SubLangEnglishChristmasIsland,
-			// 0x4:  SubLangEnglishCocosKeelingIslands,
-			// 0x4:  SubLangEnglishCookIslands,
-			// 0x4:  SubLangEnglishCyprus,
-			// 0x4:  SubLangEnglishDenmark,
-			// 0x4:  SubLangEnglishDominica,
-			// 0x4:  SubLangEnglishEritrea,
-			// 0x4:  SubLangEnglishEurope,
-			// 0x4:  SubLangEnglishFalklandIslands,
-			// 0x4:  SubLangEnglishFinland,
-			// 0x4:  SubLangEnglishFiji,
-			// 0x4:  SubLangEnglishGambia,
-			// 0x4:  SubLangEnglishGermany,
-			// 0x4:  SubLangEnglishGhana,
-			// 0x4:  SubLangEnglishGibraltar,
-			// 0x4:  SubLangEnglishGrenada,
-			// 0x4:  SubLangEnglishGuam,
-			// 0x4:  SubLangEnglishGuernsey,
-			// 0x4:  SubLangEnglishGuyana,
+			0x3:  SubLangEnglishAustralia,
+			0xa:  SubLangEnglishBelize,
+			0x4:  SubLangEnglishCanada,
+			0x9:  SubLangEnglishCaribbean,
 			0xf:  SubLangEnglishHongKong,
 			0x10: SubLangEnglishIndia,
 			0x6:  SubLangEnglishIreland,
-			// 0x4:  SubLangEnglishIsleOfMan,
-			// 0x4:  SubLangEnglishIsrael,
-			0x8: SubLangEnglishJamaica,
-			// 0x4:  SubLangEnglishJersey,
-			// 0x4:  SubLangEnglishKenya,
-			// 0x4:  SubLangEnglishKiribati,
-			// 0x4:  SubLangEnglishLesotho,
-			// 0x4:  SubLangEnglishLiberia,
-			// 0x4:  SubLangEnglishMacaoSar,
-			// 0x4:  SubLangEnglishMadagascar,
-			// 0x4:  SubLangEnglishMalawi,
+			0x8:  SubLangEnglishJamaica,
 			0x11: SubLangEnglishMalaysia,
-			// 0x4:  SubLangEnglishMalta,
-			// 0x4:  SubLangEnglishMarshallIslands,
-			// 0x4:  SubLangEnglishMauritius,
-			// 0x4:  SubLangEnglishMicronesia,
-			// 0x4:  SubLangEnglishMontserrat,
-			// 0x4:  SubLangEnglishNamibia,
-			// 0x4:  SubLangEnglishNauru,
-			// 0x4:  SubLangEnglishNetherlands,
-			0x5: SubLangEnglishNewZealand,
-			// 0x4:  SubLangEnglishNigeria,
-			// 0x4:  SubLangEnglishNiue,
-			// 0x4:  SubLangEnglishNorfolkIsland,
-			// 0x4:  SubLangEnglishNorthernMarianaIslands,
-			// 0x4:  SubLangEnglishPakistan,
-			// 0x4:  SubLangEnglishPalau,
-			// 0x4:  SubLangEnglishPapuaNewGuinea,
-			// 0x4:  SubLangEnglishPitcairnIslands,
-			// 0x4:  SubLangEnglishPuertoRico,
-			0xd: SubLangEnglishRepublicOfThePhilippines,
-			// 0x4:  SubLangEnglishRwanda,
-			// 0x4:  SubLangEnglishSaintKittsAndNevis,
-			// 0x4:  SubLangEnglishSaintLucia,
-			// 0x4:  SubLangEnglishSaintVincentAndTheGrenadines,
-			// 0x4:  SubLangEnglishSamoa,
-			// 0x4:  SubLangEnglishSeychelles,
-			// 0x4:  SubLangEnglishSierraLeone,
+			0x5:  SubLangEnglishNewZealand,
+			0xd:  SubLangEnglishRepublicOfThePhilippines,
 			0x12: SubLangEnglishSingapore,
-			// 0x4:  SubLangEnglishSintMaarten,
-			// 0x4:  SubLangEnglishSlovenia,
-			// 0x4:  SubLangEnglishSolomonIslands,
-			0x7: SubLangEnglishSouthAfrica,
-			// 0x4:  SubLangEnglishSouthSudan,
-			// 0x4:  SubLangEnglishStHelenaAscensionTristanDaCunha,
-			// 0x4:  SubLangEnglishSudan,
-			// 0x4:  SubLangEnglishSwaziland,
-			// 0x4:  SubLangEnglishSweden,
-			// 0x4:  SubLangEnglishSwitzerland,
-			// 0x4:  SubLangEnglishTanzania,
-			// 0x4:  SubLangEnglishTokelau,
-			// 0x4:  SubLangEnglishTonga,
-			0xb: SubLangEnglishTrinidadAndTobago,
-			// 0x4:  SubLangEnglishTurksAndCaicosIslands,
-			// 0x4:  SubLangEnglishTuvalu,
-			// 0x4:  SubLangEnglishUganda,
+			0x7:  SubLangEnglishSouthAfrica,
+			0xb:  SubLangEnglishTrinidadAndTobago,
 			0x13: SubLangEnglishUnitedArabEmirates,
 			0x2:  SubLangEnglishUnitedKingdom,
 			0x1:  SubLangEnglishUnitedStates,
-			// 0x4:  SubLangEnglishUsMinorOutlyingIslands,
-			// 0x4:  SubLangEnglishUsVirginIslands,
-			// 0x4:  SubLangEnglishVanuatu,
-			0x4: SubLangEnglishWorld,
-			// 0x4:  SubLangEnglishZambia,
-			0xc: SubLangEnglishZimbabwe,
-		},
-		LangEsperanto: {
-			0x4: SubLangEsperantoWorld,
+			0xc:  SubLangEnglishZimbabwe,
 		},
 		LangEstonian: {
 			0x1: SubLangEstonianEstonia,
 		},
-		LangEwe: {
-			0x4: SubLangEweGhana,
-			0x4: SubLangEweTogo,
-		},
-		LangEwondo: {
-			0x4: SubLangEwondoCameroon,
-		},
 		LangFaroese: {
-			0x4: SubLangFaroeseDenmark,
 			0x1: SubLangFaroeseFaroeIslands,
 		},
 		LangFilipino: {
@@ -1551,99 +1946,45 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 			0x1: SubLangFinnishFinland,
 		},
 		LangFrench: {
-			0x4: SubLangFrenchAlgeria,
 			0x2: SubLangFrenchBelgium,
-			0x4: SubLangFrenchBenin,
-			0x4: SubLangFrenchBurkinaFaso,
-			0x4: SubLangFrenchBurundi,
 			0xb: SubLangFrenchCameroon,
 			0x3: SubLangFrenchCanada,
 			0x7: SubLangFrenchCaribbean,
-			0x4: SubLangFrenchCentralAfricanRepublic,
-			0x4: SubLangFrenchChad,
-			0x4: SubLangFrenchComoros,
-			0x4: SubLangFrenchCongo,
 			0x9: SubLangFrenchCongoDrc,
 			0xc: SubLangFrenchCôteDivoire,
-			0x4: SubLangFrenchDjibouti,
-			0x4: SubLangFrenchEquatorialGuinea,
 			0x1: SubLangFrenchFrance,
-			0x4: SubLangFrenchFrenchGuiana,
-			0x4: SubLangFrenchFrenchPolynesia,
-			0x4: SubLangFrenchGabon,
-			0x4: SubLangFrenchGuadeloupe,
-			0x4: SubLangFrenchGuinea,
 			0xf: SubLangFrenchHaiti,
 			0x5: SubLangFrenchLuxembourg,
-			0x4: SubLangFrenchMadagascar,
 			0xd: SubLangFrenchMali,
-			0x4: SubLangFrenchMartinique,
-			0x4: SubLangFrenchMauritania,
-			0x4: SubLangFrenchMauritius,
-			0x4: SubLangFrenchMayotte,
 			0xe: SubLangFrenchMorocco,
-			0x4: SubLangFrenchNewCaledonia,
-			0x4: SubLangFrenchNiger,
 			0x6: SubLangFrenchPrincipalityOfMonaco,
 			0x8: SubLangFrenchReunion,
-			0x4: SubLangFrenchRwanda,
-			0x4: SubLangFrenchSaintBarthélemy,
-			0x4: SubLangFrenchSaintMartin,
-			0x4: SubLangFrenchSaintPierreAndMiquelon,
 			0xa: SubLangFrenchSenegal,
-			0x4: SubLangFrenchSeychelles,
 			0x4: SubLangFrenchSwitzerland,
-			0x4: SubLangFrenchSyria,
-			0x4: SubLangFrenchTogo,
-			0x4: SubLangFrenchTunisia,
-			0x4: SubLangFrenchVanuatu,
-			0x4: SubLangFrenchWallisAndFutuna,
 		},
 		LangFrisian: {
 			0x1: SubLangFrisianNetherlands,
 		},
-		LangFriulian: {
-			0x4: SubLangFriulianItaly,
-		},
 		LangFulah: {
 			0x1f: SubLangFulahLatin,
-			0x4:  SubLangFulahLatinBurkinaFaso,
-			0x4:  SubLangFulahCameroon,
-			0x4:  SubLangFulahLatinCameroon,
-			0x4:  SubLangFulahLatinGambia,
-			0x4:  SubLangFulahLatinGhana,
-			0x4:  SubLangFulahGuinea,
-			0x4:  SubLangFulahLatinGuinea,
-			0x4:  SubLangFulahLatinGuineaBissau,
-			0x4:  SubLangFulahLatinLiberia,
-			0x4:  SubLangFulahMauritania,
-			0x4:  SubLangFulahLatinMauritania,
-			0x4:  SubLangFulahLatinNiger,
 			0x1:  SubLangFulahNigeria,
 			0x1:  SubLangFulahLatinNigeria,
 			0x2:  SubLangFulahSenegal,
-			0x4:  SubLangFulahLatinSierraLeone,
 		},
 		LangGalician: {
 			0x1: SubLangGalicianSpain,
-		},
-		LangGanda: {
-			0x4: SubLangGandaUganda,
 		},
 		LangGeorgian: {
 			0x1: SubLangGeorgianGeorgia,
 		},
 		LangGerman: {
 			0x3: SubLangGermanAustria,
-			0x4: SubLangGermanBelgium,
 			0x1: SubLangGermanGermany,
-			0x4: SubLangGermanItaly,
 			0x5: SubLangGermanLiechtenstein,
 			0x4: SubLangGermanLuxembourg,
 			0x2: SubLangGermanSwitzerland,
 		},
 		LangGreek: {
-			0x4: SubLangGreekCyprus,
 			0x1: SubLangGreekGreece,
 		},
 		LangGreenlandic: {
@@ -1655,13 +1996,8 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangGujarati: {
 			0x1: SubLangGujaratiIndia,
 		},
-		LangGusii: {
-			0x4: SubLangGusiiKenya,
-		},
 		LangHausaLatin: {
 			0x1f: SubLangHausaLatin,
-			0x4:  SubLangHausaLatinGhana,
-			0x4:  SubLangHausaLatinNiger,
 			0x1:  SubLangHausaLatinNigeria,
 		},
 		LangHawaiian: {
@@ -1685,10 +2021,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangIndonesian: {
 			0x1: SubLangIndonesianIndonesia,
 		},
-		LangInterlingua: {
-			0x4: SubLangInterlinguaFrance,
-			0x4: SubLangInterlinguaWorld,
-		},
 		LangInuktitutLatin: {
 			0x1f: SubLangInuktitutLatin,
 			0x2:  SubLangInuktitutLatinCanada,
@@ -1700,34 +2032,10 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		},
 		LangItalian: {
 			0x1: SubLangItalianItaly,
-			0x4: SubLangItalianSanMarino,
 			0x2: SubLangItalianSwitzerland,
-			0x4: SubLangItalianVaticanCity,
 		},
 		LangJapanese: {
 			0x1: SubLangJapaneseJapan,
-		},
-		LangJavanese: {
-			0x4: SubLangJavaneseLatin,
-			0x4: SubLangJavaneseLatinIndonesia,
-		},
-		LangJolaFonyi: {
-			0x4: SubLangJolaFonyiSenegal,
-		},
-		LangKabuverdianu: {
-			0x4: SubLangKabuverdianuCaboVerde,
-		},
-		LangKabyle: {
-			0x4: SubLangKabyleAlgeria,
-		},
-		LangKako: {
-			0x4: SubLangKakoCameroon,
-		},
-		LangKalenjin: {
-			0x4: SubLangKalenjinKenya,
-		},
-		LangKamba: {
-			0x4: SubLangKambaKenya,
 		},
 		LangKannada: {
 			0x1: SubLangKannadaIndia,
@@ -1735,7 +2043,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		},
 		LangKashmiri: {
 			0x1: SubLangKashmiriPersoArabic,
-			0x4: SubLangKashmiriPersoArabic,
 			0x2: SubLangKashmiriDevanagariIndia,
 		},
 		LangKazakh: {
@@ -1747,42 +2054,20 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangKiche: {
 			0x1: SubLangKicheGuatemala,
 		},
-		LangKikuyu: {
-			0x4: SubLangKikuyuKenya,
-		},
 		LangKinyarwanda: {
 			0x1: SubLangKinyarwandaRwanda,
 		},
 		LangKiswahili: {
 			0x1: SubLangKiswahiliKenya,
-			0x4: SubLangKiswahiliTanzania,
-			0x4: SubLangKiswahiliUganda,
 		},
 		LangKonkani: {
 			0x1: SubLangKonkaniIndia,
 		},
 		LangKorean: {
 			0x1: SubLangKoreanKorea,
-			0x4: SubLangKoreanNorthKorea,
-		},
-		LangKoyraChiini: {
-			0x4: SubLangKoyraChiiniMali,
-		},
-		LangKoyraboroSenni: {
-			0x4: SubLangKoyraboroSenniMali,
-		},
-		LangKwasio: {
-			0x4: SubLangKwasioCameroon,
 		},
 		LangKyrgyz: {
 			0x1: SubLangKyrgyzKyrgyzstan,
-			0x4: SubLangKurdishPersoArabicIran,
-		},
-		LangLakota: {
-			0x4: SubLangLakotaUnitedStates,
-		},
-		LangLangi: {
-			0x4: SubLangLangiTanzania,
 		},
 		LangLao: {
 			0x1: SubLangLaoLaoPdr,
@@ -1791,48 +2076,17 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangLatvian: {
 			0x1: SubLangLatvianLatvia,
 		},
-		LangLingala: {
-			0x4: SubLangLingalaAngola,
-			0x4: SubLangLingalaCentralAfricanRepublic,
-			0x4: SubLangLingalaCongo,
-			0x4: SubLangLingalaCongoDrc,
-		},
 		LangLithuanian: {
 			0x1: SubLangLithuanianLithuania,
-		},
-		LangLowGerman: {
-			0x4: SubLangLowGermanGermany,
-			// 0x4: SubLangLowGermanNetherlands,
 		},
 		LangLowerSorbian: {
 			0x2: SubLangLowerSorbianGermany,
 		},
-		LangLubaKatanga: {
-			0x4: SubLangLubaKatangaCongoDrc,
-		},
-		LangLuo: {
-			0x4: SubLangLuoKenya,
-		},
 		LangLuxembourgish: {
 			0x1: SubLangLuxembourgishLuxembourg,
 		},
-		LangLuyia: {
-			0x4: SubLangLuyiaKenya,
-		},
 		LangMacedonian: {
 			0x1: SubLangMacedonianNorthMacedonia,
-		},
-		LangMachame: {
-			0x4: SubLangMachameTanzania,
-		},
-		LangMakhuwaMeetto: {
-			0x4: SubLangMakhuwaMeettoMozambique,
-		},
-		LangMakonde: {
-			0x4: SubLangMakondeTanzania,
-		},
-		LangMalagasy: {
-			0x4: SubLangMalagasyMadagascar,
 		},
 		LangMalay: {
 			0x2: SubLangMalayBruneiDarussalam,
@@ -1844,9 +2098,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangMaltese: {
 			0x1: SubLangMalteseMalta,
 		},
-		LangManx: {
-			0x4: SubLangManxIsleOfMan,
-		},
 		LangMaori: {
 			0x1: SubLangMaoriNewZealand,
 		},
@@ -1856,53 +2107,19 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangMarathi: {
 			0x1: SubLangMarathiIndia,
 		},
-		LangMasai: {
-			0x4: SubLangMasaiKenya,
-			0x4: SubLangMasaiTanzania,
-			0x4: SubLangMazanderaniIran,
-		},
-		LangMeru: {
-			0x4: SubLangMeruKenya,
-		},
-		LangMeta: {
-			0x4: SubLangMetaCameroon,
-		},
 		LangMohawk: {
 			0x1: SubLangMohawkCanada,
 		},
 		LangMongolianCyrillic: {
 			0x1e: SubLangMongolianCyrillic,
 			0x1:  SubLangMongolianCyrillicMongolia,
-			0x1f: SubLangMongolianTraditionalmongolian,
-			0x2:  SubLangMongolianTraditionalmongolianPeoplesRepublicOfChina,
-			0x3:  SubLangMongolianTraditionalmongolianMongolia,
-		},
-		LangMorisyen: {
-			0x4: SubLangMorisyenMauritius,
-		},
-		LangMundang: {
-			0x4: SubLangMundangCameroon,
-		},
-		LangNko: {
-			0x4: SubLangNkoGuinea,
-		},
-		LangNama: {
-			0x4: SubLangNamaNamibia,
+			0x1f: SubLangMongolianTraditionalMongolian,
+			0x2:  SubLangMongolianTraditionalMongolianPeoplesRepublicOfChina,
+			0x3:  SubLangMongolianTraditionalMongolianMongolia,
 		},
 		LangNepali: {
 			0x2: SubLangNepaliIndia,
 			0x1: SubLangNepaliNepal,
-		},
-		LangNgiemboon: {
-			0x4: SubLangNgiemboonCameroon,
-		},
-		LangNgomba: {
-			0x4: SubLangNgombaCameroon,
-			0x4: SubLangNorthernLuriIraq,
-			0x4: SubLangNorthernLuriIran,
-		},
-		LangNorthNdebele: {
-			0x4: SubLangNorthNdebeleZimbabwe,
 		},
 		LangNorwegianBokmal: {},
 		LangNorwegianBokmal: {
@@ -1910,14 +2127,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		},
 		LangNorwegianNynorsk: {
 			0x2: SubLangNorwegianNynorskNorway,
-			0x4: SubLangNorwegianBokmålSvalbardAndJanMayen,
-		},
-		LangNuer: {
-			0x4: SubLangNuerSudan,
-			0x4: SubLangNuerSouthSudan,
-		},
-		LangNyankole: {
-			0x4: SubLangNyankoleUganda,
 		},
 		LangOccitan: {
 			0x1: SubLangOccitanFrance,
@@ -1927,38 +2136,20 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		},
 		LangOromo: {
 			0x1: SubLangOromoEthiopia,
-			0x4: SubLangOromoKenya,
-		},
-		LangOssetian: {
-			0x4: SubLangOssetianCyrillicGeorgia,
-			0x4: SubLangOssetianCyrillicRussia,
 		},
 		LangPashto: {
 			0x1: SubLangPashtoAfghanistan,
-			0x4: SubLangPashtoPakistan,
 		},
 		LangPersian: {
-			0x4: SubLangPersianAfghanistan,
 			0x1: SubLangPersianIran,
 		},
 		LangPolish: {
 			0x1: SubLangPolishPoland,
 		},
 		LangPortuguese: {
-			0x4: SubLangPortugueseAngola,
 			0x1: SubLangPortugueseBrazil,
-			0x4: SubLangPortugueseCaboVerde,
-			0x4: SubLangPortugueseEquatorialGuinea,
-			0x4: SubLangPortugueseGuineaBissau,
-			0x4: SubLangPortugueseLuxembourg,
-			0x4: SubLangPortugueseMacaoSar,
-			0x4: SubLangPortugueseMozambique,
 			0x2: SubLangPortuguesePortugal,
-			0x4: SubLangPortugueseSãoToméAndPríncipe,
-			0x4: SubLangPortugueseSwitzerland,
-			0x4: SubLangPortugueseTimorLeste,
-			0x4: SubLangPrussian,
-			0x1: SubLangPseudoLanguagePseudoLocaleForEastAsiancomplexScriptLocalizationTesting,
+			0x1: SubLangPseudoLanguagePseudoLocaleForEastAsianComplexScriptLocalizationTesting,
 			0x1: SubLangPseudoLanguagePseudoLocaleUsedForLocalizationTesting,
 			0x2: SubLangPseudoLanguagePseudoLocaleUsedForLocalizationTestingOfMirroredLocales,
 		},
@@ -1972,9 +2163,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 			0x2: SubLangQuechuaEcuador,
 			0x3: SubLangQuechuaPeru,
 		},
-		LangRipuarian: {
-			0x4: SubLangRipuarianGermany,
-		},
 		LangRomanian: {
 			0x2: SubLangRomanianMoldova,
 			0x1: SubLangRomanianRomania,
@@ -1982,31 +2170,12 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangRomansh: {
 			0x1: SubLangRomanshSwitzerland,
 		},
-		LangRombo: {
-			0x4: SubLangRomboTanzania,
-		},
-		LangRundi: {
-			0x4: SubLangRundiBurundi,
-		},
 		LangRussian: {
-			0x4: SubLangRussianBelarus,
-			0x4: SubLangRussianKazakhstan,
-			0x4: SubLangRussianKyrgyzstan,
 			0x2: SubLangRussianMoldova,
 			0x1: SubLangRussianRussia,
-			0x4: SubLangRussianUkraine,
-		},
-		LangRwa: {
-			0x4: SubLangRwaTanzania,
-		},
-		LangSaho: {
-			0x4: SubLangSahoEritrea,
 		},
 		LangSakha: {
 			0x1: SubLangSakhaRussia,
-		},
-		LangSamburu: {
-			0x4: SubLangSamburuKenya,
 		},
 		LangSamiInari: {
 			0x9: SubLangSamiInariFinland,
@@ -2027,32 +2196,23 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 			0x6: SubLangSamiSouthernNorway,
 			0x7: SubLangSamiSouthernSweden,
 		},
-		LangSango: {
-			0x4: SubLangSangoCentralAfricanRepublic,
-		},
-		LangSangu: {
-			0x4: SubLangSanguTanzania,
-		},
 		LangSanskrit: {
 			0x1: SubLangSanskritIndia,
 		},
 		LangScottishGaelic: {
-			0x1: SubLangScottishGaelicUnitedKingdom,
-		},
-		LangSena: {
-			0x4:  SubLangSenaMozambique,
+			0x1:  SubLangScottishGaelicUnitedKingdom,
 			0x1b: SubLangSerbianCyrillic,
 			0x7:  SubLangSerbianCyrillicBosniaAndHerzegovina,
 			0xc:  SubLangSerbianCyrillicMontenegro,
 			0xa:  SubLangSerbianCyrillicSerbia,
-			0x3:  SubLangSerbianCyrillicSerbiaAndMontenegroformer,
+			0x3:  SubLangSerbianCyrillicSerbiaAndMontenegroFormer,
 			0x1c: SubLangSerbianLatin,
 		},
 		LangSerbianLatin: {
 			0x6: SubLangSerbianLatinBosniaAndHerzegovina,
 			0xb: SubLangSerbianLatinMontenegro,
 			0x9: SubLangSerbianLatinSerbia,
-			0x2: SubLangSerbianLatinSerbiaAndMontenegroformer,
+			0x2: SubLangSerbianLatinSerbiaAndMontenegroFormer,
 		},
 		LangSesothoSaLeboa: {
 			0x1: SubLangSesothoSaLeboaSouthAfrica,
@@ -2060,13 +2220,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangSetswana: {
 			0x2: SubLangSetswanaBotswana,
 			0x1: SubLangSetswanaSouthAfrica,
-		},
-		LangShambala: {
-			0x4: SubLangShambalaTanzania,
-		},
-		LangShona: {
-			0x4: SubLangShonaLatin,
-			0x4: SubLangShonaZimbabwe,
 		},
 		LangSindhi: {
 			0x1f: SubLangSindhi,
@@ -2081,28 +2234,16 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangSlovenian: {
 			0x1: SubLangSlovenianSlovenia,
 		},
-		LangSoga: {
-			0x4: SubLangSogaUganda,
-		},
 		LangSomali: {
-			0x4: SubLangSomaliDjibouti,
-			0x4: SubLangSomaliEthiopia,
-			0x4: SubLangSomaliKenya,
 			0x1: SubLangSomaliSomalia,
 		},
 		LangSotho: {
 			0x1: SubLangSothoSouthAfrica,
 		},
-		LangSouthNdebele: {
-			0x4: SubLangSouthNdebeleSouthAfrica,
-			0x4: SubLangSouthernSothoLesotho,
-		},
 		LangSpanish: {
 			0xb:  SubLangSpanishArgentina,
-			// 0x4:  SubLangSpanishBelize,
 			0x8:  SubLangSpanishBolivarianRepublicOfVenezuela,
 			0x10: SubLangSpanishBolivia,
-			0x4:  SubLangSpanishBrazil,
 			0xd:  SubLangSpanishChile,
 			0x9:  SubLangSpanishColombia,
 			0x5:  SubLangSpanishCostaRica,
@@ -2110,8 +2251,7 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 			0x7:  SubLangSpanishDominicanRepublic,
 			0xc:  SubLangSpanishEcuador,
 			0x11: SubLangSpanishElSalvador,
-			// 0x4:  SubLangSpanishEquatorialGuinea,
-			// 0x4:  SubLangSpanishGuatemala,
+			0x4:  SubLangSpanishGuatemala,
 			0x12: SubLangSpanishHonduras,
 			0x16: SubLangSpanishLatinAmerica,
 			0x2:  SubLangSpanishMexico,
@@ -2119,37 +2259,18 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 			0x6:  SubLangSpanishPanama,
 			0xf:  SubLangSpanishParaguay,
 			0xa:  SubLangSpanishPeru,
-			// 0x4:  SubLangSpanishPhilippines,
 			0x14: SubLangSpanishPuertoRico,
 			0x1:  SubLangSpanishSpain,
 			0x3:  SubLangSpanishSpain,
 			0x15: SubLangSpanishUnitedStates,
 			0xe:  SubLangSpanishUruguay,
 		},
-		LangStandardMoroccanTamazight: {
-			0x4: SubLangStandardMoroccanTamazightMorocco,
-			// 0x4: SubLangStandardMoroccanTamazightTifinagh,
-		},
-		LangSwati: {
-			0x4: SubLangSwatiSouthAfrica,
-			// 0x4: SubLangSwatiSwaziland,
-		},
 		LangSwedish: {
-			0x4: SubLangSwedishÅlandIslands,
 			0x2: SubLangSwedishFinland,
 			0x1: SubLangSwedishSweden,
 		},
 		LangSyriac: {
 			0x1: SubLangSyriacSyria,
-		},
-		LangTachelhit: {
-			// 0x4: SubLangTachelhitTifinagh,
-			0x4: SubLangTachelhitTifinaghMorocco,
-			// 0x4: SubLangTachelhitLatin,
-			// 0x4: SubLangTachelhitLatinMorocco,
-		},
-		LangTaita: {
-			0x4: SubLangTaitaKenya,
 		},
 		LangTajikCyrillic: {
 			0x1f: SubLangTajikCyrillic,
@@ -2161,12 +2282,7 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		},
 		LangTamil: {
 			0x1: SubLangTamilIndia,
-			0x4: SubLangTamilMalaysia,
-			// 0x4: SubLangTamilSingapore,
 			0x2: SubLangTamilSriLanka,
-		},
-		LangTasawaq: {
-			0x4: SubLangTasawaqNiger,
 		},
 		LangTatar: {
 			0x1: SubLangTatarRussia,
@@ -2174,32 +2290,20 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangTelugu: {
 			0x1: SubLangTeluguIndia,
 		},
-		LangTeso: {
-			0x4: SubLangTesoKenya,
-			0x4: SubLangTesoUganda,
-		},
 		LangThai: {
 			0x1: SubLangThaiThailand,
 		},
 		LangTibetan: {
-			0x4: SubLangTibetanIndia,
 			0x1: SubLangTibetanPeoplesRepublicOfChina,
-		},
-		LangTigre: {
-			0x4: SubLangTigreEritrea,
 		},
 		LangTigrinya: {
 			0x2: SubLangTigrinyaEritrea,
 			0x1: SubLangTigrinyaEthiopia,
 		},
-		LangTongan: {
-			0x4: SubLangTonganTonga,
-		},
 		LangTsonga: {
 			0x1: SubLangTsongaSouthAfrica,
 		},
 		LangTurkish: {
-			0x4: SubLangTurkishCyprus,
 			0x1: SubLangTurkishTurkey,
 		},
 		LangTurkmen: {
@@ -2217,21 +2321,13 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		},
 		LangUyghur: {
 			0x1:  SubLangUyghurPeoplesRepublicOfChina,
-			0x4:  SubLangUzbekPersoArabic,
-			0x4:  SubLangUzbekPersoArabicAfghanistan,
 			0x1e: SubLangUzbekCyrillic,
 			0x2:  SubLangUzbekCyrillicUzbekistan,
 		},
 		LangUzbekLatin: {
 			0x1f: SubLangUzbekLatin,
 			0x1:  SubLangUzbekLatinUzbekistan,
-		},
-		LangVai: {
-			0x4: SubLangVai,
-			0x4: SubLangVaiLiberia,
-			0x4: SubLangVaiLatinLiberia,
-			0x4: SubLangVaiLatin,
-			0x2: SubLangValencianSpain,
+			0x2:  SubLangValencianSpain,
 		},
 		LangVenda: {
 			0x1: SubLangVendaSouthAfrica,
@@ -2239,20 +2335,8 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangVietnamese: {
 			0x1: SubLangVietnameseVietnam,
 		},
-		LangVolapük: {
-			0x4: SubLangVolapükWorld,
-		},
-		LangVunjo: {
-			0x4: SubLangVunjoTanzania,
-		},
-		LangWalser: {
-			0x4: SubLangWalserSwitzerland,
-		},
 		LangWelsh: {
 			0x1: SubLangWelshUnitedKingdom,
-		},
-		LangWolaytta: {
-			0x4: SubLangWolayttaEthiopia,
 		},
 		LangWolof: {
 			0x1: SubLangWolofSenegal,
@@ -2260,19 +2344,12 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangXhosa: {
 			0x1: SubLangXhosaSouthAfrica,
 		},
-		LangYangben: {
-			0x4: SubLangYangbenCameroon,
-		},
 		LangYi: {
 			0x1: SubLangYiPeoplesRepublicOfChina,
-			// 0x1: SubLangYiddishWorld,
+			0x1: SubLangYiddishWorld,
 		},
 		LangYoruba: {
-			0x4: SubLangYorubaBenin,
 			0x1: SubLangYorubaNigeria,
-		},
-		LangZarma: {
-			0x4: SubLangZarmaNiger,
 		},
 		LangZulu: {
 			0x1: SubLangZuluSouthAfrica,
