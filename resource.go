@@ -1217,49 +1217,1065 @@ func (subLang ResourceSubLang) String() string {
 // PrettyResourceLang prettifies the resource lang and sub lang.
 func PrettyResourceLang(lang ResourceLang, subLang int) string {
 	m := map[ResourceLang]map[int]ResourceSubLang{
-		LangArabic: {
-			0x05: SubLangArabicAlgeria,
-			0x0f: SubLangArabicBahrain,
-			0x03: SubLangArabicEgypt,
-			0x02: SubLangArabicIraq,
-			0x0B: SubLangArabicJordan,
-			0x0D: SubLangArabicKuwait,
-			0x0C: SubLangArabicLebanon,
-			0x04: SubLangArabicLibya,
-			0x06: SubLangArabicMorocco,
-			0x08: SubLangArabicOman,
-			0x10: SubLangArabicQatar,
-			0x01: SubLangArabicSaudiArabia,
-			0x0A: SubLangArabicSyria,
-			0x07: SubLangArabicTunisia,
-			0x0E: SubLangArabicUae,
-			0x09: SubLangArabicYemen,
+		LangAfar: {
+			0x4: SubLangAfarDjibouti,
+			// 0x4: SubLangAfarEritrea,
+			// 0x4: SubLangAfarEthiopia,
 		},
-		LangAzeri: {
-			0x02: SubLangAzeriCyrillic,
-			0x01: SubLangAzeriLatin,
+		LangAfrikaans: {
+			0x4: SubLangAfrikaansNamibia,
+			0x1: SubLangAfrikaansSouthAfrica,
+		},
+		LangAghem: {
+			0x4: SubLangAghemCameroon,
+		},
+		LangAkan: {
+			0x4: SubLangAkanGhana,
+		},
+		LangAlbanian: {
+			0x1: SubLangAlbanianAlbania,
+			0x4: SubLangAlbanianNorthMacedonia,
+		},
+		LangAlsatian: {
+			0x1: SubLangAlsatianFrance,
+			0x4: SubLangAlsatianLiechtenstein,
+			// 0x4: SubLangAlsatianSwitzerland,
+		},
+		LangAmharic: {
+			0x1: SubLangAmharicEthiopia,
+		},
+		LangArabic: {
+			0x5: SubLangArabicAlgeria,
+			0xf: SubLangArabicBahrain,
+			// 0x4:  SubLangArabicChad,
+			// 0x4:  SubLangArabicComoros,
+			// 0x4:  SubLangArabicDjibouti,
+			0x3: SubLangArabicEgypt,
+			// 0x4:  SubLangArabicEritrea,
+			0x2: SubLangArabicIraq,
+			// 0x4:  SubLangArabicIsrael,
+			0xb: SubLangArabicJordan,
+			0xd: SubLangArabicKuwait,
+			0xc: SubLangArabicLebanon,
+			// 0x4:  SubLangArabicLibya,
+			// 0x4:  SubLangArabicMauritania,
+			0x6: SubLangArabicMorocco,
+			0x8: SubLangArabicOman,
+			// 0x4:  SubLangArabicPalestinianAuthority,
+			0x10: SubLangArabicQatar,
+			0x1:  SubLangArabicSaudiArabia,
+			// 0x4:  SubLangArabicSomalia,
+			// 0x4:  SubLangArabicSouthSudan,
+			// 0x4:  SubLangArabicSudan,
+			0xa: SubLangArabicSyria,
+			0x7: SubLangArabicTunisia,
+			0xe: SubLangArabicUae,
+			0x4: SubLangArabicWorld,
+			0x9: SubLangArabicYemen,
+		},
+		LangArmenian: {
+			0x1: SubLangArmenianArmenia,
+		},
+		LangAssamese: {
+			0x1: SubLangAssameseIndia,
+		},
+		LangAsturian: {
+			0x4: SubLangAsturianSpain,
+		},
+		LangAsu: {
+			0x4:  SubLangAsuTanzania,
+			0x1d: SubLangAzerbaijaniCyrillic,
+			0x2:  SubLangAzerbaijaniCyrillicAzerbaijan,
+		},
+		LangAzerbaijaniLatin: {
+			0x1e: SubLangAzerbaijaniLatin,
+			0x1:  SubLangAzerbaijaniLatinAzerbaijan,
+		},
+		LangBafia: {
+			0x4: SubLangBafiaCameroon,
+		},
+		LangBamanankan: {
+			0x4: SubLangBamanankanLatinMali,
 		},
 		LangBangla: {
-			0x02: SubLangBanglaBangladesh,
-			0x01: SubLangBanglaIndia,
+			0x2: SubLangBanglaBangladesh,
+			0x1: SubLangBanglaIndia,
 		},
-		LangBosnian: {
-			0x08: SubLangBosnianBosniaHerzegovinaCyrillic,
-			0x05: SubLangBosnianBosniaHerzegovinaLatin,
+		LangBasaa: {
+			0x4: SubLangBasaaCameroon,
 		},
-		LangChinese: {
-			0x03: SubLangChineseHongkong,
-			0x05: SubLangChineseMacau,
-			0x04: SubLangChineseSingapore,
-			0x02: SubLangChineseSimplified,
+		LangBashkir: {
+			0x1: SubLangBashkirRussia,
+		},
+		LangBasque: {
+			0x1: SubLangBasqueSpain,
+		},
+		LangBelarusian: {
+			0x1: SubLangBelarusianBelarus,
+		},
+		LangBemba: {
+			0x4: SubLangBembaZambia,
+		},
+		LangBena: {
+			0x4: SubLangBenaTanzania,
+		},
+		LangBlin: {
+			0x4: SubLangBlinEritrea,
+		},
+		LangBodo: {
+			0x4:  SubLangBodoIndia,
+			0x19: SubLangBosnianCyrillic,
+			0x8:  SubLangBosnianCyrillicBosniaAndHerzegovina,
+			0x1a: SubLangBosnianLatin,
+		},
+		LangBosnianLatin: {
+			0x5: SubLangBosnianLatinBosniaAndHerzegovina,
+		},
+		LangBreton: {
+			0x1: SubLangBretonFrance,
+		},
+		LangBulgarian: {
+			0x1: SubLangBulgarianBulgaria,
+		},
+		LangBurmese: {
+			0x1: SubLangBurmeseMyanmar,
+		},
+		LangCatalan: {
+			0x4: SubLangCatalanAndorra,
+			// 0x4: SubLangCatalanFrance,
+			// 0x4: SubLangCatalanItaly,
+			0x1: SubLangCatalanSpain,
+		},
+		LangCebuano: {
+			0x4: SubLangCebuanLatin,
+			// 0x4: SubLangCebuanLatinPhilippines,
+			0x1: SubLangCentralAtlasTamazightArabicMorocco,
+			// 0x4: SubLangCentralAtlasTamazightLatinMorocco,
+		},
+		LangCentralKurdish: {
+			0x1f: SubLangCentralKurdish,
+			0x1:  SubLangCentralKurdishIraq,
+		},
+		LangChakma: {
+			0x4: SubLangChakmaChakma,
+			// 0x4: SubLangChakmaBangladesh,
+			// 0x4: SubLangChakmaIndia,
+			0x4: SubLangChechenRussia,
+		},
+		LangCherokee: {
+			0x1f: SubLangCherokee,
+			0x1:  SubLangCherokeeUnitedStates,
+		},
+		LangChiga: {
+			0x4: SubLangChigaUganda,
+			0x0: SubLangChineseSimplified,
+		},
+		LangChineseSimplified: {
+			0x2:  SubLangChineseSimplifiedPeoplesRepublicOfChina,
+			0x4:  SubLangChineseSimplifiedSingapore,
+			0x1f: SubLangChineseTraditional,
+			0x3:  SubLangChineseTraditionalHongKongSar,
+			0x5:  SubLangChineseTraditionalMacaoSar,
+			0x1:  SubLangChineseTraditionalTaiwan,
+			0x4:  SubLangChurchSlavicRussia,
+		},
+		LangCongoSwahili: {
+			0x4: SubLangCongoSwahiliCongoDrc,
+		},
+		LangCornish: {
+			0x4: SubLangCornishUnitedKingdom,
+		},
+		LangCorsican: {
+			0x1: SubLangCorsicanFrance,
 		},
 		LangCroatian: {
-			0x04: SubLangCroatianBosniaHerzegovinaLatin,
-			0x01: SubLangCroatianCroatia,
+			0x1: SubLangCroatianCroatia,
+			0x4: SubLangCroatianLatinBosniaAndHerzegovina,
+		},
+		LangCzech: {
+			0x1: SubLangCzechCzechRepublic,
+		},
+		LangDanish: {
+			0x1: SubLangDanishDenmark,
+			0x4: SubLangDanishGreenland,
+		},
+		LangDari: {
+			0x1: SubLangDariAfghanistan,
+		},
+		LangDivehi: {
+			0x1: SubLangDivehiMaldives,
+		},
+		LangDuala: {
+			0x4: SubLangDualaCameroon,
 		},
 		LangDutch: {
-			0x02: SubLangDutchBelgian,
-			0x01: SubLangDutch,
+			0x4: SubLangDutchAruba,
+			0x2: SubLangDutchBelgium,
+			0x4: SubLangDutchBonaireSintEustatiusAndSaba,
+			0x4: SubLangDutchCuraçao,
+			0x1: SubLangDutchNetherlands,
+			0x4: SubLangDutchSintMaarten,
+			0x4: SubLangDutchSuriname,
+		},
+		LangDzongkha: {
+			0x3: SubLangDzongkhaBhutan,
+		},
+		LangEmbu: {
+			0x4: SubLangEmbuKenya,
+		},
+		LangEnglish: {
+
+			0x3: SubLangEnglishAustralia,
+			// 0x4:  SubLangEnglishBahamas,
+			// 0x4:  SubLangEnglishBarbados,
+			// 0x4:  SubLangEnglishBelgium,
+			0xa: SubLangEnglishBelize,
+			// 0x4:  SubLangEnglishBermuda,
+			// 0x4:  SubLangEnglishBotswana,
+			// 0x4:  SubLangEnglishBritishIndianOceanTerritory,
+			// 0x4:  SubLangEnglishBritishVirginIslands,
+			// 0x4:  SubLangEnglishBurundi,
+			// 0x4:  SubLangEnglishCameroon,
+			// 0x4:  SubLangEnglishCanada,
+			0x9: SubLangEnglishCaribbean,
+			// 0x4:  SubLangEnglishCaymanIslands,
+			// 0x4:  SubLangEnglishChristmasIsland,
+			// 0x4:  SubLangEnglishCocosKeelingIslands,
+			// 0x4:  SubLangEnglishCookIslands,
+			// 0x4:  SubLangEnglishCyprus,
+			// 0x4:  SubLangEnglishDenmark,
+			// 0x4:  SubLangEnglishDominica,
+			// 0x4:  SubLangEnglishEritrea,
+			// 0x4:  SubLangEnglishEurope,
+			// 0x4:  SubLangEnglishFalklandIslands,
+			// 0x4:  SubLangEnglishFinland,
+			// 0x4:  SubLangEnglishFiji,
+			// 0x4:  SubLangEnglishGambia,
+			// 0x4:  SubLangEnglishGermany,
+			// 0x4:  SubLangEnglishGhana,
+			// 0x4:  SubLangEnglishGibraltar,
+			// 0x4:  SubLangEnglishGrenada,
+			// 0x4:  SubLangEnglishGuam,
+			// 0x4:  SubLangEnglishGuernsey,
+			// 0x4:  SubLangEnglishGuyana,
+			0xf:  SubLangEnglishHongKong,
+			0x10: SubLangEnglishIndia,
+			0x6:  SubLangEnglishIreland,
+			// 0x4:  SubLangEnglishIsleOfMan,
+			// 0x4:  SubLangEnglishIsrael,
+			0x8: SubLangEnglishJamaica,
+			// 0x4:  SubLangEnglishJersey,
+			// 0x4:  SubLangEnglishKenya,
+			// 0x4:  SubLangEnglishKiribati,
+			// 0x4:  SubLangEnglishLesotho,
+			// 0x4:  SubLangEnglishLiberia,
+			// 0x4:  SubLangEnglishMacaoSar,
+			// 0x4:  SubLangEnglishMadagascar,
+			// 0x4:  SubLangEnglishMalawi,
+			0x11: SubLangEnglishMalaysia,
+			// 0x4:  SubLangEnglishMalta,
+			// 0x4:  SubLangEnglishMarshallIslands,
+			// 0x4:  SubLangEnglishMauritius,
+			// 0x4:  SubLangEnglishMicronesia,
+			// 0x4:  SubLangEnglishMontserrat,
+			// 0x4:  SubLangEnglishNamibia,
+			// 0x4:  SubLangEnglishNauru,
+			// 0x4:  SubLangEnglishNetherlands,
+			0x5: SubLangEnglishNewZealand,
+			// 0x4:  SubLangEnglishNigeria,
+			// 0x4:  SubLangEnglishNiue,
+			// 0x4:  SubLangEnglishNorfolkIsland,
+			// 0x4:  SubLangEnglishNorthernMarianaIslands,
+			// 0x4:  SubLangEnglishPakistan,
+			// 0x4:  SubLangEnglishPalau,
+			// 0x4:  SubLangEnglishPapuaNewGuinea,
+			// 0x4:  SubLangEnglishPitcairnIslands,
+			// 0x4:  SubLangEnglishPuertoRico,
+			0xd: SubLangEnglishRepublicOfThePhilippines,
+			// 0x4:  SubLangEnglishRwanda,
+			// 0x4:  SubLangEnglishSaintKittsAndNevis,
+			// 0x4:  SubLangEnglishSaintLucia,
+			// 0x4:  SubLangEnglishSaintVincentAndTheGrenadines,
+			// 0x4:  SubLangEnglishSamoa,
+			// 0x4:  SubLangEnglishSeychelles,
+			// 0x4:  SubLangEnglishSierraLeone,
+			0x12: SubLangEnglishSingapore,
+			// 0x4:  SubLangEnglishSintMaarten,
+			// 0x4:  SubLangEnglishSlovenia,
+			// 0x4:  SubLangEnglishSolomonIslands,
+			0x7: SubLangEnglishSouthAfrica,
+			// 0x4:  SubLangEnglishSouthSudan,
+			// 0x4:  SubLangEnglishStHelenaAscensionTristanDaCunha,
+			// 0x4:  SubLangEnglishSudan,
+			// 0x4:  SubLangEnglishSwaziland,
+			// 0x4:  SubLangEnglishSweden,
+			// 0x4:  SubLangEnglishSwitzerland,
+			// 0x4:  SubLangEnglishTanzania,
+			// 0x4:  SubLangEnglishTokelau,
+			// 0x4:  SubLangEnglishTonga,
+			0xb: SubLangEnglishTrinidadAndTobago,
+			// 0x4:  SubLangEnglishTurksAndCaicosIslands,
+			// 0x4:  SubLangEnglishTuvalu,
+			// 0x4:  SubLangEnglishUganda,
+			0x13: SubLangEnglishUnitedArabEmirates,
+			0x2:  SubLangEnglishUnitedKingdom,
+			0x1:  SubLangEnglishUnitedStates,
+			// 0x4:  SubLangEnglishUsMinorOutlyingIslands,
+			// 0x4:  SubLangEnglishUsVirginIslands,
+			// 0x4:  SubLangEnglishVanuatu,
+			0x4: SubLangEnglishWorld,
+			// 0x4:  SubLangEnglishZambia,
+			0xc: SubLangEnglishZimbabwe,
+		},
+		LangEsperanto: {
+			0x4: SubLangEsperantoWorld,
+		},
+		LangEstonian: {
+			0x1: SubLangEstonianEstonia,
+		},
+		LangEwe: {
+			0x4: SubLangEweGhana,
+			0x4: SubLangEweTogo,
+		},
+		LangEwondo: {
+			0x4: SubLangEwondoCameroon,
+		},
+		LangFaroese: {
+			0x4: SubLangFaroeseDenmark,
+			0x1: SubLangFaroeseFaroeIslands,
+		},
+		LangFilipino: {
+			0x1: SubLangFilipinoPhilippines,
+		},
+		LangFinnish: {
+			0x1: SubLangFinnishFinland,
+		},
+		LangFrench: {
+			0x4: SubLangFrenchAlgeria,
+			0x2: SubLangFrenchBelgium,
+			0x4: SubLangFrenchBenin,
+			0x4: SubLangFrenchBurkinaFaso,
+			0x4: SubLangFrenchBurundi,
+			0xb: SubLangFrenchCameroon,
+			0x3: SubLangFrenchCanada,
+			0x7: SubLangFrenchCaribbean,
+			0x4: SubLangFrenchCentralAfricanRepublic,
+			0x4: SubLangFrenchChad,
+			0x4: SubLangFrenchComoros,
+			0x4: SubLangFrenchCongo,
+			0x9: SubLangFrenchCongoDrc,
+			0xc: SubLangFrenchCôteDivoire,
+			0x4: SubLangFrenchDjibouti,
+			0x4: SubLangFrenchEquatorialGuinea,
+			0x1: SubLangFrenchFrance,
+			0x4: SubLangFrenchFrenchGuiana,
+			0x4: SubLangFrenchFrenchPolynesia,
+			0x4: SubLangFrenchGabon,
+			0x4: SubLangFrenchGuadeloupe,
+			0x4: SubLangFrenchGuinea,
+			0xf: SubLangFrenchHaiti,
+			0x5: SubLangFrenchLuxembourg,
+			0x4: SubLangFrenchMadagascar,
+			0xd: SubLangFrenchMali,
+			0x4: SubLangFrenchMartinique,
+			0x4: SubLangFrenchMauritania,
+			0x4: SubLangFrenchMauritius,
+			0x4: SubLangFrenchMayotte,
+			0xe: SubLangFrenchMorocco,
+			0x4: SubLangFrenchNewCaledonia,
+			0x4: SubLangFrenchNiger,
+			0x6: SubLangFrenchPrincipalityOfMonaco,
+			0x8: SubLangFrenchReunion,
+			0x4: SubLangFrenchRwanda,
+			0x4: SubLangFrenchSaintBarthélemy,
+			0x4: SubLangFrenchSaintMartin,
+			0x4: SubLangFrenchSaintPierreAndMiquelon,
+			0xa: SubLangFrenchSenegal,
+			0x4: SubLangFrenchSeychelles,
+			0x4: SubLangFrenchSwitzerland,
+			0x4: SubLangFrenchSyria,
+			0x4: SubLangFrenchTogo,
+			0x4: SubLangFrenchTunisia,
+			0x4: SubLangFrenchVanuatu,
+			0x4: SubLangFrenchWallisAndFutuna,
+		},
+		LangFrisian: {
+			0x1: SubLangFrisianNetherlands,
+		},
+		LangFriulian: {
+			0x4: SubLangFriulianItaly,
+		},
+		LangFulah: {
+			0x1f: SubLangFulahLatin,
+			0x4:  SubLangFulahLatinBurkinaFaso,
+			0x4:  SubLangFulahCameroon,
+			0x4:  SubLangFulahLatinCameroon,
+			0x4:  SubLangFulahLatinGambia,
+			0x4:  SubLangFulahLatinGhana,
+			0x4:  SubLangFulahGuinea,
+			0x4:  SubLangFulahLatinGuinea,
+			0x4:  SubLangFulahLatinGuineaBissau,
+			0x4:  SubLangFulahLatinLiberia,
+			0x4:  SubLangFulahMauritania,
+			0x4:  SubLangFulahLatinMauritania,
+			0x4:  SubLangFulahLatinNiger,
+			0x1:  SubLangFulahNigeria,
+			0x1:  SubLangFulahLatinNigeria,
+			0x2:  SubLangFulahSenegal,
+			0x4:  SubLangFulahLatinSierraLeone,
+		},
+		LangGalician: {
+			0x1: SubLangGalicianSpain,
+		},
+		LangGanda: {
+			0x4: SubLangGandaUganda,
+		},
+		LangGeorgian: {
+			0x1: SubLangGeorgianGeorgia,
+		},
+		LangGerman: {
+			0x3: SubLangGermanAustria,
+			0x4: SubLangGermanBelgium,
+			0x1: SubLangGermanGermany,
+			0x4: SubLangGermanItaly,
+			0x5: SubLangGermanLiechtenstein,
+			0x4: SubLangGermanLuxembourg,
+			0x2: SubLangGermanSwitzerland,
+		},
+		LangGreek: {
+			0x4: SubLangGreekCyprus,
+			0x1: SubLangGreekGreece,
+		},
+		LangGreenlandic: {
+			0x1: SubLangGreenlandicGreenland,
+		},
+		LangGuarani: {
+			0x1: SubLangGuaraniParaguay,
+		},
+		LangGujarati: {
+			0x1: SubLangGujaratiIndia,
+		},
+		LangGusii: {
+			0x4: SubLangGusiiKenya,
+		},
+		LangHausaLatin: {
+			0x1f: SubLangHausaLatin,
+			0x4:  SubLangHausaLatinGhana,
+			0x4:  SubLangHausaLatinNiger,
+			0x1:  SubLangHausaLatinNigeria,
+		},
+		LangHawaiian: {
+			0x1: SubLangHawaiianUnitedStates,
+		},
+		LangHebrew: {
+			0x1: SubLangHebrewIsrael,
+		},
+		LangHindi: {
+			0x1: SubLangHindiIndia,
+		},
+		LangHungarian: {
+			0x1: SubLangHungarianHungary,
+		},
+		LangIcelandic: {
+			0x1: SubLangIcelandicIceland,
+		},
+		LangIgbo: {
+			0x1: SubLangIgboNigeria,
+		},
+		LangIndonesian: {
+			0x1: SubLangIndonesianIndonesia,
+		},
+		LangInterlingua: {
+			0x4: SubLangInterlinguaFrance,
+			0x4: SubLangInterlinguaWorld,
+		},
+		LangInuktitutLatin: {
+			0x1f: SubLangInuktitutLatin,
+			0x2:  SubLangInuktitutLatinCanada,
+			0x1e: SubLangInuktitutSyllabics,
+			0x1:  SubLangInuktitutSyllabicsCanada,
+		},
+		LangIrish: {
+			0x2: SubLangIrishIreland,
+		},
+		LangItalian: {
+			0x1: SubLangItalianItaly,
+			0x4: SubLangItalianSanMarino,
+			0x2: SubLangItalianSwitzerland,
+			0x4: SubLangItalianVaticanCity,
+		},
+		LangJapanese: {
+			0x1: SubLangJapaneseJapan,
+		},
+		LangJavanese: {
+			0x4: SubLangJavaneseLatin,
+			0x4: SubLangJavaneseLatinIndonesia,
+		},
+		LangJolaFonyi: {
+			0x4: SubLangJolaFonyiSenegal,
+		},
+		LangKabuverdianu: {
+			0x4: SubLangKabuverdianuCaboVerde,
+		},
+		LangKabyle: {
+			0x4: SubLangKabyleAlgeria,
+		},
+		LangKako: {
+			0x4: SubLangKakoCameroon,
+		},
+		LangKalenjin: {
+			0x4: SubLangKalenjinKenya,
+		},
+		LangKamba: {
+			0x4: SubLangKambaKenya,
+		},
+		LangKannada: {
+			0x1: SubLangKannadaIndia,
+			0x1: SubLangKanuriLatinNigeria,
+		},
+		LangKashmiri: {
+			0x1: SubLangKashmiriPersoArabic,
+			0x4: SubLangKashmiriPersoArabic,
+			0x2: SubLangKashmiriDevanagariIndia,
+		},
+		LangKazakh: {
+			0x1: SubLangKazakhKazakhstan,
+		},
+		LangKhmer: {
+			0x1: SubLangKhmerCambodia,
+		},
+		LangKiche: {
+			0x1: SubLangKicheGuatemala,
+		},
+		LangKikuyu: {
+			0x4: SubLangKikuyuKenya,
+		},
+		LangKinyarwanda: {
+			0x1: SubLangKinyarwandaRwanda,
+		},
+		LangKiswahili: {
+			0x1: SubLangKiswahiliKenya,
+			0x4: SubLangKiswahiliTanzania,
+			0x4: SubLangKiswahiliUganda,
+		},
+		LangKonkani: {
+			0x1: SubLangKonkaniIndia,
+		},
+		LangKorean: {
+			0x1: SubLangKoreanKorea,
+			0x4: SubLangKoreanNorthKorea,
+		},
+		LangKoyraChiini: {
+			0x4: SubLangKoyraChiiniMali,
+		},
+		LangKoyraboroSenni: {
+			0x4: SubLangKoyraboroSenniMali,
+		},
+		LangKwasio: {
+			0x4: SubLangKwasioCameroon,
+		},
+		LangKyrgyz: {
+			0x1: SubLangKyrgyzKyrgyzstan,
+			0x4: SubLangKurdishPersoArabicIran,
+		},
+		LangLakota: {
+			0x4: SubLangLakotaUnitedStates,
+		},
+		LangLangi: {
+			0x4: SubLangLangiTanzania,
+		},
+		LangLao: {
+			0x1: SubLangLaoLaoPdr,
+			0x1: SubLangLatinVaticanCity,
+		},
+		LangLatvian: {
+			0x1: SubLangLatvianLatvia,
+		},
+		LangLingala: {
+			0x4: SubLangLingalaAngola,
+			0x4: SubLangLingalaCentralAfricanRepublic,
+			0x4: SubLangLingalaCongo,
+			0x4: SubLangLingalaCongoDrc,
+		},
+		LangLithuanian: {
+			0x1: SubLangLithuanianLithuania,
+		},
+		LangLowGerman: {
+			0x4: SubLangLowGermanGermany,
+			// 0x4: SubLangLowGermanNetherlands,
+		},
+		LangLowerSorbian: {
+			0x2: SubLangLowerSorbianGermany,
+		},
+		LangLubaKatanga: {
+			0x4: SubLangLubaKatangaCongoDrc,
+		},
+		LangLuo: {
+			0x4: SubLangLuoKenya,
+		},
+		LangLuxembourgish: {
+			0x1: SubLangLuxembourgishLuxembourg,
+		},
+		LangLuyia: {
+			0x4: SubLangLuyiaKenya,
+		},
+		LangMacedonian: {
+			0x1: SubLangMacedonianNorthMacedonia,
+		},
+		LangMachame: {
+			0x4: SubLangMachameTanzania,
+		},
+		LangMakhuwaMeetto: {
+			0x4: SubLangMakhuwaMeettoMozambique,
+		},
+		LangMakonde: {
+			0x4: SubLangMakondeTanzania,
+		},
+		LangMalagasy: {
+			0x4: SubLangMalagasyMadagascar,
+		},
+		LangMalay: {
+			0x2: SubLangMalayBruneiDarussalam,
+			0x1: SubLangMalayMalaysia,
+		},
+		LangMalayalam: {
+			0x1: SubLangMalayalamIndia,
+		},
+		LangMaltese: {
+			0x1: SubLangMalteseMalta,
+		},
+		LangManx: {
+			0x4: SubLangManxIsleOfMan,
+		},
+		LangMaori: {
+			0x1: SubLangMaoriNewZealand,
+		},
+		LangMapudungun: {
+			0x1: SubLangMapudungunChile,
+		},
+		LangMarathi: {
+			0x1: SubLangMarathiIndia,
+		},
+		LangMasai: {
+			0x4: SubLangMasaiKenya,
+			0x4: SubLangMasaiTanzania,
+			0x4: SubLangMazanderaniIran,
+		},
+		LangMeru: {
+			0x4: SubLangMeruKenya,
+		},
+		LangMeta: {
+			0x4: SubLangMetaCameroon,
+		},
+		LangMohawk: {
+			0x1: SubLangMohawkCanada,
+		},
+		LangMongolianCyrillic: {
+			0x1e: SubLangMongolianCyrillic,
+			0x1:  SubLangMongolianCyrillicMongolia,
+			0x1f: SubLangMongolianTraditionalmongolian,
+			0x2:  SubLangMongolianTraditionalmongolianPeoplesRepublicOfChina,
+			0x3:  SubLangMongolianTraditionalmongolianMongolia,
+		},
+		LangMorisyen: {
+			0x4: SubLangMorisyenMauritius,
+		},
+		LangMundang: {
+			0x4: SubLangMundangCameroon,
+		},
+		LangNko: {
+			0x4: SubLangNkoGuinea,
+		},
+		LangNama: {
+			0x4: SubLangNamaNamibia,
+		},
+		LangNepali: {
+			0x2: SubLangNepaliIndia,
+			0x1: SubLangNepaliNepal,
+		},
+		LangNgiemboon: {
+			0x4: SubLangNgiemboonCameroon,
+		},
+		LangNgomba: {
+			0x4: SubLangNgombaCameroon,
+			0x4: SubLangNorthernLuriIraq,
+			0x4: SubLangNorthernLuriIran,
+		},
+		LangNorthNdebele: {
+			0x4: SubLangNorthNdebeleZimbabwe,
+		},
+		LangNorwegianBokmal: {},
+		LangNorwegianBokmal: {
+			0x1: SubLangNorwegianBokmalNorway,
+		},
+		LangNorwegianNynorsk: {
+			0x2: SubLangNorwegianNynorskNorway,
+			0x4: SubLangNorwegianBokmålSvalbardAndJanMayen,
+		},
+		LangNuer: {
+			0x4: SubLangNuerSudan,
+			0x4: SubLangNuerSouthSudan,
+		},
+		LangNyankole: {
+			0x4: SubLangNyankoleUganda,
+		},
+		LangOccitan: {
+			0x1: SubLangOccitanFrance,
+		},
+		LangOdia: {
+			0x1: SubLangOdiaIndia,
+		},
+		LangOromo: {
+			0x1: SubLangOromoEthiopia,
+			0x4: SubLangOromoKenya,
+		},
+		LangOssetian: {
+			0x4: SubLangOssetianCyrillicGeorgia,
+			0x4: SubLangOssetianCyrillicRussia,
+		},
+		LangPashto: {
+			0x1: SubLangPashtoAfghanistan,
+			0x4: SubLangPashtoPakistan,
+		},
+		LangPersian: {
+			0x4: SubLangPersianAfghanistan,
+			0x1: SubLangPersianIran,
+		},
+		LangPolish: {
+			0x1: SubLangPolishPoland,
+		},
+		LangPortuguese: {
+			0x4: SubLangPortugueseAngola,
+			0x1: SubLangPortugueseBrazil,
+			0x4: SubLangPortugueseCaboVerde,
+			0x4: SubLangPortugueseEquatorialGuinea,
+			0x4: SubLangPortugueseGuineaBissau,
+			0x4: SubLangPortugueseLuxembourg,
+			0x4: SubLangPortugueseMacaoSar,
+			0x4: SubLangPortugueseMozambique,
+			0x2: SubLangPortuguesePortugal,
+			0x4: SubLangPortugueseSãoToméAndPríncipe,
+			0x4: SubLangPortugueseSwitzerland,
+			0x4: SubLangPortugueseTimorLeste,
+			0x4: SubLangPrussian,
+			0x1: SubLangPseudoLanguagePseudoLocaleForEastAsiancomplexScriptLocalizationTesting,
+			0x1: SubLangPseudoLanguagePseudoLocaleUsedForLocalizationTesting,
+			0x2: SubLangPseudoLanguagePseudoLocaleUsedForLocalizationTestingOfMirroredLocales,
+		},
+		LangPunjabi: {
+			0x1f: SubLangPunjabi,
+			0x1:  SubLangPunjabiIndia,
+			0x2:  SubLangPunjabiIslamicRepublicOfPakistan,
+		},
+		LangQuechua: {
+			0x1: SubLangQuechuaBolivia,
+			0x2: SubLangQuechuaEcuador,
+			0x3: SubLangQuechuaPeru,
+		},
+		LangRipuarian: {
+			0x4: SubLangRipuarianGermany,
+		},
+		LangRomanian: {
+			0x2: SubLangRomanianMoldova,
+			0x1: SubLangRomanianRomania,
+		},
+		LangRomansh: {
+			0x1: SubLangRomanshSwitzerland,
+		},
+		LangRombo: {
+			0x4: SubLangRomboTanzania,
+		},
+		LangRundi: {
+			0x4: SubLangRundiBurundi,
+		},
+		LangRussian: {
+			0x4: SubLangRussianBelarus,
+			0x4: SubLangRussianKazakhstan,
+			0x4: SubLangRussianKyrgyzstan,
+			0x2: SubLangRussianMoldova,
+			0x1: SubLangRussianRussia,
+			0x4: SubLangRussianUkraine,
+		},
+		LangRwa: {
+			0x4: SubLangRwaTanzania,
+		},
+		LangSaho: {
+			0x4: SubLangSahoEritrea,
+		},
+		LangSakha: {
+			0x1: SubLangSakhaRussia,
+		},
+		LangSamburu: {
+			0x4: SubLangSamburuKenya,
+		},
+		LangSamiInari: {
+			0x9: SubLangSamiInariFinland,
+		},
+		LangSamiLule: {
+			0x4: SubLangSamiLuleNorway,
+			0x5: SubLangSamiLuleSweden,
+		},
+		LangSamiNorthern: {
+			0x3: SubLangSamiNorthernFinland,
+			0x1: SubLangSamiNorthernNorway,
+			0x2: SubLangSamiNorthernSweden,
+		},
+		LangSamiSkolt: {
+			0x8: SubLangSamiSkoltFinland,
+		},
+		LangSamiSouthern: {
+			0x6: SubLangSamiSouthernNorway,
+			0x7: SubLangSamiSouthernSweden,
+		},
+		LangSango: {
+			0x4: SubLangSangoCentralAfricanRepublic,
+		},
+		LangSangu: {
+			0x4: SubLangSanguTanzania,
+		},
+		LangSanskrit: {
+			0x1: SubLangSanskritIndia,
+		},
+		LangScottishGaelic: {
+			0x1: SubLangScottishGaelicUnitedKingdom,
+		},
+		LangSena: {
+			0x4:  SubLangSenaMozambique,
+			0x1b: SubLangSerbianCyrillic,
+			0x7:  SubLangSerbianCyrillicBosniaAndHerzegovina,
+			0xc:  SubLangSerbianCyrillicMontenegro,
+			0xa:  SubLangSerbianCyrillicSerbia,
+			0x3:  SubLangSerbianCyrillicSerbiaAndMontenegroformer,
+			0x1c: SubLangSerbianLatin,
+		},
+		LangSerbianLatin: {
+			0x6: SubLangSerbianLatinBosniaAndHerzegovina,
+			0xb: SubLangSerbianLatinMontenegro,
+			0x9: SubLangSerbianLatinSerbia,
+			0x2: SubLangSerbianLatinSerbiaAndMontenegroformer,
+		},
+		LangSesothoSaLeboa: {
+			0x1: SubLangSesothoSaLeboaSouthAfrica,
+		},
+		LangSetswana: {
+			0x2: SubLangSetswanaBotswana,
+			0x1: SubLangSetswanaSouthAfrica,
+		},
+		LangShambala: {
+			0x4: SubLangShambalaTanzania,
+		},
+		LangShona: {
+			0x4: SubLangShonaLatin,
+			0x4: SubLangShonaZimbabwe,
+		},
+		LangSindhi: {
+			0x1f: SubLangSindhi,
+			0x2:  SubLangSindhiIslamicRepublicOfPakistan,
+		},
+		LangSinhala: {
+			0x1: SubLangSinhalaSriLanka,
+		},
+		LangSlovak: {
+			0x1: SubLangSlovakSlovakia,
+		},
+		LangSlovenian: {
+			0x1: SubLangSlovenianSlovenia,
+		},
+		LangSoga: {
+			0x4: SubLangSogaUganda,
+		},
+		LangSomali: {
+			0x4: SubLangSomaliDjibouti,
+			0x4: SubLangSomaliEthiopia,
+			0x4: SubLangSomaliKenya,
+			0x1: SubLangSomaliSomalia,
+		},
+		LangSotho: {
+			0x1: SubLangSothoSouthAfrica,
+		},
+		LangSouthNdebele: {
+			0x4: SubLangSouthNdebeleSouthAfrica,
+			0x4: SubLangSouthernSothoLesotho,
+		},
+		LangSpanish: {
+			0xb:  SubLangSpanishArgentina,
+			// 0x4:  SubLangSpanishBelize,
+			0x8:  SubLangSpanishBolivarianRepublicOfVenezuela,
+			0x10: SubLangSpanishBolivia,
+			0x4:  SubLangSpanishBrazil,
+			0xd:  SubLangSpanishChile,
+			0x9:  SubLangSpanishColombia,
+			0x5:  SubLangSpanishCostaRica,
+			0x17: SubLangSpanishCuba,
+			0x7:  SubLangSpanishDominicanRepublic,
+			0xc:  SubLangSpanishEcuador,
+			0x11: SubLangSpanishElSalvador,
+			// 0x4:  SubLangSpanishEquatorialGuinea,
+			// 0x4:  SubLangSpanishGuatemala,
+			0x12: SubLangSpanishHonduras,
+			0x16: SubLangSpanishLatinAmerica,
+			0x2:  SubLangSpanishMexico,
+			0x13: SubLangSpanishNicaragua,
+			0x6:  SubLangSpanishPanama,
+			0xf:  SubLangSpanishParaguay,
+			0xa:  SubLangSpanishPeru,
+			// 0x4:  SubLangSpanishPhilippines,
+			0x14: SubLangSpanishPuertoRico,
+			0x1:  SubLangSpanishSpain,
+			0x3:  SubLangSpanishSpain,
+			0x15: SubLangSpanishUnitedStates,
+			0xe:  SubLangSpanishUruguay,
+		},
+		LangStandardMoroccanTamazight: {
+			0x4: SubLangStandardMoroccanTamazightMorocco,
+			// 0x4: SubLangStandardMoroccanTamazightTifinagh,
+		},
+		LangSwati: {
+			0x4: SubLangSwatiSouthAfrica,
+			// 0x4: SubLangSwatiSwaziland,
+		},
+		LangSwedish: {
+			0x4: SubLangSwedishÅlandIslands,
+			0x2: SubLangSwedishFinland,
+			0x1: SubLangSwedishSweden,
+		},
+		LangSyriac: {
+			0x1: SubLangSyriacSyria,
+		},
+		LangTachelhit: {
+			// 0x4: SubLangTachelhitTifinagh,
+			0x4: SubLangTachelhitTifinaghMorocco,
+			// 0x4: SubLangTachelhitLatin,
+			// 0x4: SubLangTachelhitLatinMorocco,
+		},
+		LangTaita: {
+			0x4: SubLangTaitaKenya,
+		},
+		LangTajikCyrillic: {
+			0x1f: SubLangTajikCyrillic,
+			0x1:  SubLangTajikCyrillicTajikistan,
+		},
+		LangTamazightLatin: {
+			0x1f: SubLangTamazightLatin,
+			0x2:  SubLangTamazightLatinAlgeria,
+		},
+		LangTamil: {
+			0x1: SubLangTamilIndia,
+			0x4: SubLangTamilMalaysia,
+			// 0x4: SubLangTamilSingapore,
+			0x2: SubLangTamilSriLanka,
+		},
+		LangTasawaq: {
+			0x4: SubLangTasawaqNiger,
+		},
+		LangTatar: {
+			0x1: SubLangTatarRussia,
+		},
+		LangTelugu: {
+			0x1: SubLangTeluguIndia,
+		},
+		LangTeso: {
+			0x4: SubLangTesoKenya,
+			0x4: SubLangTesoUganda,
+		},
+		LangThai: {
+			0x1: SubLangThaiThailand,
+		},
+		LangTibetan: {
+			0x4: SubLangTibetanIndia,
+			0x1: SubLangTibetanPeoplesRepublicOfChina,
+		},
+		LangTigre: {
+			0x4: SubLangTigreEritrea,
+		},
+		LangTigrinya: {
+			0x2: SubLangTigrinyaEritrea,
+			0x1: SubLangTigrinyaEthiopia,
+		},
+		LangTongan: {
+			0x4: SubLangTonganTonga,
+		},
+		LangTsonga: {
+			0x1: SubLangTsongaSouthAfrica,
+		},
+		LangTurkish: {
+			0x4: SubLangTurkishCyprus,
+			0x1: SubLangTurkishTurkey,
+		},
+		LangTurkmen: {
+			0x1: SubLangTurkmenTurkmenistan,
+		},
+		LangUkrainian: {
+			0x1: SubLangUkrainianUkraine,
+		},
+		LangUpperSorbian: {
+			0x1: SubLangUpperSorbianGermany,
+		},
+		LangUrdu: {
+			0x2: SubLangUrduIndia,
+			0x1: SubLangUrduIslamicRepublicOfPakistan,
+		},
+		LangUyghur: {
+			0x1:  SubLangUyghurPeoplesRepublicOfChina,
+			0x4:  SubLangUzbekPersoArabic,
+			0x4:  SubLangUzbekPersoArabicAfghanistan,
+			0x1e: SubLangUzbekCyrillic,
+			0x2:  SubLangUzbekCyrillicUzbekistan,
+		},
+		LangUzbekLatin: {
+			0x1f: SubLangUzbekLatin,
+			0x1:  SubLangUzbekLatinUzbekistan,
+		},
+		LangVai: {
+			0x4: SubLangVai,
+			0x4: SubLangVaiLiberia,
+			0x4: SubLangVaiLatinLiberia,
+			0x4: SubLangVaiLatin,
+			0x2: SubLangValencianSpain,
+		},
+		LangVenda: {
+			0x1: SubLangVendaSouthAfrica,
+		},
+		LangVietnamese: {
+			0x1: SubLangVietnameseVietnam,
+		},
+		LangVolapük: {
+			0x4: SubLangVolapükWorld,
+		},
+		LangVunjo: {
+			0x4: SubLangVunjoTanzania,
+		},
+		LangWalser: {
+			0x4: SubLangWalserSwitzerland,
+		},
+		LangWelsh: {
+			0x1: SubLangWelshUnitedKingdom,
+		},
+		LangWolaytta: {
+			0x4: SubLangWolayttaEthiopia,
+		},
+		LangWolof: {
+			0x1: SubLangWolofSenegal,
+		},
+		LangXhosa: {
+			0x1: SubLangXhosaSouthAfrica,
+		},
+		LangYangben: {
+			0x4: SubLangYangbenCameroon,
+		},
+		LangYi: {
+			0x1: SubLangYiPeoplesRepublicOfChina,
+			// 0x1: SubLangYiddishWorld,
+		},
+		LangYoruba: {
+			0x4: SubLangYorubaBenin,
+			0x1: SubLangYorubaNigeria,
+		},
+		LangZarma: {
+			0x4: SubLangZarmaNiger,
+		},
+		LangZulu: {
+			0x1: SubLangZuluSouthAfrica,
 		},
 	}
 	return m[lang][subLang].String()

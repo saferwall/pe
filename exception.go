@@ -569,8 +569,7 @@ func PrettyUnwindInfoHandlerFlags(flags uint8) []string {
 	return values
 }
 
-// PrettyUnwindOpcode returns the string representation of the
-// an unwind opcode
+// PrettyUnwindOpcode returns the string representation of the an unwind opcode.
 func PrettyUnwindOpcode(unwindOpcode uint8) string {
 
 	unOpToString := map[uint8]string{
@@ -588,5 +587,9 @@ func PrettyUnwindOpcode(unwindOpcode uint8) string {
 		UwOpSetFpRegLarge: "UWOP_SET_FPREG_LARGE",
 	}
 
-	return unOpToString[unwindOpcode]
+	if val, ok := unOpToString[unwindOpcode]; ok {
+		return val
+	}
+
+	return "?"
 }

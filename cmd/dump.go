@@ -391,8 +391,8 @@ func parsePE(filename string, cfg config) {
 			fmt.Fprintf(w, "|- Size: 0x%x\n\t", imgRsrcDataEntry.Size)
 			fmt.Fprintf(w, "|- Code Page: 0x%x\n\t", imgRsrcDataEntry.CodePage)
 			fmt.Fprintf(w, "|- Reserved: 0x%x\n\t", imgRsrcDataEntry.Reserved)
-			fmt.Fprintf(w, "|- Language: 0x%x\n\t", entry.Lang)
-			fmt.Fprintf(w, "|- Sub-language: 0x%x\n\t", entry.SubLang)
+			fmt.Fprintf(w, "|- Language: %d (%s)\n\t", entry.Lang, entry.Lang.String())
+			fmt.Fprintf(w, "|- Sub-language: %d (%s)\n\t", entry.SubLang, entry.SubLang.String())
 			w.Flush()
 			padding--
 		}
