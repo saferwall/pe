@@ -30,6 +30,11 @@ func prettyPrint(buff []byte) string {
 	return prettyJSON.String()
 }
 
+func humanizeTimestamp(ts uint32) string {
+	unixTimeUTC := time.Unix(int64(ts), 0)
+	return unixTimeUTC.String()
+}
+
 func hexDump(b []byte) {
 	var a [16]byte
 	n := (len(b) + 15) &^ 15
@@ -226,13 +231,12 @@ func parsePE(filename string, cfg config) {
 
 	if cfg.wantNTHeader {
 		ntHeader := pe.NtHeader.FileHeader
-		unixTimeUTC := time.Unix(int64(ntHeader.TimeDateStamp), 0)
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
 
 		fmt.Print("\n\t------[ File Header ]------\n\n")
 		fmt.Fprintf(w, "Machine:\t 0x%x (%s)\n", ntHeader.Machine, pe.PrettyMachineType())
 		fmt.Fprintf(w, "Number Of Sections:\t 0x%x\n", ntHeader.NumberOfSections)
-		fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", ntHeader.TimeDateStamp, unixTimeUTC.String())
+		fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", ntHeader.TimeDateStamp, humanizeTimestamp(ntHeader.TimeDateStamp))
 		fmt.Fprintf(w, "Pointer To Symbol Table:\t 0x%x\n", ntHeader.PointerToSymbolTable)
 		fmt.Fprintf(w, "Number Of Symbols:\t 0x%x\n", ntHeader.NumberOfSymbols)
 		fmt.Fprintf(w, "Number Of Symbols:\t 0x%x\n", ntHeader.NumberOfSymbols)
@@ -364,14 +368,15 @@ func parsePE(filename string, cfg config) {
 			fmt.Fprintf(w, "Name:\t 0x%x\n", desc.Name)
 			fmt.Fprintf(w, "Original First Thunk:\t 0x%x\n", desc.OriginalFirstThunk)
 			fmt.Fprintf(w, "First Thunk:\t 0x%x\n", desc.FirstThunk)
-			fmt.Fprintf(w, "TimeDateStamp:\t 0x%x\n", desc.TimeDateStamp)
+			fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s\n", desc.TimeDateStamp,
+				humanizeTimestamp(desc.TimeDateStamp))
 			fmt.Fprintf(w, "Forwarder Chain:\t 0x%x\n", desc.ForwarderChain)
 			fmt.Fprintf(w, "\n")
 			fmt.Fprintln(w, "Name\tThunkRVA\tThunkValue\tOriginalThunkRVA\tOriginalThunkValue\tHint\t")
 			for _, impFunc := range imp.Functions {
 				fmt.Fprintf(w, "%s\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t\n",
-					impFunc.Name, impFunc.ThunkRVA, impFunc.ThunkValue, impFunc.OriginalThunkRVA,
-					impFunc.OriginalThunkValue, impFunc.Hint)
+					impFunc.Name, impFunc.ThunkRVA, impFunc.ThunkValue,
+					impFunc.OriginalThunkRVA, impFunc.OriginalThunkValue, impFunc.Hint)
 			}
 			w.Flush()
 
@@ -504,6 +509,29 @@ func parsePE(filename string, cfg config) {
 		fmt.Fprintf(w, "Signature Algorithm:\t %s\n", cert.Info.SignatureAlgorithm.String())
 		fmt.Fprintf(w, "PublicKey Algorithm:\t %s\n", cert.Info.PublicKeyAlgorithm.String())
 		w.Flush()
+	}
+
+	if cfg.wantBoundImp && pe.FileInfo.HasBoundImp {
+		fmt.Printf("BOUND IMPORTS\n\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		for _, bndImp := range pe.BoundImports {
+			fmt.Printf("\n\t------[ %s ]------\n\n", bndImp.Name)
+			fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", bndImp.Struct.TimeDateStamp,
+				humanizeTimestamp(bndImp.Struct.TimeDateStamp))
+			fmt.Fprintf(w, "Offset Module  Name:\t 0x%x\n", bndImp.Struct.OffsetModuleName)
+			fmt.Fprintf(w, "# Module Forwarder Refs:\t 0x%x\n", bndImp.Struct.NumberOfModuleForwarderRefs)
+			fmt.Fprintf(w, "\n")
+			if len(bndImp.ForwardedRefs) > 0 {
+				fmt.Fprintln(w, "Name\tTimeDateStamp\tOffsetModuleName\tReserved\t")
+				for _, fr := range bndImp.ForwardedRefs {
+					fmt.Fprintf(w, "%s\t0x%x\t0x%x\t0x%x\t\n", fr.Name,
+						fr.Struct.TimeDateStamp, fr.Struct.OffsetModuleName,
+						fr.Struct.Reserved)
+				}
+			}
+			w.Flush()
+		}
+
 	}
 
 	fmt.Print("\n")
