@@ -443,8 +443,8 @@ func (pe *File) ParseNTHeader() (err error) {
 	return nil
 }
 
-// PrettyMachineType returns the string representations
-// of the `Machine` field of  the IMAGE_FILE_HEADER.
+// PrettyMachineType returns the string representations of the `Machine` field
+// of  the IMAGE_FILE_HEADER.
 func (pe *File) PrettyMachineType() string {
 	machineType := map[uint16]string{
 		ImageFileMachineUnknown:   "Unknown",
@@ -474,7 +474,10 @@ func (pe *File) PrettyMachineType() string {
 		ImageFileMachineWCEMIPSv2: "MIPS little-endian WCE v2",
 	}
 
-	return machineType[pe.NtHeader.FileHeader.Machine]
+	if val, ok := machineType[pe.NtHeader.FileHeader.Machine]; ok {
+		return val
+	}
+	return "?"
 }
 
 // PrettyImageFileCharacteristics returns the string representations
@@ -486,7 +489,7 @@ func (pe *File) PrettyImageFileCharacteristics() []string {
 		ImageFileExecutableImage:      "ExecutableImage",
 		ImageFileLineNumsStripped:     "LineNumsStripped",
 		ImageFileLocalSymsStripped:    "LocalSymsStripped",
-		ImageFileAgressibeWsTrim:      "AgressibeWsTrim",
+		ImageFileAggressiveWSTrim:     "AgressibeWsTrim",
 		ImageFileLargeAddressAware:    "LargeAddressAware",
 		ImageFileBytesReservedLow:     "BytesReservedLow",
 		ImageFile32BitMachine:         "32BitMachine",
@@ -574,7 +577,11 @@ func (pe *File) PrettySubsystem() string {
 		ImageSubsystemWindowsBootApplication: "Windows boot application",
 	}
 
-	return subsystemMap[subsystem]
+	if val, ok := subsystemMap[subsystem]; ok {
+		return val
+	}
+
+	return "?"
 }
 
 // PrettyOptionalHeaderMagic returns the string representations of the

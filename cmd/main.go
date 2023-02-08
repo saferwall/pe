@@ -11,25 +11,25 @@ import (
 )
 
 type config struct {
-	wantDOSHeader    bool
-	wantRichHeader   bool
-	wantNTHeader     bool
-	wantCOFF         bool
-	wantDataDirs     bool
-	wantSections     bool
-	wantExport       bool
-	wantImport       bool
-	wantRsrc         bool
-	wantExceptions   bool
-	wantCertificates bool
-	wantReloc        bool
-	wantDebug        bool
-	wantTLS          bool
-	wantLoadCfg      bool
-	wantBoundImp     bool
-	wantIAT          bool
-	wantDelayImp     bool
-	wantCLR          bool
+	wantDOSHeader   bool
+	wantRichHeader  bool
+	wantNTHeader    bool
+	wantCOFF        bool
+	wantDataDirs    bool
+	wantSections    bool
+	wantExport      bool
+	wantImport      bool
+	wantResource    bool
+	wantException   bool
+	wantCertificate bool
+	wantReloc       bool
+	wantDebug       bool
+	wantTLS         bool
+	wantLoadCfg     bool
+	wantBoundImp    bool
+	wantIAT         bool
+	wantDelayImp    bool
+	wantCLR         bool
 }
 
 func main() {
@@ -42,12 +42,12 @@ func main() {
 	dumpDirs := dumpCmd.Bool("directories", false, "Dump data directories")
 	dumpSections := dumpCmd.Bool("sections", false, "Dump sections")
 	dumpExport := dumpCmd.Bool("export", false, "Dump export table")
-	dumpImport := dumpCmd.Bool("imports", false, "Dump import table")
-	dumpRsrc := dumpCmd.Bool("resources", false, "Dump resource table")
-	dumpExceptions := dumpCmd.Bool("exceptions", false, "Dump exception table")
+	dumpImport := dumpCmd.Bool("import", false, "Dump import table")
+	dumpResource := dumpCmd.Bool("resource", false, "Dump resource table")
+	dumpException := dumpCmd.Bool("exception", false, "Dump exception table")
 	dumpCertificate := dumpCmd.Bool("cert", false, "Dump certificate directory")
 	dumpReloc := dumpCmd.Bool("reloc", false, "Dump relocation table")
-	dumpDebug := dumpCmd.Bool("debugs", false, "Dump debug infos")
+	dumpDebug := dumpCmd.Bool("debug", false, "Dump debug infos")
 	dumpTLS := dumpCmd.Bool("tls", false, "Dump TLS")
 	dumpLoadCfg := dumpCmd.Bool("loadconfig", false, "Dump load configuration table")
 	dumpBoundImport := dumpCmd.Bool("bound", false, "Dump bound import table")
@@ -67,25 +67,25 @@ func main() {
 		dumpCmd.Parse(os.Args[3:])
 
 		cfg := config{
-			wantDOSHeader:    *dumpDOSHdr,
-			wantRichHeader:   *dumpRichHdr,
-			wantNTHeader:     *dumpNTHdr,
-			wantCOFF:         *dumpCOFF,
-			wantDataDirs:     *dumpDirs,
-			wantSections:     *dumpSections,
-			wantExport:       *dumpExport,
-			wantImport:       *dumpImport,
-			wantRsrc:         *dumpRsrc,
-			wantExceptions:   *dumpExceptions,
-			wantCertificates: *dumpCertificate,
-			wantReloc:        *dumpReloc,
-			wantDebug:        *dumpDebug,
-			wantTLS:          *dumpTLS,
-			wantLoadCfg:      *dumpLoadCfg,
-			wantBoundImp:     *dumpBoundImport,
-			wantIAT:          *dumpIAT,
-			wantDelayImp:     *dumpDelayedImport,
-			wantCLR:          *dumpCLR,
+			wantDOSHeader:   *dumpDOSHdr,
+			wantRichHeader:  *dumpRichHdr,
+			wantNTHeader:    *dumpNTHdr,
+			wantCOFF:        *dumpCOFF,
+			wantDataDirs:    *dumpDirs,
+			wantSections:    *dumpSections,
+			wantExport:      *dumpExport,
+			wantImport:      *dumpImport,
+			wantResource:    *dumpResource,
+			wantException:   *dumpException,
+			wantCertificate: *dumpCertificate,
+			wantReloc:       *dumpReloc,
+			wantDebug:       *dumpDebug,
+			wantTLS:         *dumpTLS,
+			wantLoadCfg:     *dumpLoadCfg,
+			wantBoundImp:    *dumpBoundImport,
+			wantIAT:         *dumpIAT,
+			wantDelayImp:    *dumpDelayedImport,
+			wantCLR:         *dumpCLR,
 		}
 
 		parse(os.Args[2], cfg)

@@ -99,7 +99,7 @@ const (
 	ImageFileLocalSymsStripped = 0x0008
 
 	// Aggressively trim the working set.
-	ImageFileAgressibeWsTrim = 0x0010
+	ImageFileAggressiveWSTrim = 0x0010
 
 	// Application can handle addresses beyond the 2GB range. This flag should
 	// not be set for pure-IL managed PE files of versions 1.0 and 1.1 but can

@@ -378,6 +378,71 @@ func parsePE(filename string, cfg config) {
 		}
 	}
 
+	if cfg.wantResource && pe.FileInfo.HasResource {
+		var printRsrcDir func(rsrcDir peparser.ResourceDirectory)
+		padding := 0
+
+		printRsrcDataEntry := func(entry peparser.ResourceDataEntry) {
+			padding++
+			w := tabwriter.NewWriter(os.Stdout, 1, 1, padding, ' ', 0)
+			imgRsrcDataEntry := entry.Struct
+			fmt.Fprintf(w, "\n\t\u27A1 Resource Data Entry\n\t")
+			fmt.Fprintf(w, "|- Offset To Data: 0x%x\n\t", imgRsrcDataEntry.OffsetToData)
+			fmt.Fprintf(w, "|- Size: 0x%x\n\t", imgRsrcDataEntry.Size)
+			fmt.Fprintf(w, "|- Code Page: 0x%x\n\t", imgRsrcDataEntry.CodePage)
+			fmt.Fprintf(w, "|- Reserved: 0x%x\n\t", imgRsrcDataEntry.Reserved)
+			fmt.Fprintf(w, "|- Language: %d (%s)\n\t", entry.Lang, entry.Lang.String())
+			fmt.Fprintf(w, "|- Sub-language: %s\n\t", peparser.PrettyResourceLang(entry.Lang, int(entry.SubLang)))
+			w.Flush()
+			padding--
+		}
+
+		printRsrcDir = func(rsrcDir peparser.ResourceDirectory) {
+			padding++
+			w := tabwriter.NewWriter(os.Stdout, 1, 1, padding, ' ', 0)
+			imgRsrcDir := rsrcDir.Struct
+			fmt.Fprintf(w, "\n\t\u27A1 Resource Directory\n\t")
+			fmt.Fprintf(w, "|- Characteristics: 0x%x\n\t", imgRsrcDir.Characteristics)
+			fmt.Fprintf(w, "|- TimeDateStamp: 0x%x\n\t", imgRsrcDir.TimeDateStamp)
+			fmt.Fprintf(w, "|- Major Version: 0x%x\n\t", imgRsrcDir.MajorVersion)
+			fmt.Fprintf(w, "|- Minor Version: 0x%x\n\t", imgRsrcDir.MinorVersion)
+			fmt.Fprintf(w, "|- Number Of Named Entries: 0x%x\n\t", imgRsrcDir.NumberOfNamedEntries)
+			fmt.Fprintf(w, "|- Number Of ID Entries: 0x%x\n\t", imgRsrcDir.NumberOfIDEntries)
+			fmt.Fprintf(w, "|----------------------------------\n\t")
+			padding++
+			w.Flush()
+			w = tabwriter.NewWriter(os.Stdout, 1, 1, padding, ' ', 0)
+			for i, entry := range rsrcDir.Entries {
+				fmt.Fprintf(w, "\t|- \u27A1 Resource Directory Entry %d, ID: %d", i+1, entry.ID)
+
+				// Print the interpretation of a resource ID only in root node.
+				if padding == 2 {
+					if entry.ID <= peparser.RTManifest {
+						fmt.Fprintf(w, " (%s)", peparser.ResourceType(entry.ID).String())
+					}
+				}
+				fmt.Fprintf(w, "\n\t|- Name: 0x%x\n\t", entry.Struct.Name)
+				if entry.Name != "" {
+					fmt.Fprintf(w, " (%s)", entry.Name)
+				}
+				fmt.Fprintf(w, "|- Offset To Data: 0x%x\t", entry.Struct.OffsetToData)
+				fmt.Fprintf(w, "\n\t|----------------------------------\t")
+				w.Flush()
+				if entry.IsResourceDir {
+					printRsrcDir(entry.Directory)
+				} else {
+					printRsrcDataEntry(entry.Data)
+				}
+
+			}
+			padding -= 2
+
+		}
+
+		fmt.Printf("\n\nRESOURCES\n**********\n")
+		printRsrcDir(pe.Resources)
+	}
+
 	if cfg.wantCLR && pe.FileInfo.HasCLR {
 		dotnetMetadata, _ := json.Marshal(pe.CLR)
 		log.Info(prettyPrint(dotnetMetadata))
@@ -391,7 +456,7 @@ func parsePE(filename string, cfg config) {
 		}
 	}
 
-	if cfg.wantExceptions && pe.FileInfo.HasException {
+	if cfg.wantException && pe.FileInfo.HasException {
 		fmt.Printf("\n\nEXCEPTIONS\n***********\n")
 		for _, exception := range pe.Exceptions {
 			entry := exception.RuntimeFunction
@@ -420,7 +485,7 @@ func parsePE(filename string, cfg config) {
 		}
 	}
 
-	if cfg.wantCertificates && pe.FileInfo.HasCertificate {
+	if cfg.wantCertificate && pe.FileInfo.HasCertificate {
 		fmt.Printf("\nSECURITY\n*********\n")
 
 		cert := pe.Certificates
