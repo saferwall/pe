@@ -9,14 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Annotate PE structures with JSON tags during JSON encoding [#64](https://github.com/saferwall/pe/pull/64) and [#65](https://github.com/saferwall/pe/pull/65).
+- Unit tests for resource directory and add functions to prettify resource (sub)languages [#66](https://github.com/saferwall/pe/pull/66).
+- Annotate PE structures with JSON tags during JSON encoding [#64](https://github.com/saferwall/pe/pull/64), [#65](https://github.com/saferwall/pe/pull/65)  and [#67](https://github.com/saferwall/pe/pull/67).
 - Improve PE dumper to print imports and unit test parsing imports data directory[#63](https://github.com/saferwall/pe/pull/63).
 - Improve PE dumper to print section headers [#62](https://github.com/saferwall/pe/pull/62).
 - Improve PE dumper to print PE headers [#61](https://github.com/saferwall/pe/pull/61).
 - Add `SerialNumber`, `SignatureAlgorithm` and `PubKeyAlgorithm` to the `CertInfo` [#60](https://github.com/saferwall/pe/pull/60).
 - Option to disable certificate validation [#59](https://github.com/saferwall/pe/pull/59).
 - Improve PE dumper to print exceptions [#57](https://github.com/saferwall/pe/pull/57).
-- Unit tests test debug directory [#49](https://github.com/saferwall/pe/pull/49).
+- Unit tests for debug directory [#49](https://github.com/saferwall/pe/pull/49).
 
 ### Fixed
 

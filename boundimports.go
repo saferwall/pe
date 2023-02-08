@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -17,30 +17,34 @@ const (
 
 // ImageBoundImportDescriptor represents the IMAGE_BOUND_IMPORT_DESCRIPTOR.
 type ImageBoundImportDescriptor struct {
-	TimeDateStamp               uint32 // is just the value from the Exports information of the DLL which is being imported from.
-	OffsetModuleName            uint16 //  offset of the DLL name counted from the beginning of the BOUND_IMPORT table
-	NumberOfModuleForwarderRefs uint16 // number of forwards
-	// Array of zero or more IMAGE_BOUND_FORWARDER_REF follows
+	// TimeDateStamp is just the value from the Exports information of the DLL
+	// which is being imported from.
+	TimeDateStamp uint32 `json:"time_date_stamp"`
+	// Offset of the DLL name counted from the beginning of the BOUND_IMPORT table.
+	OffsetModuleName uint16 `json:"offset_module_name"`
+	// Number of forwards,
+	NumberOfModuleForwarderRefs uint16 `json:"number_of_module_forwarder_refs"`
+	// Array of zero or more IMAGE_BOUND_FORWARDER_REF follows.
 }
 
 // ImageBoundForwardedRef represents the IMAGE_BOUND_FORWARDER_REF.
 type ImageBoundForwardedRef struct {
-	TimeDateStamp    uint32
-	OffsetModuleName uint16
-	Reserved         uint16
+	TimeDateStamp    uint32 `json:"time_date_stamp"`
+	OffsetModuleName uint16 `json:"offset_module_name"`
+	Reserved         uint16 `json:"reserved"`
 }
 
 // BoundImportDescriptorData represents the descriptor in addition to forwarded refs.
 type BoundImportDescriptorData struct {
-	Struct        ImageBoundImportDescriptor
-	Name          string
-	ForwardedRefs []BoundForwardedRefData
+	Struct        ImageBoundImportDescriptor `json:"struct"`
+	Name          string                     `json:"name"`
+	ForwardedRefs []BoundForwardedRefData    `json:"forwarded_refs"`
 }
 
-// BoundForwardedRefData reprents the struct in addition to the dll name.
+// BoundForwardedRefData represents the struct in addition to the dll name.
 type BoundForwardedRefData struct {
-	Struct ImageBoundForwardedRef
-	Name   string
+	Struct ImageBoundForwardedRef `json:"struct"`
+	Name   string                 `json:"name"`
 }
 
 // This table is an array of bound import descriptors, each of which describes
