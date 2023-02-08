@@ -18,6 +18,7 @@ type ResourceLang uint32
 type ResourceSubLang uint32
 
 // https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/70feba9f-294e-491e-b6eb-56532684c37f
+
 // Special resource (sub)language identifiers.
 var (
 	LangNeutral       ResourceLang = 0x00 // Default custom (MUI) locale language
@@ -36,7 +37,6 @@ var (
 
 // All resource (sub)language identifiers.
 var (
-
 	// Afrikaans (af)
 	LangAfrikaans ResourceLang = 0x0036
 	// Afrikaans South Africa (af-ZA)
@@ -165,6 +165,8 @@ var (
 	LangCatalan ResourceLang = 0x0003
 	// Catalan Spain (ca-ES)
 	SubLangCatalanSpain ResourceSubLang = 0x1
+	// Central Atlas Tamazight (Arabic) Morocco (tzm-ArabMA)
+	SubLangCentralAtlasTamazightArabicMorocco ResourceSubLang = 0x1
 
 	// Central Kurdish (ku)
 	LangCentralKurdish ResourceLang = 0x0092
@@ -337,8 +339,9 @@ var (
 
 	// Fulah (ff)
 	LangFulah ResourceLang = 0x0067
+
 	// Fulah (Latin) (ff-Latn)
-	SubLangFulahLatin ResourceSubLang = 0x1f
+	LangFulahLatin ResourceLang = 0x7C67
 	// Fulah Nigeria (ff-NG)
 	SubLangFulahNigeria ResourceSubLang = 0x1
 	// Fulah (Latin) Nigeria (ff-Latn-NG)
@@ -603,10 +606,10 @@ var (
 	SubLangNepaliNepal ResourceSubLang = 0x1
 
 	// Norwegian (Bokmal) (no)
-	LangNorwegianBokmal1 ResourceLang = 0x0014
+	LangNorwegianBokmal ResourceLang = 0x0014
 
 	// Norwegian (Bokmal) (nb)
-	LangNorwegianBokmal ResourceLang = 0x7C14
+	LangNorwegianBokmalNb ResourceLang = 0x7C14
 	// Norwegian (Bokmal) Norway (nb-NO)
 	SubLangNorwegianBokmalNorway ResourceSubLang = 0x1
 
@@ -651,7 +654,7 @@ var (
 	SubLangPortugueseBrazil ResourceSubLang = 0x1
 	// Portuguese Portugal (pt-PT)
 	SubLangPortuguesePortugal ResourceSubLang = 0x2
-	// Pseudo Language Pseudo Locale For East Asian/complex Script Localization Testing (qps-ploca)
+	// Pseudo Language Pseudo Locale For East Asian/Complex Script Localization Testing (qps-ploca)
 	SubLangPseudoLanguagePseudoLocaleForEastAsianComplexScriptLocalizationTesting ResourceSubLang = 0x1
 	// Pseudo Language Pseudo Locale Used For Localization Testing (qps-ploc)
 	SubLangPseudoLanguagePseudoLocaleUsedForLocalizationTesting ResourceSubLang = 0x1
@@ -750,7 +753,7 @@ var (
 	SubLangSerbianCyrillicMontenegro ResourceSubLang = 0xc
 	// Serbian (Cyrillic) Serbia (sr-Cyrl-RS)
 	SubLangSerbianCyrillicSerbia ResourceSubLang = 0xa
-	// Serbian (Cyrillic) Serbia And Montenegro (former) (sr-Cyrl-CS)
+	// Serbian (Cyrillic) Serbia And Montenegro (Former) (sr-Cyrl-CS)
 	SubLangSerbianCyrillicSerbiaAndMontenegroFormer ResourceSubLang = 0x3
 	// Serbian (Latin) (sr-Latn)
 	SubLangSerbianLatin ResourceSubLang = 0x1c
@@ -763,7 +766,7 @@ var (
 	SubLangSerbianLatinMontenegro ResourceSubLang = 0xb
 	// Serbian (Latin) Serbia (sr-Latn-RS)
 	SubLangSerbianLatinSerbia ResourceSubLang = 0x9
-	// Serbian (Latin) Serbia And Montenegro (former) (sr-Latn-CS)
+	// Serbian (Latin) Serbia And Montenegro (Former) (sr-Latn-CS)
 	SubLangSerbianLatinSerbiaAndMontenegroFormer ResourceSubLang = 0x2
 
 	// Sesotho Sa Leboa (nso)
@@ -1391,6 +1394,7 @@ func (lang ResourceLang) String() string {
 		LangFrench:            "French (fr)",
 		LangFrisian:           "Frisian (fy)",
 		LangFulah:             "Fulah (ff)",
+		LangFulahLatin:        "Fulah (Latin) (ff-Latn)",
 		LangGalician:          "Galician (gl)",
 		LangGeorgian:          "Georgian (ka)",
 		LangGerman:            "German (de)",
@@ -1436,7 +1440,7 @@ func (lang ResourceLang) String() string {
 		LangMongolianCyrillic: "Mongolian (Cyrillic) (mn)",
 		LangNepali:            "Nepali (ne)",
 		LangNorwegianBokmal:   "Norwegian (Bokmal) (no)",
-		LangNorwegianBokmal:   "Norwegian (Bokmal) (nb)",
+		LangNorwegianBokmalNb: "Norwegian (Bokmal) (nb)",
 		LangNorwegianNynorsk:  "Norwegian (Nynorsk) (nn)",
 		LangOccitan:           "Occitan (oc)",
 		LangOdia:              "Odia (or)",
@@ -1546,6 +1550,7 @@ func (subLang ResourceSubLang) String() string {
 		SubLangBulgarianBulgaria:                       "Bulgarian Bulgaria (bg-BG)",
 		SubLangBurmeseMyanmar:                          "Burmese Myanmar (my-MM)",
 		SubLangCatalanSpain:                            "Catalan Spain (ca-ES)",
+		SubLangCentralAtlasTamazightArabicMorocco:      "Central Atlas Tamazight (Arabic) Morocco (tzm-ArabMA)",
 		SubLangCentralKurdish:                          "Central Kurdish (ku-Arab)",
 		SubLangCentralKurdishIraq:                      "Central Kurdish Iraq (ku-Arab-IQ)",
 		SubLangCherokee:                                "Cherokee (chr-Cher)",
@@ -1605,7 +1610,6 @@ func (subLang ResourceSubLang) String() string {
 		SubLangFrenchSenegal:                           "French Senegal (fr-SN)",
 		SubLangFrenchSwitzerland:                       "French Switzerland (fr-CH)",
 		SubLangFrisianNetherlands:                      "Frisian Netherlands (fy-NL)",
-		SubLangFulahLatin:                              "Fulah (Latin) (ff-Latn)",
 		SubLangFulahNigeria:                            "Fulah Nigeria (ff-NG)",
 		SubLangFulahLatinNigeria:                       "Fulah (Latin) Nigeria (ff-Latn-NG)",
 		SubLangFulahSenegal:                            "Fulah Senegal (ff-Latn-SN)",
@@ -1711,12 +1715,12 @@ func (subLang ResourceSubLang) String() string {
 		SubLangSerbianCyrillicBosniaAndHerzegovina:      "Serbian (Cyrillic) Bosnia And Herzegovina (sr-Cyrl-BA)",
 		SubLangSerbianCyrillicMontenegro:                "Serbian (Cyrillic) Montenegro (sr-Cyrl-ME)",
 		SubLangSerbianCyrillicSerbia:                    "Serbian (Cyrillic) Serbia (sr-Cyrl-RS)",
-		SubLangSerbianCyrillicSerbiaAndMontenegroFormer: "Serbian (Cyrillic) Serbia And Montenegro (former) (sr-Cyrl-CS)",
+		SubLangSerbianCyrillicSerbiaAndMontenegroFormer: "Serbian (Cyrillic) Serbia And Montenegro (Former) (sr-Cyrl-CS)",
 		SubLangSerbianLatin:                             "Serbian (Latin) (sr-Latn)",
 		SubLangSerbianLatinBosniaAndHerzegovina:         "Serbian (Latin) Bosnia And Herzegovina (sr-Latn-BA)",
 		SubLangSerbianLatinMontenegro:                   "Serbian (Latin) Montenegro (sr-Latn-ME)",
 		SubLangSerbianLatinSerbia:                       "Serbian (Latin) Serbia (sr-Latn-RS)",
-		SubLangSerbianLatinSerbiaAndMontenegroFormer:    "Serbian (Latin) Serbia And Montenegro (former) (sr-Latn-CS)",
+		SubLangSerbianLatinSerbiaAndMontenegroFormer:    "Serbian (Latin) Serbia And Montenegro (Former) (sr-Latn-CS)",
 		SubLangSesothoSaLeboaSouthAfrica:                "Sesotho Sa Leboa South Africa (nso-ZA)",
 		SubLangSetswanaBotswana:                         "Setswana Botswana (tn-BW)",
 		SubLangSetswanaSouthAfrica:                      "Setswana South Africa (tn-ZA)",
@@ -1966,10 +1970,11 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 			0x1: SubLangFrisianNetherlands,
 		},
 		LangFulah: {
-			0x1f: SubLangFulahLatin,
-			0x1:  SubLangFulahNigeria,
-			0x1:  SubLangFulahLatinNigeria,
-			0x2:  SubLangFulahSenegal,
+			0x1: SubLangFulahNigeria,
+		},
+		LangFulahLatin: {
+			0x1: SubLangFulahLatinNigeria,
+			0x2: SubLangFulahSenegal,
 		},
 		LangGalician: {
 			0x1: SubLangGalicianSpain,
@@ -2039,7 +2044,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		},
 		LangKannada: {
 			0x1: SubLangKannadaIndia,
-			0x1: SubLangKanuriLatinNigeria,
 		},
 		LangKashmiri: {
 			0x1: SubLangKashmiriPersoArabic,
@@ -2071,7 +2075,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		},
 		LangLao: {
 			0x1: SubLangLaoLaoPdr,
-			0x1: SubLangLatinVaticanCity,
 		},
 		LangLatvian: {
 			0x1: SubLangLatvianLatvia,
@@ -2121,7 +2124,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 			0x2: SubLangNepaliIndia,
 			0x1: SubLangNepaliNepal,
 		},
-		LangNorwegianBokmal: {},
 		LangNorwegianBokmal: {
 			0x1: SubLangNorwegianBokmalNorway,
 		},
@@ -2149,9 +2151,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		LangPortuguese: {
 			0x1: SubLangPortugueseBrazil,
 			0x2: SubLangPortuguesePortugal,
-			0x1: SubLangPseudoLanguagePseudoLocaleForEastAsianComplexScriptLocalizationTesting,
-			0x1: SubLangPseudoLanguagePseudoLocaleUsedForLocalizationTesting,
-			0x2: SubLangPseudoLanguagePseudoLocaleUsedForLocalizationTestingOfMirroredLocales,
 		},
 		LangPunjabi: {
 			0x1f: SubLangPunjabi,
@@ -2346,7 +2345,6 @@ func PrettyResourceLang(lang ResourceLang, subLang int) string {
 		},
 		LangYi: {
 			0x1: SubLangYiPeoplesRepublicOfChina,
-			0x1: SubLangYiddishWorld,
 		},
 		LangYoruba: {
 			0x1: SubLangYorubaNigeria,
