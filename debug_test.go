@@ -50,8 +50,8 @@ func TestDebugDirectoryCodeView(t *testing.T) {
 						AddressOfRawData: 0x932f0,
 						PointerToRawData: 0x91cf0,
 					},
-					Info: CvInfoPDB70{
-						CvSignature: 0x53445352,
+					Info: CVInfoPDB70{
+						CVSignature: 0x53445352,
 						Signature: GUID{
 							Data1: 0xdbe09e71,
 							Data2: 0xb370,
@@ -206,12 +206,12 @@ func TestDebugDirectoryPOGO(t *testing.T) {
 				},
 				entriesCount: 63,
 				firstEntry: ImagePGOItem{
-					Rva:  0x1000,
+					RVA:  0x1000,
 					Size: 0x280,
 					Name:  ".text$lp00kernel32.dll!20_pri7",
 				},
 				lastEntry: ImagePGOItem{
-					Rva:  0xbc0b0,
+					RVA:  0xbc0b0,
 					Size: 0x470,
 					Name:  ".rsrc$02",
 				},

@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -20,7 +20,7 @@ const (
 	ImageDebugTypeCOFF = 1
 
 	// The Visual C++ debug information.
-	ImageDebugTypeCodeview = 2
+	ImageDebugTypeCodeView = 2
 
 	// The frame pointer omission (FPO) information. This information tells the
 	// debugger how to interpret nonstandard stack frames, which use the EBP
@@ -37,10 +37,10 @@ const (
 	ImageDebugTypeFixup = 6
 
 	// The mapping from an RVA in image to an RVA in source image.
-	ImageDebugTypeOmapToSrc = 7
+	ImageDebugTypeOMAPToSrc = 7
 
 	// The mapping from an RVA in source image to an RVA in image.
-	ImageDebugTypeOmapFromSrc = 8
+	ImageDebugTypeOMAPFromSrc = 8
 
 	// Reserved for Borland.
 	ImageDebugTypeBorland = 9
@@ -49,18 +49,18 @@ const (
 	ImageDebugTypeReserved10 = 10
 
 	// Reserved.
-	ImageDebugTypeClsid = 11
+	ImageDebugTypeCLSID = 11
 
-	// Visual C++ features (/GS counts /sdl counts and guardN counts)
+	// Visual C++ features (/GS counts /sdl counts and guardN counts).
 	ImageDebugTypeVCFeature = 12
 
 	// Pogo aka PGO aka Profile Guided Optimization.
 	ImageDebugTypePOGO = 13
 
-	// Incremental Link Time Code Generation (iLTCG)
+	// Incremental Link Time Code Generation (iLTCG).
 	ImageDebugTypeILTCG = 14
 
-	// Intel MPX
+	// Intel MPX.
 	ImageDebugTypeMPX = 15
 
 	// PE determinism or reproducibility.
@@ -115,43 +115,43 @@ const (
 // entries whose location and size are indicated in the image optional header.
 type ImageDebugDirectory struct {
 	// Reserved, must be 0.
-	Characteristics uint32
+	Characteristics uint32 `json:"characteristics"`
 
 	// The time and date that the debug data was created.
-	TimeDateStamp uint32
+	TimeDateStamp uint32 `json:"time_date_stamp"`
 
 	// The major version number of the debug data format.
-	MajorVersion uint16
+	MajorVersion uint16 `json:"major_version"`
 
 	// The minor version number of the debug data format.
-	MinorVersion uint16
+	MinorVersion uint16 `json:"minor_version"`
 
 	// The format of debugging information. This field enables support of
 	// multiple debuggers.
-	Type uint32
+	Type uint32 `json:"type"`
 
 	// The size of the debug data (not including the debug directory itself).
-	SizeOfData uint32
+	SizeOfData uint32 `json:"size_of_data"`
 
 	//The address of the debug data when loaded, relative to the image base.
-	AddressOfRawData uint32
+	AddressOfRawData uint32 `json:"address_of_raw_data"`
 
 	// The file pointer to the debug data.
-	PointerToRawData uint32
+	PointerToRawData uint32 `json:"pointer_to_raw_data"`
 }
 
 // DebugEntry wraps ImageDebugDirectory to include debug directory type.
 type DebugEntry struct {
 	// Points to the image debug entry structure.
-	Struct ImageDebugDirectory
+	Struct ImageDebugDirectory `json:"struct"`
 
 	// Holds specific information about the debug type entry.
-	Info interface{}
+	Info interface{} `json:"info"`
 }
 
 // GUID is a 128-bit value consisting of one group of 8 hexadecimal digits,
 // followed by three groups of 4 hexadecimal digits each, followed by one
-//group of 12 hexadecimal digits.
+// group of 12 hexadecimal digits.
 type GUID struct {
 	Data1 uint32
 	Data2 uint16
@@ -159,94 +159,98 @@ type GUID struct {
 	Data4 [8]byte
 }
 
-// CvInfoPDB70 represents the the CodeView data block of a PDB 7.0 file.
-type CvInfoPDB70 struct {
-	// CodeView signature, equal to `RSDS`
-	CvSignature uint32
+// CVInfoPDB70 represents the the CodeView data block of a PDB 7.0 file.
+type CVInfoPDB70 struct {
+	// CodeView signature, equal to `RSDS`.
+	CVSignature uint32 `json:"cv_signature"`
 
 	// A unique identifier, which changes with every rebuild of the executable and PDB file.
-	Signature GUID
+	Signature GUID `json:"signature"`
 
 	// Ever-incrementing value, which is initially set to 1 and incremented every
 	// time when a part of the PDB file is updated without rewriting the whole file.
-	Age uint32
+	Age uint32 `json:"age"`
 
 	// Null-terminated name of the PDB file. It can also contain full or partial
 	// path to the file.
-	PDBFileName string
+	PDBFileName string `json:"pdb_file_name"`
 }
 
 // CVHeader represents the the CodeView header struct to the PDB 2.0 file.
 type CVHeader struct {
-	// CodeView signature, equal to `NB10`
-	Signature uint32
+	// CodeView signature, equal to `NB10`.
+	Signature uint32 `json:"signature"`
 
-	// CodeView offset. Set to 0, because debug information is stored in a separate file.
-	Offset uint32
+	// CodeView offset. Set to 0, because debug information is stored in a
+	// separate file.
+	Offset uint32 `json:"offset"`
 }
 
-// CvInfoPDB20 represents the the CodeView data block of a PDB 2.0 file.
-type CvInfoPDB20 struct {
+// CVInfoPDB20 represents the the CodeView data block of a PDB 2.0 file.
+type CVInfoPDB20 struct {
 	// Points to the CodeView header structure.
-	CvHeader CVHeader
+	CVHeader CVHeader `json:"cv_header"`
 
-	// The time when debug information was created (in seconds since 01.01.1970)
-	Signature uint32
+	// The time when debug information was created (in seconds since 01.01.1970).
+	Signature uint32 `json:"signature"`
 
 	// Ever-incrementing value, which is initially set to 1 and incremented every
 	// time when a part of the PDB file is updated without rewriting the whole file.
-	Age uint32
+	Age uint32 `json:"age"`
 
 	// Null-terminated name of the PDB file. It can also contain full or partial
 	// path to the file.
-	PDBFileName string
+	PDBFileName string `json:"pdb_file_name"`
 }
 
-// FPOData Represents the stack frame layout for a function on an x86 computer when
+// FPOData represents the stack frame layout for a function on an x86 computer when
 // frame pointer omission (FPO) optimization is used. The structure is used to locate
 // the base of the call frame.
 type FPOData struct {
 	// The offset of the first byte of the function code.
-	OffStart uint32
+	OffStart uint32 `json:"off_start"`
 
 	// The number of bytes in the function.
-	ProcSize uint32
+	ProcSize uint32 `json:"proc_size"`
 
 	// The number of local variables.
-	NumLocals uint32
+	NumLocals uint32 `json:"num_locals"`
 
 	// The size of the parameters, in DWORDs.
-	ParamsSize uint16
+	ParamsSize uint16 `json:"params_size"`
 
 	// The number of bytes in the function prolog code.
-	PrologLength uint8
+	PrologLength uint8 `json:"prolog_length"`
 
 	// The number of registers saved.
-	SavedRegsCount uint8
+	SavedRegsCount uint8 `json:"saved_regs_count"`
 
 	// A variable that indicates whether the function uses structured exception handling.
-	HasSEH uint8
+	HasSEH uint8 `json:"has_seh"`
 
 	// A variable that indicates whether the EBP register has been allocated.
-	UseBP uint8
+	UseBP uint8 `json:"use_bp"`
 
 	// Reserved for future use.
-	Reserved uint8
+	Reserved uint8 `json:"reserved"`
 
 	// A variable that indicates the frame type.
-	FrameType uint8
+	FrameType uint8 `json:"frame_type"`
 }
 
+// ImagePGOItem represents the _IMAGE_POGO_INFO structure.
 type ImagePGOItem struct {
-	Rva  uint32
-	Size uint32
-	Name string
+	RVA  uint32 `json:"rva"`
+	Size uint32 `json:"size"`
+	Name string `json:"name"`
 }
 
-// POGO structure that information related to the Profile Guided Optimization.
+// POGO structure contains information related to the Profile Guided Optimization.
+// PGO is an approach to optimization where the compiler uses profile information
+// to make better optimization decisions for the program.
 type POGO struct {
-	Signature uint32 // _IMAGE_POGO_INFO
-	Entries   []ImagePGOItem
+	Signature uint32         `json:"signature"`
+	Entries   []ImagePGOItem `json:"entries"`
 }
 
 type VCFeature struct {
@@ -258,40 +262,39 @@ type VCFeature struct {
 }
 
 type REPRO struct {
-	Size uint32
-	Hash []byte
+	Size uint32 `json:"size"`
+	Hash []byte `json:"hash"`
 }
 
 // ImageDebugMisc represents the IMAGE_DEBUG_MISC structure.
 type ImageDebugMisc struct {
-	DataType uint32 // The type of data carried in the `Data` field.
+	// The type of data carried in the `Data` field.
+	DataType uint32 `json:"data_type"`
 
 	// The length of this structure in bytes, including the entire Data field
 	// and its NUL terminator (rounded to four byte multiple.)
-	Length uint32
+	Length uint32 `json:"length"`
 
-	// The encoding of the Data field. True if data is unicode string
-	Unicode bool
+	// The encoding of the Data field. True if data is unicode string.
+	Unicode bool `json:"unicode"`
 
-	// Reserved
-	Reserved [3]byte
+	// Reserved.
+	Reserved [3]byte `json:"reserved"`
 
-	// Actual data
-	Data string
+	// Actual data.
+	Data string `json:"data"`
 }
 
 // Image files contain an optional debug directory that indicates what form of
 // debug information is present and where it is. This directory consists of an
 // array of debug directory entries whose location and size are indicated in the
-// image optional header.
-// The debug directory can be in a discardable .debug section (if one exists),
-// or it can be included in any other section in the image file, or not be in a
-// section at all.
+// image optional header.  The debug directory can be in a discardable .debug
+// section (if one exists), or it can be included in any other section in the
+// image file, or not be in a section at all.
 func (pe *File) parseDebugDirectory(rva, size uint32) error {
 
-	// Define some vars.
-	debugDir := ImageDebugDirectory{}
 	debugEntry := DebugEntry{}
+	debugDir := ImageDebugDirectory{}
 	errorMsg := fmt.Sprintf("Invalid debug information. Can't read data at RVA: 0x%x", rva)
 	debugDirSize := uint32(binary.Size(debugDir))
 	debugDirsCount := size / debugDirSize
@@ -304,7 +307,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 		}
 
 		switch debugDir.Type {
-		case ImageDebugTypeCodeview:
+		case ImageDebugTypeCodeView:
 			debugSignature, err := pe.ReadUint32(debugDir.PointerToRawData)
 			if err != nil {
 				continue
@@ -312,15 +315,16 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 
 			if debugSignature == CVSignatureRSDS {
 				// PDB 7.0
-				pdb := CvInfoPDB70{CvSignature: CVSignatureRSDS}
+				pdb := CVInfoPDB70{CVSignature: CVSignatureRSDS}
 
-				// Guid
+				// GUID
 				offset := debugDir.PointerToRawData + 4
 				guidSize := uint32(binary.Size(pdb.Signature))
 				err = pe.structUnpack(&pdb.Signature, offset, guidSize)
 				if err != nil {
 					continue
 				}
+
 				// Age
 				offset += guidSize
 				pdb.Age, err = pe.ReadUint32(offset)
@@ -329,7 +333,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 				}
 				offset += 4
 
-				// PDB file name
+				// PDB file name.
 				pdbFilenameSize := debugDir.SizeOfData - 24 - 1
 
 				// pdbFileName_size can be negative here, as seen in the malware
@@ -344,7 +348,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 					pdb.PDBFileName = string(pdbFilename)
 				}
 
-				// Include these extra informations
+				// Include these extra information.
 				debugEntry.Info = pdb
 
 			} else if debugSignature == CVSignatureNB10 {
@@ -356,7 +360,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 					continue
 				}
 
-				pdb := CvInfoPDB20{CvHeader: cvHeader}
+				pdb := CVInfoPDB20{CVHeader: cvHeader}
 
 				// Signature
 				pdb.Signature, err = pe.ReadUint32(offset + 8)
@@ -381,7 +385,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 					pdb.PDBFileName = string(pdbFilename)
 				}
 
-				// Include these extra informations
+				// Include these extra information.
 				debugEntry.Info = pdb
 			}
 		case ImageDebugTypePOGO:
@@ -400,20 +404,27 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 				for c < debugDir.SizeOfData-4 {
 
 					pogoEntry := ImagePGOItem{}
-					pogoEntry.Rva, err = pe.ReadUint32(offset)
+					pogoEntry.RVA, err = pe.ReadUint32(offset)
 					if err != nil {
 						break
 					}
-					pogoEntry.Size, err = pe.ReadUint32(offset + 4)
-					if err != nil {
-						break
-					}
+					offset += 4
 
-					pogoEntry.Name = string(pe.GetStringFromData(0, pe.data[offset+8:offset+8+32]))
+					pogoEntry.Size, err = pe.ReadUint32(offset)
+					if err != nil {
+						break
+					}
+					offset += 4
+
+					pogoEntry.Name = string(pe.GetStringFromData(0, pe.data[offset:offset+64]))
 
 					pogo.Entries = append(pogo.Entries, pogoEntry)
-					c += 8 + uint32(len(pogoEntry.Name)) + 4
-					offset += 8 + uint32(len(pogoEntry.Name)) + 4
+					offset += uint32(len(pogoEntry.Name))
+
+					// Make sure offset is aligned to 4 bytes.
+					padding := 4 - (offset % 4)
+					c += 4 + 4 + uint32(len(pogoEntry.Name)) + padding
+					offset += padding
 				}
 
 				debugEntry.Info = pogo
@@ -505,12 +516,12 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 			}
 			debugEntry.Info = fpoEntries
 		case ImageDebugTypeExDllCharacteristics:
-			exllChar, err := pe.ReadUint32(debugDir.PointerToRawData)
+			exDllChar, err := pe.ReadUint32(debugDir.PointerToRawData)
 			if err != nil {
 				continue
 			}
 
-			debugEntry.Info = exllChar
+			debugEntry.Info = exDllChar
 		}
 
 		debugEntry.Struct = debugDir
@@ -603,7 +614,7 @@ func FPOFrameTypePretty(ft uint8) string {
 	return "?"
 }
 
-// PrettyExtendedDLLCharacteristics maps dll char to string.
+// PrettyExtendedDLLCharacteristics maps DLL char to string.
 func PrettyExtendedDLLCharacteristics(characteristics uint32) []string {
 
 	var values []string
@@ -618,4 +629,28 @@ func PrettyExtendedDLLCharacteristics(characteristics uint32) []string {
 	}
 
 	return values
+}
+
+// String returns the string representation of a GUID.
+func (g GUID) String() string {
+	return fmt.Sprintf("{%06X-%04X-%04X-%04X-%X}", g.Data1, g.Data2, g.Data3, g.Data4[0:2], g.Data4[2:])
+}
+
+// String returns the string representation of a debug entry.
+func (de DebugEntry) String() string {
+	switch de.Struct.Type {
+	case ImageDebugTypeCodeView:
+		return "CodeView"
+	case ImageDebugTypePOGO:
+		return "PGP"
+	case ImageDebugTypeFPO:
+		return "FPO"
+	case ImageDebugTypeRepro:
+		return "REPRO"
+	case ImageDebugTypeVCFeature:
+		return "VC Feature"
+	case ImageDebugTypeExDllCharacteristics:
+		return "Ex.DLL Characteristics"
+	}
+	return "?"
 }

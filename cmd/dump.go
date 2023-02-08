@@ -511,6 +511,53 @@ func parsePE(filename string, cfg config) {
 		w.Flush()
 	}
 
+	if cfg.wantDebug && pe.FileInfo.HasDebug {
+		fmt.Printf("\nDEBUGS\n*******\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		for _, debug := range pe.Debugs {
+			imgDbgDir := debug.Struct
+			fmt.Fprintf(w, "\n\t------[ %s ]------\n", debug.String())
+			fmt.Fprintf(w, "Characteristics:\t 0x%x\n", imgDbgDir.Characteristics)
+			fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", imgDbgDir.TimeDateStamp,
+				humanizeTimestamp(imgDbgDir.TimeDateStamp))
+			fmt.Fprintf(w, "Major Version:\t 0x%x\n", imgDbgDir.MajorVersion)
+			fmt.Fprintf(w, "Minor Version:\t 0x%x\n", imgDbgDir.MinorVersion)
+			fmt.Fprintf(w, "Type:\t 0x%x\n", imgDbgDir.Type)
+			fmt.Fprintf(w, "Size Of Data:\t 0x%x (%s)\n", imgDbgDir.SizeOfData,
+				BytesSize(float64(imgDbgDir.SizeOfData)))
+			fmt.Fprintf(w, "Address Of Raw Data:\t 0x%x\n", imgDbgDir.AddressOfRawData)
+			fmt.Fprintf(w, "Pointer To Raw Data:\t 0x%x\n", imgDbgDir.PointerToRawData)
+			fmt.Fprintf(w, "\n")
+			switch imgDbgDir.Type {
+			case peparser.ImageDebugTypeCodeView:
+				debugSignature, err := pe.ReadUint32(imgDbgDir.PointerToRawData)
+				if err != nil {
+					continue
+				}
+				if debugSignature == peparser.CVSignatureRSDS {
+					pdb := debug.Info.(peparser.CVInfoPDB70)
+					fmt.Fprintf(w, "CV Signature:\t 0x%x\n", pdb.CVSignature)
+					fmt.Fprintf(w, "Signature:\t %s\n", pdb.Signature.String())
+					fmt.Fprintf(w, "Age:\t 0x%x\n", pdb.Age)
+					fmt.Fprintf(w, "PDBFileName:\t %s\n", pdb.PDBFileName)
+				}
+			case peparser.ImageDebugTypePOGO:
+				pogo := debug.Info.(peparser.POGO)
+				if len(pogo.Entries) > 0 {
+					fmt.Fprintf(w, "Signature:\t 0x%x\n", pogo.Signature)
+					fmt.Fprintln(w, "RVA\tSize\tName\t")
+					for _, pogoEntry := range pogo.Entries {
+						fmt.Fprintf(w, "0x%x\t0x%x\t%s\t\n", pogoEntry.RVA,
+							pogoEntry.Size, pogoEntry.Name)
+					}
+				}
+
+			}
+		}
+
+		w.Flush()
+	}
+
 	if cfg.wantBoundImp && pe.FileInfo.HasBoundImp {
 		fmt.Printf("BOUND IMPORTS\n\n")
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
