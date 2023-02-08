@@ -317,7 +317,7 @@ const (
 	LangZulu ResourceLang = 0x0035
 )
 
-// All resource sub-language.
+// All resource sub-language identifiers.
 const (
 	// Afrikaans South Africa (af-ZA)
 	SubLangAfrikaansSouthAfrica ResourceSubLang = iota
@@ -1218,7 +1218,11 @@ func (rt ResourceType) String() string {
 		RTManifest:     "Manifest",
 	}
 
-	return rsrcTypeMap[rt]
+	if val, ok := rsrcTypeMap[rt]; ok {
+		return val
+	}
+
+	return "?"
 }
 
 // String stringify the resource language.
