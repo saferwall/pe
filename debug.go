@@ -98,11 +98,14 @@ const (
 	ImageDllCharacteristicsExCETCompat = 0x0001
 )
 
+// POGOType represents a POGO type.
+type POGOType int
+
 const (
 	// POGOTypePGU represents a signature for an undocumented PGO sub type.
 	POGOTypePGU = 0x50475500
-	// POGzOTypePGI represents a signature for an undocumented PGO sub type.
-	POGzOTypePGI = 0x50474900
+	// POGOTypePGI represents a signature for an undocumented PGO sub type.
+	POGOTypePGI = 0x50474900
 	// POGOTypePGO represents a signature for an undocumented PGO sub type.
 	POGOTypePGO = 0x50474F00
 	// POGOTypeLTCG represents a signature for an undocumented PGO sub type.
@@ -249,7 +252,8 @@ type ImagePGOItem struct {
 // PGO is an approach to optimization where the compiler uses profile information
 // to make better optimization decisions for the program.
 type POGO struct {
-	Signature uint32         `json:"signature"`
+	// Signature represents the PGO sub type.
+	Signature POGOType       `json:"signature"`
 	Entries   []ImagePGOItem `json:"entries"`
 }
 
@@ -397,8 +401,8 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 			pogo := POGO{}
 
 			switch pogoSignature {
-			case POGOTypePGU, POGzOTypePGI, POGOTypePGO, POGOTypeLTCG:
-				pogo.Signature = pogoSignature
+			case POGOTypePGU, POGOTypePGI, POGOTypePGO, POGOTypeLTCG:
+				pogo.Signature = POGOType(pogoSignature)
 				offset = debugDir.PointerToRawData + 4
 				c := uint32(0)
 				for c < debugDir.SizeOfData-4 {
@@ -652,5 +656,22 @@ func (de DebugEntry) String() string {
 	case ImageDebugTypeExDllCharacteristics:
 		return "Ex.DLL Characteristics"
 	}
+	return "?"
+}
+
+// String returns a string interpretation of a POGO type.
+func (p POGOType) String() string {
+	pogoTypeMap := map[POGOType]string{
+		POGOTypePGU:  "PGU",
+		POGOTypePGI:  "PGI",
+		POGOTypePGO:  "PGO",
+		POGOTypeLTCG: "LTCG",
+	}
+
+	v, ok := pogoTypeMap[p]
+	if ok {
+		return v
+	}
+
 	return "?"
 }

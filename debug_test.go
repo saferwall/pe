@@ -191,7 +191,7 @@ func TestDebugDirectoryPOGO(t *testing.T) {
 				index:      1,
 				filepath:   getAbsoluteFilePath("test/kernel32.dll"),
 				firstIndex: 0,
-				lastIndex:  62,
+				lastIndex:  59,
 			},
 			TestPOGO{
 				imgDebugEntry: ImageDebugDirectory{
@@ -204,7 +204,7 @@ func TestDebugDirectoryPOGO(t *testing.T) {
 					AddressOfRawData: 0x93318,
 					PointerToRawData: 0x91d18,
 				},
-				entriesCount: 63,
+				entriesCount: 60,
 				firstEntry: ImagePGOItem{
 					RVA:  0x1000,
 					Size: 0x280,
