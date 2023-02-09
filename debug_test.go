@@ -11,6 +11,7 @@ import (
 
 type TestDebugEntry struct {
 	debugEntry DebugEntry
+	dbgType    string
 }
 
 type TestPOGO struct {
@@ -62,6 +63,37 @@ func TestDebugDirectoryCodeView(t *testing.T) {
 						PDBFileName: "kernel32.pdb",
 					},
 				},
+				dbgType: "CodeView",
+			},
+		},
+		{
+			TestDebugIn{
+				index:    0,
+				filepath: getAbsoluteFilePath("test/01008963d32f5cc17b64c31446386ee5b36a7eab6761df87a2989ba9394d8f3d"),
+			},
+			TestDebugEntry{
+				debugEntry: DebugEntry{
+					Struct: ImageDebugDirectory{
+						Characteristics:  0x0,
+						TimeDateStamp:    0x3b7d84d4,
+						MajorVersion:     0x0,
+						MinorVersion:     0x0,
+						Type:             0x2,
+						SizeOfData:       0x1d,
+						AddressOfRawData: 0x1cf4,
+						PointerToRawData: 0x10f4,
+					},
+					Info: CVInfoPDB20{
+						CVHeader: CVHeader{
+							Signature: 0x3031424e,
+							Offset:    0x0,
+						},
+						Signature:   0x3b7d84d4,
+						Age:         0x1,
+						PDBFileName: "routemon.pdb",
+					},
+				},
+				dbgType: "CodeView",
 			},
 		},
 	}
@@ -100,7 +132,12 @@ func TestDebugDirectoryCodeView(t *testing.T) {
 
 			debugEntry := file.Debugs[tt.in.index]
 			if !reflect.DeepEqual(debugEntry, tt.out.debugEntry) {
-				t.Errorf("debug entry assertion failed, got %v, want %v", debugEntry, tt.out.debugEntry)
+				t.Fatalf("debug entry assertion failed, got %v, want %v", debugEntry, tt.out.debugEntry)
+			}
+
+			dbgTypeString := debugEntry.String()
+			if dbgTypeString != tt.out.dbgType {
+				t.Fatalf("debug type assertion failed, got %v, want %v", dbgTypeString, tt.out.dbgType)
 			}
 		})
 	}
@@ -208,12 +245,12 @@ func TestDebugDirectoryPOGO(t *testing.T) {
 				firstEntry: ImagePGOItem{
 					RVA:  0x1000,
 					Size: 0x280,
-					Name:  ".text$lp00kernel32.dll!20_pri7",
+					Name: ".text$lp00kernel32.dll!20_pri7",
 				},
 				lastEntry: ImagePGOItem{
 					RVA:  0xbc0b0,
 					Size: 0x470,
-					Name:  ".rsrc$02",
+					Name: ".rsrc$02",
 				},
 			},
 		},

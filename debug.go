@@ -329,7 +329,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 					continue
 				}
 
-				// Age
+				// Extract the age.
 				offset += guidSize
 				pdb.Age, err = pe.ReadUint32(offset)
 				if err != nil {
@@ -356,7 +356,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 				debugEntry.Info = pdb
 
 			} else if debugSignature == CVSignatureNB10 {
-				// PDB 2.0
+				// PDB 2.0.
 				cvHeader := CVHeader{}
 				offset := debugDir.PointerToRawData
 				err = pe.structUnpack(&cvHeader, offset, size)
@@ -366,13 +366,13 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 
 				pdb := CVInfoPDB20{CVHeader: cvHeader}
 
-				// Signature
+				// Extract the signature.
 				pdb.Signature, err = pe.ReadUint32(offset + 8)
 				if err != nil {
 					continue
 				}
 
-				// Age
+				// Extract the age.
 				pdb.Age, err = pe.ReadUint32(offset + 12)
 				if err != nil {
 					continue
