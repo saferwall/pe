@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -14,27 +14,13 @@ type TestDebugIn struct {
 	index    int // debug entry index
 }
 
-type TestCodeView struct {
-	debugType  string
-	debugEntry DebugEntry
-	signature  string
-}
-
-type TestREPRO struct {
-	debugType  string
-	debugEntry DebugEntry
-}
-
-type TestPOGO struct {
-	imgDebugEntry ImageDebugDirectory
-	entriesCount  int
-	debugType     string
-	POGOItemIndex int
-	POGOItem      ImagePGOItem
-	POGOSignature string
-}
-
 func TestDebugDirectoryCodeView(t *testing.T) {
+
+	type TestCodeView struct {
+		debugType  string
+		debugEntry DebugEntry
+		signature  string
+	}
 
 	tests := []struct {
 		in  TestDebugIn
@@ -166,90 +152,16 @@ func TestDebugDirectoryCodeView(t *testing.T) {
 	}
 }
 
-func TestDebugDirectoryREPRO(t *testing.T) {
-
-	tests := []struct {
-		in  TestDebugIn
-		out TestREPRO
-	}{
-
-		{
-			TestDebugIn{
-				index:    2,
-				filepath: getAbsoluteFilePath("test/kernel32.dll"),
-			},
-			TestREPRO{
-				debugEntry: DebugEntry{
-					Struct: ImageDebugDirectory{
-						Characteristics:  0x0,
-						TimeDateStamp:    0x38b369c4,
-						MajorVersion:     0x0,
-						MinorVersion:     0x0,
-						Type:             0x10,
-						SizeOfData:       0x24,
-						AddressOfRawData: 0x9388c,
-						PointerToRawData: 0x9228c,
-					},
-					Info: REPRO{
-						Size: 0x20,
-						Hash: []byte{113, 158, 224, 219, 112, 179, 183, 156, 34, 197, 94, 85, 115, 250, 123, 225, 130,
-							247, 187, 89, 220, 154, 207, 99, 80, 113, 179, 171, 196, 105, 179, 56},
-					},
-				},
-				debugType: "REPRO",
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.in.filepath, func(t *testing.T) {
-			ops := Options{Fast: true}
-			file, err := New(tt.in.filepath, &ops)
-			if err != nil {
-				t.Fatalf("New(%s) failed, reason: %v", tt.in.filepath, err)
-			}
-
-			err = file.Parse()
-			if err != nil {
-				t.Fatalf("Parse(%s) failed, reason: %v", tt.in.filepath, err)
-			}
-
-			var va, size uint32
-
-			if file.Is64 {
-				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
-				dirEntry := oh64.DataDirectory[ImageDirectoryEntryDebug]
-				va = dirEntry.VirtualAddress
-				size = dirEntry.Size
-			} else {
-				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
-				dirEntry := oh32.DataDirectory[ImageDirectoryEntryDebug]
-				va = dirEntry.VirtualAddress
-				size = dirEntry.Size
-			}
-
-			err = file.parseDebugDirectory(va, size)
-			if err != nil {
-				t.Fatalf("parseExportDirectory(%s) failed, reason: %v",
-					tt.in.filepath, err)
-			}
-
-			debugEntry := file.Debugs[tt.in.index]
-			if !reflect.DeepEqual(debugEntry, tt.out.debugEntry) {
-				t.Errorf("debug entry assertion failed, got %v, want %v",
-					debugEntry, tt.out.debugEntry)
-			}
-
-			debugTypeString := debugEntry.String()
-			if debugTypeString != tt.out.debugType {
-				t.Fatalf("debug entry type string assertion failed, got %v, want %v",
-					debugTypeString, tt.out.debugType)
-			}
-		})
-	}
-}
-
 func TestDebugDirectoryPOGO(t *testing.T) {
+
+	type TestPOGO struct {
+		imgDebugEntry ImageDebugDirectory
+		entriesCount  int
+		debugType     string
+		POGOItemIndex int
+		POGOItem      ImagePGOItem
+		POGOSignature string
+	}
 
 	tests := []struct {
 		in  TestDebugIn
@@ -339,6 +251,94 @@ func TestDebugDirectoryPOGO(t *testing.T) {
 			if pogoItemSignature != tt.out.POGOSignature {
 				t.Fatalf("debug pogo signature string assertion failed, got %v, want %v",
 					pogoItemSignature, tt.out.POGOSignature)
+			}
+		})
+	}
+}
+
+func TestDebugDirectoryREPRO(t *testing.T) {
+
+	type TestREPRO struct {
+		debugType  string
+		debugEntry DebugEntry
+	}
+
+	tests := []struct {
+		in  TestDebugIn
+		out TestREPRO
+	}{
+
+		{
+			TestDebugIn{
+				index:    2,
+				filepath: getAbsoluteFilePath("test/kernel32.dll"),
+			},
+			TestREPRO{
+				debugEntry: DebugEntry{
+					Struct: ImageDebugDirectory{
+						Characteristics:  0x0,
+						TimeDateStamp:    0x38b369c4,
+						MajorVersion:     0x0,
+						MinorVersion:     0x0,
+						Type:             0x10,
+						SizeOfData:       0x24,
+						AddressOfRawData: 0x9388c,
+						PointerToRawData: 0x9228c,
+					},
+					Info: REPRO{
+						Size: 0x20,
+						Hash: []byte{113, 158, 224, 219, 112, 179, 183, 156, 34, 197, 94, 85, 115, 250, 123, 225, 130,
+							247, 187, 89, 220, 154, 207, 99, 80, 113, 179, 171, 196, 105, 179, 56},
+					},
+				},
+				debugType: "REPRO",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in.filepath, func(t *testing.T) {
+			ops := Options{Fast: true}
+			file, err := New(tt.in.filepath, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in.filepath, err)
+			}
+
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in.filepath, err)
+			}
+
+			var va, size uint32
+
+			if file.Is64 {
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryDebug]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			} else {
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryDebug]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseDebugDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseExportDirectory(%s) failed, reason: %v",
+					tt.in.filepath, err)
+			}
+
+			debugEntry := file.Debugs[tt.in.index]
+			if !reflect.DeepEqual(debugEntry, tt.out.debugEntry) {
+				t.Errorf("debug entry assertion failed, got %v, want %v",
+					debugEntry, tt.out.debugEntry)
+			}
+
+			debugTypeString := debugEntry.String()
+			if debugTypeString != tt.out.debugType {
+				t.Fatalf("debug entry type string assertion failed, got %v, want %v",
+					debugTypeString, tt.out.debugType)
 			}
 		})
 	}
