@@ -98,9 +98,6 @@ const (
 	ImageDllCharacteristicsExCETCompat = 0x0001
 )
 
-// POGOType represents a POGO type.
-type POGOType int
-
 const (
 	// POGOTypePGU represents a signature for an undocumented PGO sub type.
 	POGOTypePGU = 0x50475500
@@ -162,10 +159,13 @@ type GUID struct {
 	Data4 [8]byte
 }
 
+// CVSignature represents a CodeView signature.
+type CVSignature uint32
+
 // CVInfoPDB70 represents the the CodeView data block of a PDB 7.0 file.
 type CVInfoPDB70 struct {
 	// CodeView signature, equal to `RSDS`.
-	CVSignature uint32 `json:"cv_signature"`
+	CVSignature CVSignature `json:"cv_signature"`
 
 	// A unique identifier, which changes with every rebuild of the executable and PDB file.
 	Signature GUID `json:"signature"`
@@ -182,7 +182,7 @@ type CVInfoPDB70 struct {
 // CVHeader represents the the CodeView header struct to the PDB 2.0 file.
 type CVHeader struct {
 	// CodeView signature, equal to `NB10`.
-	Signature uint32 `json:"signature"`
+	Signature CVSignature `json:"signature"`
 
 	// CodeView offset. Set to 0, because debug information is stored in a
 	// separate file.
@@ -247,6 +247,9 @@ type ImagePGOItem struct {
 	Size uint32 `json:"size"`
 	Name string `json:"name"`
 }
+
+// POGOType represents a POGO type.
+type POGOType uint32
 
 // POGO structure contains information related to the Profile Guided Optimization.
 // PGO is an approach to optimization where the compiler uses profile information
@@ -640,13 +643,13 @@ func (g GUID) String() string {
 	return fmt.Sprintf("{%06X-%04X-%04X-%04X-%X}", g.Data1, g.Data2, g.Data3, g.Data4[0:2], g.Data4[2:])
 }
 
-// String returns the string representation of a debug entry.
+// String returns the string representation of a debug entry type.
 func (de DebugEntry) String() string {
 	switch de.Struct.Type {
 	case ImageDebugTypeCodeView:
 		return "CodeView"
 	case ImageDebugTypePOGO:
-		return "PGP"
+		return "POGO"
 	case ImageDebugTypeFPO:
 		return "FPO"
 	case ImageDebugTypeRepro:
@@ -669,6 +672,21 @@ func (p POGOType) String() string {
 	}
 
 	v, ok := pogoTypeMap[p]
+	if ok {
+		return v
+	}
+
+	return "?"
+}
+
+// String returns a string interpretation of a CodeView signature.
+func (s CVSignature) String() string {
+	cvSignatureMap := map[CVSignature]string{
+		CVSignatureRSDS: "RSDS",
+		CVSignatureNB10: "NB10",
+	}
+
+	v, ok := cvSignatureMap[s]
 	if ok {
 		return v
 	}

@@ -9,37 +9,43 @@ import (
 	"testing"
 )
 
-type TestDebugEntry struct {
+type TestDebugIn struct {
+	filepath string
+	index    int // debug entry index
+}
+
+type TestCodeView struct {
+	debugType  string
 	debugEntry DebugEntry
-	dbgType    string
+	signature  string
+}
+
+type TestREPRO struct {
+	debugType  string
+	debugEntry DebugEntry
 }
 
 type TestPOGO struct {
 	imgDebugEntry ImageDebugDirectory
 	entriesCount  int
-	firstEntry    ImagePGOItem
-	lastEntry     ImagePGOItem
-}
-
-type TestDebugIn struct {
-	index      int
-	filepath   string
-	firstIndex int
-	lastIndex  int
+	debugType     string
+	POGOItemIndex int
+	POGOItem      ImagePGOItem
+	POGOSignature string
 }
 
 func TestDebugDirectoryCodeView(t *testing.T) {
 
 	tests := []struct {
 		in  TestDebugIn
-		out TestDebugEntry
+		out TestCodeView
 	}{
 		{
 			TestDebugIn{
 				index:    0,
 				filepath: getAbsoluteFilePath("test/kernel32.dll"),
 			},
-			TestDebugEntry{
+			TestCodeView{
 				debugEntry: DebugEntry{
 					Struct: ImageDebugDirectory{
 						Characteristics:  0x0,
@@ -63,7 +69,8 @@ func TestDebugDirectoryCodeView(t *testing.T) {
 						PDBFileName: "kernel32.pdb",
 					},
 				},
-				dbgType: "CodeView",
+				debugType: "CodeView",
+				signature: "RSDS",
 			},
 		},
 		{
@@ -71,7 +78,7 @@ func TestDebugDirectoryCodeView(t *testing.T) {
 				index:    0,
 				filepath: getAbsoluteFilePath("test/01008963d32f5cc17b64c31446386ee5b36a7eab6761df87a2989ba9394d8f3d"),
 			},
-			TestDebugEntry{
+			TestCodeView{
 				debugEntry: DebugEntry{
 					Struct: ImageDebugDirectory{
 						Characteristics:  0x0,
@@ -93,7 +100,8 @@ func TestDebugDirectoryCodeView(t *testing.T) {
 						PDBFileName: "routemon.pdb",
 					},
 				},
-				dbgType: "CodeView",
+				debugType: "CodeView",
+				signature: "NB10",
 			},
 		},
 	}
@@ -127,17 +135,32 @@ func TestDebugDirectoryCodeView(t *testing.T) {
 
 			err = file.parseDebugDirectory(va, size)
 			if err != nil {
-				t.Fatalf("parseExportDirectory(%s) failed, reason: %v", tt.in.filepath, err)
+				t.Fatalf("parseExportDirectory(%s) failed, reason: %v",
+					tt.in.filepath, err)
 			}
 
 			debugEntry := file.Debugs[tt.in.index]
 			if !reflect.DeepEqual(debugEntry, tt.out.debugEntry) {
-				t.Fatalf("debug entry assertion failed, got %v, want %v", debugEntry, tt.out.debugEntry)
+				t.Fatalf("debug entry assertion failed, got %v, want %v",
+					debugEntry, tt.out.debugEntry)
 			}
 
-			dbgTypeString := debugEntry.String()
-			if dbgTypeString != tt.out.dbgType {
-				t.Fatalf("debug type assertion failed, got %v, want %v", dbgTypeString, tt.out.dbgType)
+			debugTypeString := debugEntry.String()
+			if debugTypeString != tt.out.debugType {
+				t.Fatalf("debug entry type string assertion failed, got %v, want %v",
+					debugTypeString, tt.out.debugType)
+			}
+
+			cvSignature := ""
+			switch debugEntry.Info.(type) {
+			case CVInfoPDB70:
+				cvSignature = debugEntry.Info.(CVInfoPDB70).CVSignature.String()
+			case CVInfoPDB20:
+				cvSignature = debugEntry.Info.(CVInfoPDB20).CVHeader.Signature.String()
+			}
+			if cvSignature != tt.out.signature {
+				t.Fatalf("debug CV signature assertion failed, got %v, want %v",
+					cvSignature, tt.out.signature)
 			}
 		})
 	}
@@ -147,7 +170,7 @@ func TestDebugDirectoryREPRO(t *testing.T) {
 
 	tests := []struct {
 		in  TestDebugIn
-		out TestDebugEntry
+		out TestREPRO
 	}{
 
 		{
@@ -155,7 +178,7 @@ func TestDebugDirectoryREPRO(t *testing.T) {
 				index:    2,
 				filepath: getAbsoluteFilePath("test/kernel32.dll"),
 			},
-			TestDebugEntry{
+			TestREPRO{
 				debugEntry: DebugEntry{
 					Struct: ImageDebugDirectory{
 						Characteristics:  0x0,
@@ -173,6 +196,7 @@ func TestDebugDirectoryREPRO(t *testing.T) {
 							247, 187, 89, 220, 154, 207, 99, 80, 113, 179, 171, 196, 105, 179, 56},
 					},
 				},
+				debugType: "REPRO",
 			},
 		},
 	}
@@ -206,12 +230,20 @@ func TestDebugDirectoryREPRO(t *testing.T) {
 
 			err = file.parseDebugDirectory(va, size)
 			if err != nil {
-				t.Fatalf("parseExportDirectory(%s) failed, reason: %v", tt.in.filepath, err)
+				t.Fatalf("parseExportDirectory(%s) failed, reason: %v",
+					tt.in.filepath, err)
 			}
 
 			debugEntry := file.Debugs[tt.in.index]
 			if !reflect.DeepEqual(debugEntry, tt.out.debugEntry) {
-				t.Errorf("debug entry assertion failed, got %v, want %v", debugEntry, tt.out.debugEntry)
+				t.Errorf("debug entry assertion failed, got %v, want %v",
+					debugEntry, tt.out.debugEntry)
+			}
+
+			debugTypeString := debugEntry.String()
+			if debugTypeString != tt.out.debugType {
+				t.Fatalf("debug entry type string assertion failed, got %v, want %v",
+					debugTypeString, tt.out.debugType)
 			}
 		})
 	}
@@ -225,10 +257,8 @@ func TestDebugDirectoryPOGO(t *testing.T) {
 	}{
 		{
 			TestDebugIn{
-				index:      1,
-				filepath:   getAbsoluteFilePath("test/kernel32.dll"),
-				firstIndex: 0,
-				lastIndex:  59,
+				index:    1,
+				filepath: getAbsoluteFilePath("test/kernel32.dll"),
 			},
 			TestPOGO{
 				imgDebugEntry: ImageDebugDirectory{
@@ -241,17 +271,15 @@ func TestDebugDirectoryPOGO(t *testing.T) {
 					AddressOfRawData: 0x93318,
 					PointerToRawData: 0x91d18,
 				},
-				entriesCount: 60,
-				firstEntry: ImagePGOItem{
+				debugType:     "POGO",
+				entriesCount:  60,
+				POGOItemIndex: 0,
+				POGOItem: ImagePGOItem{
 					RVA:  0x1000,
 					Size: 0x280,
 					Name: ".text$lp00kernel32.dll!20_pri7",
 				},
-				lastEntry: ImagePGOItem{
-					RVA:  0xbc0b0,
-					Size: 0x470,
-					Name: ".rsrc$02",
-				},
+				POGOSignature: "PGU",
 			},
 		},
 	}
@@ -290,17 +318,27 @@ func TestDebugDirectoryPOGO(t *testing.T) {
 
 			imgDebugEntry := file.Debugs[tt.in.index].Struct
 			if !reflect.DeepEqual(imgDebugEntry, tt.out.imgDebugEntry) {
-				t.Errorf("debug entry assertion failed, got %v, want %v", imgDebugEntry, tt.out.imgDebugEntry)
+				t.Errorf("debug entry assertion failed, got %v, want %v",
+					imgDebugEntry, tt.out.imgDebugEntry)
 			}
 
-			pogo := file.Debugs[tt.in.index].Info.(POGO).Entries[tt.in.firstIndex]
-			if !reflect.DeepEqual(pogo, tt.out.firstEntry) {
-				t.Errorf("debug pogo entry assertion failed, got %v, want %v", pogo, tt.out.firstEntry)
+			debugTypeString := file.Debugs[tt.in.index].String()
+			if debugTypeString != tt.out.debugType {
+				t.Fatalf("debug type assertion failed, got %v, want %v",
+					debugTypeString, tt.out.debugType)
 			}
 
-			pogo = file.Debugs[tt.in.index].Info.(POGO).Entries[tt.in.lastIndex]
-			if !reflect.DeepEqual(pogo, tt.out.lastEntry) {
-				t.Errorf("debug pogo entry assertion failed, got %v, want %v", pogo, tt.out.lastEntry)
+			pogo := file.Debugs[tt.in.index].Info.(POGO)
+			pogoItem := pogo.Entries[tt.out.POGOItemIndex]
+			if !reflect.DeepEqual(pogoItem, tt.out.POGOItem) {
+				t.Errorf("debug pogo entry assertion failed, got %v, want %v",
+					pogoItem, tt.out.POGOItemIndex)
+			}
+
+			pogoItemSignature := pogo.Signature.String()
+			if pogoItemSignature != tt.out.POGOSignature {
+				t.Fatalf("debug pogo signature string assertion failed, got %v, want %v",
+					pogoItemSignature, tt.out.POGOSignature)
 			}
 		})
 	}

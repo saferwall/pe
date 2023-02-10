@@ -536,10 +536,21 @@ func parsePE(filename string, cfg config) {
 				}
 				if debugSignature == peparser.CVSignatureRSDS {
 					pdb := debug.Info.(peparser.CVInfoPDB70)
-					fmt.Fprintf(w, "CV Signature:\t 0x%x\n", pdb.CVSignature)
+					fmt.Fprintf(w, "CV Signature:\t 0x%x (%s)\n", pdb.CVSignature,
+						pdb.CVSignature.String())
 					fmt.Fprintf(w, "Signature:\t %s\n", pdb.Signature.String())
 					fmt.Fprintf(w, "Age:\t 0x%x\n", pdb.Age)
 					fmt.Fprintf(w, "PDBFileName:\t %s\n", pdb.PDBFileName)
+				} else if debugSignature == peparser.CVSignatureNB10 {
+					pdb := debug.Info.(peparser.CVInfoPDB20)
+					fmt.Fprintf(w, "CV Header Signature:\t 0x%x (%s)\n",
+						pdb.CVHeader.Signature, pdb.CVHeader.Signature.String())
+					fmt.Fprintf(w, "CV Header Offset:\t 0x%x\n", pdb.CVHeader.Offset)
+					fmt.Fprintf(w, "Signature:\t 0x%x (%s)\n", pdb.Signature,
+						humanizeTimestamp(pdb.Signature))
+					fmt.Fprintf(w, "Age:\t 0x%x\n", pdb.Age)
+					fmt.Fprintf(w, "PDBFileName:\t %s\n", pdb.PDBFileName)
+
 				}
 			case peparser.ImageDebugTypePOGO:
 				pogo := debug.Info.(peparser.POGO)
