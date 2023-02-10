@@ -448,10 +448,13 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 			repro := REPRO{}
 			offset := debugDir.PointerToRawData
 
+			// Extract the size.
 			repro.Size, err = pe.ReadUint32(offset)
 			if err != nil {
 				continue
 			}
+
+			// Extract the hash.
 			repro.Hash, err = pe.ReadBytesAtOffset(offset+4, repro.Size)
 			if err != nil {
 				continue
