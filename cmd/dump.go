@@ -568,6 +568,10 @@ func parsePE(filename string, cfg config) {
 				repro := debug.Info.(peparser.REPRO)
 				fmt.Fprintf(w, "Hash:\t %x\n", repro.Hash)
 				fmt.Fprintf(w, "Size:\t 0x%x (%s)\n", repro.Size, BytesSize(float64(repro.Size)))
+			case peparser.ImageDebugTypeExDllCharacteristics:
+				exDllCharacteristics := debug.Info.(peparser.DllCharacteristicsExType)
+				fmt.Fprintf(w, "Value:\t %d (%s)\n", exDllCharacteristics,
+					exDllCharacteristics.String())
 			}
 		}
 

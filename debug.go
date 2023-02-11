@@ -92,6 +92,9 @@ const (
 	FrameNonFPO = 0x3
 )
 
+// DllCharacteristicsExType represents a DLL Characteristics type.
+type DllCharacteristicsExType uint32
+
 const (
 	// ImageDllCharacteristicsExCETCompat indicates that the image is CET
 	// compatible.
@@ -531,7 +534,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 				continue
 			}
 
-			debugEntry.Info = exDllChar
+			debugEntry.Info = DllCharacteristicsExType(exDllChar)
 		}
 
 		debugEntry.Struct = debugDir
@@ -690,6 +693,20 @@ func (s CVSignature) String() string {
 	}
 
 	v, ok := cvSignatureMap[s]
+	if ok {
+		return v
+	}
+
+	return "?"
+}
+
+// String returns a string interpretation of Dll Characteristics Ex.
+func (flag DllCharacteristicsExType) String() string {
+	dllCharacteristicsExTypeMap := map[DllCharacteristicsExType]string{
+		ImageDllCharacteristicsExCETCompat: "CET Compatible",
+	}
+
+	v, ok := dllCharacteristicsExTypeMap[flag]
 	if ok {
 		return v
 	}
