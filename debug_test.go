@@ -648,3 +648,32 @@ func TestDebugDirectoryFPO(t *testing.T) {
 		})
 	}
 }
+
+func TestDebugSectionAttributes(t *testing.T) {
+
+	tests := []struct {
+		in  string
+		out string
+	}{
+		{
+
+			".00cfg",
+			"CFG Check Functions Pointers",
+		},
+		{
+			"__undefined__",
+			"",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.out, func(t *testing.T) {
+
+			secAttrString := SectionAttributeDescription(tt.in)
+			if secAttrString != tt.out {
+				t.Fatalf("debug section attributes description failed, got %v, want %v",
+					secAttrString, tt.out)
+			}
+		})
+	}
+}

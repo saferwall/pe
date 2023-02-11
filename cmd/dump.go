@@ -557,11 +557,12 @@ func parsePE(filename string, cfg config) {
 				if len(pogo.Entries) > 0 {
 					fmt.Fprintf(w, "Signature:\t 0x%x (%s)\n\n", pogo.Signature,
 						pogo.Signature.String())
-					fmt.Fprintln(w, "RVA\tSize\tName\t")
-					fmt.Fprintln(w, "---\t----\t----\t")
+					fmt.Fprintln(w, "RVA\tSize\tName\tDescription")
+					fmt.Fprintln(w, "---\t----\t----\t----\t")
 					for _, pogoEntry := range pogo.Entries {
-						fmt.Fprintf(w, "0x%x\t0x%x\t%s\t\n", pogoEntry.RVA,
-							pogoEntry.Size, pogoEntry.Name)
+						fmt.Fprintf(w, "0x%x\t0x%x\t%s\t%s\t\n", pogoEntry.RVA,
+							pogoEntry.Size, pogoEntry.Name,
+							peparser.SectionAttributeDescription(pogoEntry.Name))
 					}
 				}
 			case peparser.ImageDebugTypeRepro:
