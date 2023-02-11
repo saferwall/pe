@@ -46,7 +46,7 @@ const (
 	ImageDebugTypeBorland = 9
 
 	// Reserved.
-	ImageDebugTypeReserved10 = 10
+	ImageDebugTypeReserved = 10
 
 	// Reserved.
 	ImageDebugTypeCLSID = 11
@@ -215,12 +215,15 @@ type CVInfoPDB20 struct {
 	PDBFileName string `json:"pdb_file_name"`
 }
 
+// FPOFrameType represents the type of a FPO frame.
+type FPOFrameType uint8
+
 // FPOData represents the stack frame layout for a function on an x86 computer when
 // frame pointer omission (FPO) optimization is used. The structure is used to locate
 // the base of the call frame.
 type FPOData struct {
 	// The offset of the first byte of the function code.
-	OffStart uint32 `json:"off_start"`
+	OffsetStart uint32 `json:"offset_start"`
 
 	// The number of bytes in the function.
 	ProcSize uint32 `json:"proc_size"`
@@ -247,7 +250,7 @@ type FPOData struct {
 	Reserved uint8 `json:"reserved"`
 
 	// A variable that indicates the frame type.
-	FrameType uint8 `json:"frame_type"`
+	FrameType FPOFrameType `json:"frame_type"`
 }
 
 // ImagePGOItem represents the _IMAGE_POGO_INFO structure.
@@ -478,7 +481,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 			c := uint32(0)
 			for c < debugDir.SizeOfData {
 				fpo := FPOData{}
-				fpo.OffStart, err = pe.ReadUint32(offset)
+				fpo.OffsetStart, err = pe.ReadUint32(offset)
 				if err != nil {
 					break
 				}
@@ -529,7 +532,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 				fpo.Reserved = uint8(attributes & 0x20 >> 5)
 
 				// The next 2 bits.
-				fpo.FrameType = uint8(attributes & 0xC0 >> 6)
+				fpo.FrameType = FPOFrameType(attributes & 0xC0 >> 6)
 
 				fpoEntries = append(fpoEntries, fpo)
 				c += size
@@ -619,13 +622,13 @@ func SectionAttributeDescription(section string) string {
 	return "?"
 }
 
-// FPOFrameTypePretty returns a string interpretation of the FPO frame type.
-func FPOFrameTypePretty(ft uint8) string {
-	frameTypeMap := map[uint8]string{
+// String returns a string interpretation of the FPO frame type.
+func (ft FPOFrameType) String() string {
+	frameTypeMap := map[FPOFrameType]string{
 		FrameFPO:    "FPO",
 		FrameTrap:   "Trap",
 		FrameTSS:    "TSS",
-		FrameNonFPO: "NonFPO",
+		FrameNonFPO: "Non FPO",
 	}
 
 	v, ok := frameTypeMap[ft]
@@ -636,23 +639,6 @@ func FPOFrameTypePretty(ft uint8) string {
 	return "?"
 }
 
-// PrettyExtendedDLLCharacteristics maps DLL char to string.
-func PrettyExtendedDLLCharacteristics(characteristics uint32) []string {
-
-	var values []string
-
-	exDllCharacteristicsMap := map[uint32]string{
-		ImageDllCharacteristicsExCETCompat: "CET Compatible",
-	}
-	for k, s := range exDllCharacteristicsMap {
-		if k&characteristics != 0 {
-			values = append(values, s)
-		}
-	}
-
-	return values
-}
-
 // String returns the string representation of a GUID.
 func (g GUID) String() string {
 	return fmt.Sprintf("{%06X-%04X-%04X-%04X-%X}", g.Data1, g.Data2, g.Data3, g.Data4[0:2], g.Data4[2:])
@@ -660,20 +646,32 @@ func (g GUID) String() string {
 
 // String returns the string representation of a debug entry type.
 func (t ImageDebugDirectoryType) String() string {
-	switch t {
-	case ImageDebugTypeCodeView:
-		return "CodeView"
-	case ImageDebugTypePOGO:
-		return "POGO"
-	case ImageDebugTypeFPO:
-		return "FPO"
-	case ImageDebugTypeRepro:
-		return "REPRO"
-	case ImageDebugTypeVCFeature:
-		return "VC Feature"
-	case ImageDebugTypeExDllCharacteristics:
-		return "Ex.DLL Characteristics"
+
+	debugTypeMap := map[ImageDebugDirectoryType]string{
+		ImageDebugTypeUnknown:              "Unknown",
+		ImageDebugTypeCOFF:                 "COFF",
+		ImageDebugTypeCodeView:             "CodeView",
+		ImageDebugTypeFPO:                  "FPO",
+		ImageDebugTypeMisc:                 "Misc",
+		ImageDebugTypeException:            "Exception",
+		ImageDebugTypeFixup:                "Fixup",
+		ImageDebugTypeOMAPToSrc:            "OMAP To Src",
+		ImageDebugTypeOMAPFromSrc:          "OMAP From Src",
+		ImageDebugTypeBorland:              "Borland",
+		ImageDebugTypeReserved:             "Reserved",
+		ImageDebugTypeVCFeature:            "VC Feature",
+		ImageDebugTypePOGO:                 "POGO",
+		ImageDebugTypeILTCG:                "iLTCG",
+		ImageDebugTypeMPX:                  "MPX",
+		ImageDebugTypeRepro:                "REPRO",
+		ImageDebugTypeExDllCharacteristics: "Ex.DLL Characteristics",
 	}
+
+	v, ok := debugTypeMap[t]
+	if ok {
+		return v
+	}
+
 	return "?"
 }
 

@@ -234,6 +234,12 @@ func TestDebugDirectoryPOGO(t *testing.T) {
 			}
 
 			pogo := file.Debugs[tt.in.index].Info.(POGO)
+			entriesCount := len(pogo.Entries)
+			if entriesCount != tt.out.entriesCount {
+				t.Fatalf("debug entry count failed, got %v, want %v",
+					entriesCount, tt.out.entriesCount)
+			}
+
 			pogoItem := pogo.Entries[tt.out.POGOItemIndex]
 			if !reflect.DeepEqual(pogoItem, tt.out.POGOItem) {
 				t.Fatalf("debug pogo entry assertion failed, got %v, want %v",
@@ -496,6 +502,149 @@ func TestDebugDirectoryVCFeature(t *testing.T) {
 					debugEntry, tt.out.debugEntry)
 			}
 
+		})
+	}
+}
+
+func TestDebugDirectoryFPO(t *testing.T) {
+
+	type TestFPO struct {
+		imgDebugEntry ImageDebugDirectory
+		entriesCount  int
+		debugType     string
+		FPODataIndex  int
+		FPOData       FPOData
+		FPOFrameType  string
+	}
+
+	tests := []struct {
+		in  TestDebugIn
+		out TestFPO
+	}{
+		{
+			TestDebugIn{
+				index:    1,
+				filepath: getAbsoluteFilePath("test/jobexec.dll"),
+			},
+			TestFPO{
+				imgDebugEntry: ImageDebugDirectory{
+					Characteristics:  0x0,
+					TimeDateStamp:    0x355b8e5f,
+					MajorVersion:     0x0,
+					MinorVersion:     0x0,
+					Type:             0x3,
+					SizeOfData:       0x840,
+					AddressOfRawData: 0x0,
+					PointerToRawData: 0xb310,
+				},
+				debugType:    "FPO",
+				entriesCount: 131,
+				FPODataIndex: 0,
+				FPOData: FPOData{
+					OffsetStart: 0x1bc0,
+					ProcSize:    0x22,
+				},
+				FPOFrameType: "FPO",
+			},
+		},
+		{
+			TestDebugIn{
+				index:    1,
+				filepath: getAbsoluteFilePath("test/jobexec.dll"),
+			},
+			TestFPO{
+				imgDebugEntry: ImageDebugDirectory{
+					Characteristics:  0x0,
+					TimeDateStamp:    0x355b8e5f,
+					MajorVersion:     0x0,
+					MinorVersion:     0x0,
+					Type:             0x3,
+					SizeOfData:       0x840,
+					AddressOfRawData: 0x0,
+					PointerToRawData: 0xb310,
+				},
+				debugType:    "FPO",
+				entriesCount: 131,
+				FPODataIndex: 2,
+				FPOData: FPOData{
+					OffsetStart:    0x1c26,
+					ProcSize:       0x267,
+					NumLocals:      0x104,
+					ParamsSize:     0x1,
+					PrologLength:   0x16,
+					SavedRegsCount: 0x3,
+					HasSEH:         0x0,
+					UseBP:          0x1,
+					Reserved:       0x0,
+					FrameType:      0x3,
+				},
+				FPOFrameType: "Non FPO",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in.filepath, func(t *testing.T) {
+			ops := Options{Fast: true}
+			file, err := New(tt.in.filepath, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in.filepath, err)
+			}
+
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in.filepath, err)
+			}
+
+			var va, size uint32
+
+			if file.Is64 {
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryDebug]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			} else {
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryDebug]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseDebugDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseExportDirectory(%s) failed, reason: %v", tt.in.filepath, err)
+			}
+
+			imgDebugEntry := file.Debugs[tt.in.index].Struct
+			if !reflect.DeepEqual(imgDebugEntry, tt.out.imgDebugEntry) {
+				t.Fatalf("debug entry assertion failed, got %v, want %v",
+					imgDebugEntry, tt.out.imgDebugEntry)
+			}
+
+			debugTypeString := file.Debugs[tt.in.index].Type
+			if debugTypeString != tt.out.debugType {
+				t.Fatalf("debug type assertion failed, got %v, want %v",
+					debugTypeString, tt.out.debugType)
+			}
+
+			fpo := file.Debugs[tt.in.index].Info.([]FPOData)
+			entriesCount := len(fpo)
+			if entriesCount != tt.out.entriesCount {
+				t.Fatalf("debug entry count failed, got %v, want %v",
+					entriesCount, tt.out.entriesCount)
+			}
+
+			fpoData := fpo[tt.out.FPODataIndex]
+			if !reflect.DeepEqual(fpoData, tt.out.FPOData) {
+				t.Fatalf("debug FPO data entry assertion failed, got %v, want %v",
+					fpoData, tt.out.FPOData)
+			}
+
+			frameType := fpoData.FrameType.String()
+			if frameType != tt.out.FPOFrameType {
+				t.Fatalf("debug FPO frame type string assertion failed, got %v, want %v",
+					frameType, tt.out.FPOFrameType)
+			}
 		})
 	}
 }

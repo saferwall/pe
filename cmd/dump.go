@@ -579,6 +579,20 @@ func parsePE(filename string, cfg config) {
 				fmt.Fprintf(w, "/GS:\t 0x%x\n", VCFeature.Gs)
 				fmt.Fprintf(w, "/sdl:\t 0x%x\n", VCFeature.Sdl)
 				fmt.Fprintf(w, "GuardN:\t 0x%x\n", VCFeature.GuardN)
+			case peparser.ImageDebugTypeFPO:
+				fpo := debug.Info.([]peparser.FPOData)
+				if len(fpo) > 0 {
+					fmt.Fprintln(w, "OffsetStart\tProcSize\tNumLocals\tParamsSize\tPrologLength\tSavedRegsCount\tHasSEH\tUseBP\tReserved\tFrameType\t")
+					fmt.Fprintln(w, "------\t------\t------\t------\t------\t------\t------\t------\t------\t------\t")
+					for _, fpoData := range fpo {
+						fmt.Fprintf(w, "0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t%d (%s)\t\n",
+							fpoData.OffsetStart, fpoData.ProcSize, fpoData.NumLocals,
+							fpoData.ParamsSize, fpoData.PrologLength,
+							fpoData.SavedRegsCount, fpoData.HasSEH, fpoData.UseBP,
+							fpoData.Reserved, fpoData.FrameType, fpoData.FrameType.String())
+					}
+				}
+
 			}
 		}
 
