@@ -511,6 +511,95 @@ func parsePE(filename string, cfg config) {
 		w.Flush()
 	}
 
+	if cfg.wantDebug && pe.FileInfo.HasDebug {
+		fmt.Printf("\nDEBUGS\n*******\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		for _, debug := range pe.Debugs {
+			imgDbgDir := debug.Struct
+			fmt.Fprintf(w, "\n\t------[ %s ]------\n", debug.Type)
+			fmt.Fprintf(w, "Characteristics:\t 0x%x\n", imgDbgDir.Characteristics)
+			fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", imgDbgDir.TimeDateStamp,
+				humanizeTimestamp(imgDbgDir.TimeDateStamp))
+			fmt.Fprintf(w, "Major Version:\t 0x%x\n", imgDbgDir.MajorVersion)
+			fmt.Fprintf(w, "Minor Version:\t 0x%x\n", imgDbgDir.MinorVersion)
+			fmt.Fprintf(w, "Type:\t 0x%x\n", imgDbgDir.Type)
+			fmt.Fprintf(w, "Size Of Data:\t 0x%x (%s)\n", imgDbgDir.SizeOfData,
+				BytesSize(float64(imgDbgDir.SizeOfData)))
+			fmt.Fprintf(w, "Address Of Raw Data:\t 0x%x\n", imgDbgDir.AddressOfRawData)
+			fmt.Fprintf(w, "Pointer To Raw Data:\t 0x%x\n", imgDbgDir.PointerToRawData)
+			fmt.Fprintf(w, "\n")
+			switch imgDbgDir.Type {
+			case peparser.ImageDebugTypeCodeView:
+				debugSignature, err := pe.ReadUint32(imgDbgDir.PointerToRawData)
+				if err != nil {
+					continue
+				}
+				if debugSignature == peparser.CVSignatureRSDS {
+					pdb := debug.Info.(peparser.CVInfoPDB70)
+					fmt.Fprintf(w, "CV Signature:\t 0x%x (%s)\n", pdb.CVSignature,
+						pdb.CVSignature.String())
+					fmt.Fprintf(w, "Signature:\t %s\n", pdb.Signature.String())
+					fmt.Fprintf(w, "Age:\t 0x%x\n", pdb.Age)
+					fmt.Fprintf(w, "PDBFileName:\t %s\n", pdb.PDBFileName)
+				} else if debugSignature == peparser.CVSignatureNB10 {
+					pdb := debug.Info.(peparser.CVInfoPDB20)
+					fmt.Fprintf(w, "CV Header Signature:\t 0x%x (%s)\n",
+						pdb.CVHeader.Signature, pdb.CVHeader.Signature.String())
+					fmt.Fprintf(w, "CV Header Offset:\t 0x%x\n", pdb.CVHeader.Offset)
+					fmt.Fprintf(w, "Signature:\t 0x%x (%s)\n", pdb.Signature,
+						humanizeTimestamp(pdb.Signature))
+					fmt.Fprintf(w, "Age:\t 0x%x\n", pdb.Age)
+					fmt.Fprintf(w, "PDBFileName:\t %s\n", pdb.PDBFileName)
+
+				}
+			case peparser.ImageDebugTypePOGO:
+				pogo := debug.Info.(peparser.POGO)
+				if len(pogo.Entries) > 0 {
+					fmt.Fprintf(w, "Signature:\t 0x%x (%s)\n\n", pogo.Signature,
+						pogo.Signature.String())
+					fmt.Fprintln(w, "RVA\tSize\tName\tDescription")
+					fmt.Fprintln(w, "---\t----\t----\t----\t")
+					for _, pogoEntry := range pogo.Entries {
+						fmt.Fprintf(w, "0x%x\t0x%x\t%s\t%s\t\n", pogoEntry.RVA,
+							pogoEntry.Size, pogoEntry.Name,
+							peparser.SectionAttributeDescription(pogoEntry.Name))
+					}
+				}
+			case peparser.ImageDebugTypeRepro:
+				repro := debug.Info.(peparser.REPRO)
+				fmt.Fprintf(w, "Hash:\t %x\n", repro.Hash)
+				fmt.Fprintf(w, "Size:\t 0x%x (%s)\n", repro.Size, BytesSize(float64(repro.Size)))
+			case peparser.ImageDebugTypeExDllCharacteristics:
+				exDllCharacteristics := debug.Info.(peparser.DllCharacteristicsExType)
+				fmt.Fprintf(w, "Value:\t %d (%s)\n", exDllCharacteristics,
+					exDllCharacteristics.String())
+			case peparser.ImageDebugTypeVCFeature:
+				VCFeature := debug.Info.(peparser.VCFeature)
+				fmt.Fprintf(w, "Pre VC11:\t 0x%x\n", VCFeature.PreVC11)
+				fmt.Fprintf(w, "C/C++:\t 0x%x\n", VCFeature.CCpp)
+				fmt.Fprintf(w, "/GS:\t 0x%x\n", VCFeature.Gs)
+				fmt.Fprintf(w, "/sdl:\t 0x%x\n", VCFeature.Sdl)
+				fmt.Fprintf(w, "GuardN:\t 0x%x\n", VCFeature.GuardN)
+			case peparser.ImageDebugTypeFPO:
+				fpo := debug.Info.([]peparser.FPOData)
+				if len(fpo) > 0 {
+					fmt.Fprintln(w, "OffsetStart\tProcSize\tNumLocals\tParamsSize\tPrologLength\tSavedRegsCount\tHasSEH\tUseBP\tReserved\tFrameType\t")
+					fmt.Fprintln(w, "------\t------\t------\t------\t------\t------\t------\t------\t------\t------\t")
+					for _, fpoData := range fpo {
+						fmt.Fprintf(w, "0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t%d (%s)\t\n",
+							fpoData.OffsetStart, fpoData.ProcSize, fpoData.NumLocals,
+							fpoData.ParamsSize, fpoData.PrologLength,
+							fpoData.SavedRegsCount, fpoData.HasSEH, fpoData.UseBP,
+							fpoData.Reserved, fpoData.FrameType, fpoData.FrameType.String())
+					}
+				}
+
+			}
+		}
+
+		w.Flush()
+	}
+
 	if cfg.wantBoundImp && pe.FileInfo.HasBoundImp {
 		fmt.Printf("BOUND IMPORTS\n\n")
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
