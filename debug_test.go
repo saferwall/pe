@@ -17,7 +17,6 @@ type TestDebugIn struct {
 func TestDebugDirectoryCodeView(t *testing.T) {
 
 	type TestCodeView struct {
-		debugType  string
 		debugEntry DebugEntry
 		signature  string
 	}
@@ -54,8 +53,8 @@ func TestDebugDirectoryCodeView(t *testing.T) {
 						Age:         0x1,
 						PDBFileName: "kernel32.pdb",
 					},
+					Type: "CodeView",
 				},
-				debugType: "CodeView",
 				signature: "RSDS",
 			},
 		},
@@ -85,8 +84,8 @@ func TestDebugDirectoryCodeView(t *testing.T) {
 						Age:         0x1,
 						PDBFileName: "routemon.pdb",
 					},
+					Type: "CodeView",
 				},
-				debugType: "CodeView",
 				signature: "NB10",
 			},
 		},
@@ -129,12 +128,6 @@ func TestDebugDirectoryCodeView(t *testing.T) {
 			if !reflect.DeepEqual(debugEntry, tt.out.debugEntry) {
 				t.Fatalf("debug entry assertion failed, got %v, want %v",
 					debugEntry, tt.out.debugEntry)
-			}
-
-			debugTypeString := debugEntry.String()
-			if debugTypeString != tt.out.debugType {
-				t.Fatalf("debug entry type string assertion failed, got %v, want %v",
-					debugTypeString, tt.out.debugType)
 			}
 
 			cvSignature := ""
@@ -234,7 +227,7 @@ func TestDebugDirectoryPOGO(t *testing.T) {
 					imgDebugEntry, tt.out.imgDebugEntry)
 			}
 
-			debugTypeString := file.Debugs[tt.in.index].String()
+			debugTypeString := file.Debugs[tt.in.index].Type
 			if debugTypeString != tt.out.debugType {
 				t.Fatalf("debug type assertion failed, got %v, want %v",
 					debugTypeString, tt.out.debugType)
@@ -290,8 +283,9 @@ func TestDebugDirectoryREPRO(t *testing.T) {
 						Hash: []byte{113, 158, 224, 219, 112, 179, 183, 156, 34, 197, 94, 85, 115, 250, 123, 225, 130,
 							247, 187, 89, 220, 154, 207, 99, 80, 113, 179, 171, 196, 105, 179, 56},
 					},
+
+					Type: "REPRO",
 				},
-				debugType: "REPRO",
 			},
 		},
 	}
@@ -335,11 +329,6 @@ func TestDebugDirectoryREPRO(t *testing.T) {
 					debugEntry, tt.out.debugEntry)
 			}
 
-			debugTypeString := debugEntry.String()
-			if debugTypeString != tt.out.debugType {
-				t.Fatalf("debug entry type string assertion failed, got %v, want %v",
-					debugTypeString, tt.out.debugType)
-			}
 		})
 	}
 }
@@ -347,7 +336,6 @@ func TestDebugDirectoryREPRO(t *testing.T) {
 func TestDebugDirectoryExDLLCharacteristics(t *testing.T) {
 
 	type TestExDLLCharacteristics struct {
-		debugType            string
 		debugEntry           DebugEntry
 		exDLLCharacteristics string
 	}
@@ -374,8 +362,8 @@ func TestDebugDirectoryExDLLCharacteristics(t *testing.T) {
 						PointerToRawData: 0x922b0,
 					},
 					Info: DllCharacteristicsExType(0x1),
+					Type: "Ex.DLL Characteristics",
 				},
-				debugType:            "Ex.DLL Characteristics",
 				exDLLCharacteristics: "CET Compatible",
 			},
 		},
@@ -420,17 +408,94 @@ func TestDebugDirectoryExDLLCharacteristics(t *testing.T) {
 					debugEntry, tt.out.debugEntry)
 			}
 
-			debugTypeString := debugEntry.String()
-			if debugTypeString != tt.out.debugType {
-				t.Fatalf("debug entry type string assertion failed, got %v, want %v",
-					debugTypeString, tt.out.debugType)
-			}
-
 			dllCharacteristicsExString := debugEntry.Info.(DllCharacteristicsExType).String()
 			if dllCharacteristicsExString != tt.out.exDLLCharacteristics {
 				t.Fatalf("debug entry DllCharacteristicsEx string assertion failed, got %v, want %v",
 					dllCharacteristicsExString, tt.out.exDLLCharacteristics)
 			}
+		})
+	}
+}
+
+func TestDebugDirectoryVCFeature(t *testing.T) {
+
+	type TestVCFeature struct {
+		debugEntry DebugEntry
+	}
+
+	tests := []struct {
+		in  TestDebugIn
+		out TestVCFeature
+	}{
+		{
+			TestDebugIn{
+				index:    1,
+				filepath: getAbsoluteFilePath("test/00da1a2a9d9ebf447508bf6550f05f466f8eabb4ed6c4f2a524c0769b2d75bc1"),
+			},
+			TestVCFeature{
+				debugEntry: DebugEntry{
+					Struct: ImageDebugDirectory{
+						Characteristics:  0x0,
+						TimeDateStamp:    0x5ef47ea0,
+						MajorVersion:     0x0,
+						MinorVersion:     0x0,
+						Type:             0xc,
+						SizeOfData:       0x14,
+						AddressOfRawData: 0x39d58,
+						PointerToRawData: 0x39158,
+					},
+					Info: VCFeature{
+						PreVC11: 0xa,
+						CCpp:    0x115,
+						Gs:      0xe4,
+						Sdl:     0x0,
+						GuardN:  0x115,
+					},
+					Type: "VC Feature",
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in.filepath, func(t *testing.T) {
+			ops := Options{Fast: true}
+			file, err := New(tt.in.filepath, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in.filepath, err)
+			}
+
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in.filepath, err)
+			}
+
+			var va, size uint32
+
+			if file.Is64 {
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryDebug]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			} else {
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryDebug]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseDebugDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseExportDirectory(%s) failed, reason: %v",
+					tt.in.filepath, err)
+			}
+
+			debugEntry := file.Debugs[tt.in.index]
+			if !reflect.DeepEqual(debugEntry, tt.out.debugEntry) {
+				t.Fatalf("debug entry assertion failed, got %+v, want %+v",
+					debugEntry, tt.out.debugEntry)
+			}
+
 		})
 	}
 }

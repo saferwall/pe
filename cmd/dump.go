@@ -516,7 +516,7 @@ func parsePE(filename string, cfg config) {
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
 		for _, debug := range pe.Debugs {
 			imgDbgDir := debug.Struct
-			fmt.Fprintf(w, "\n\t------[ %s ]------\n", debug.String())
+			fmt.Fprintf(w, "\n\t------[ %s ]------\n", debug.Type)
 			fmt.Fprintf(w, "Characteristics:\t 0x%x\n", imgDbgDir.Characteristics)
 			fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", imgDbgDir.TimeDateStamp,
 				humanizeTimestamp(imgDbgDir.TimeDateStamp))
@@ -572,6 +572,13 @@ func parsePE(filename string, cfg config) {
 				exDllCharacteristics := debug.Info.(peparser.DllCharacteristicsExType)
 				fmt.Fprintf(w, "Value:\t %d (%s)\n", exDllCharacteristics,
 					exDllCharacteristics.String())
+			case peparser.ImageDebugTypeVCFeature:
+				VCFeature := debug.Info.(peparser.VCFeature)
+				fmt.Fprintf(w, "Pre VC11:\t 0x%x\n", VCFeature.PreVC11)
+				fmt.Fprintf(w, "C/C++:\t 0x%x\n", VCFeature.CCpp)
+				fmt.Fprintf(w, "/GS:\t 0x%x\n", VCFeature.Gs)
+				fmt.Fprintf(w, "/sdl:\t 0x%x\n", VCFeature.Sdl)
+				fmt.Fprintf(w, "GuardN:\t 0x%x\n", VCFeature.GuardN)
 			}
 		}
 

@@ -112,6 +112,9 @@ const (
 	POGOTypeLTCG = 0x4c544347
 )
 
+// ImageDebugDirectoryType represents the type of a debug directory.
+type ImageDebugDirectoryType uint32
+
 // ImageDebugDirectory represents the IMAGE_DEBUG_DIRECTORY structure.
 // This directory indicates what form of debug information is present
 // and where it is. This directory consists of an array of debug directory
@@ -131,7 +134,7 @@ type ImageDebugDirectory struct {
 
 	// The format of debugging information. This field enables support of
 	// multiple debuggers.
-	Type uint32 `json:"type"`
+	Type ImageDebugDirectoryType `json:"type"`
 
 	// The size of the debug data (not including the debug directory itself).
 	SizeOfData uint32 `json:"size_of_data"`
@@ -150,6 +153,9 @@ type DebugEntry struct {
 
 	// Holds specific information about the debug type entry.
 	Info interface{} `json:"info"`
+
+	// Type of the debug entry.
+	Type string `json:"type"`
 }
 
 // GUID is a 128-bit value consisting of one group of 8 hexadecimal digits,
@@ -264,11 +270,11 @@ type POGO struct {
 }
 
 type VCFeature struct {
-	PreVC11 uint32 `json:"Pre VC 11"`
+	PreVC11 uint32 `json:"pre_vc11"`
 	CCpp    uint32 `json:"C/C++"`
 	Gs      uint32 `json:"/GS"`
 	Sdl     uint32 `json:"/sdl"`
-	GuardN  uint32
+	GuardN  uint32 `json:"guardN"`
 }
 
 type REPRO struct {
@@ -538,6 +544,7 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 		}
 
 		debugEntry.Struct = debugDir
+		debugEntry.Type = debugDir.Type.String()
 		pe.Debugs = append(pe.Debugs, debugEntry)
 	}
 
@@ -650,8 +657,8 @@ func (g GUID) String() string {
 }
 
 // String returns the string representation of a debug entry type.
-func (de DebugEntry) String() string {
-	switch de.Struct.Type {
+func (t ImageDebugDirectoryType) String() string {
+	switch t {
 	case ImageDebugTypeCodeView:
 		return "CodeView"
 	case ImageDebugTypePOGO:
