@@ -413,7 +413,9 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 			pogo := POGO{}
 
 			switch pogoSignature {
-			case POGOTypePGU, POGOTypePGI, POGOTypePGO, POGOTypeLTCG:
+			case 0x0, POGOTypePGU, POGOTypePGI, POGOTypePGO, POGOTypeLTCG:
+				// TODO: Some files like 00da1a2a9d9ebf447508bf6550f05f466f8eabb4ed6c4f2a524c0769b2d75bc1
+				// have a POGO signature of 0x0. To be reverse engineered.
 				pogo.Signature = POGOType(pogoSignature)
 				offset = debugDir.PointerToRawData + 4
 				c := uint32(0)
