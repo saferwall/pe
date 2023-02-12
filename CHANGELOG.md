@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Unit tests for TLS directory [#69](https://github.com/saferwall/pe/pull/69).
 - Unit tests for debug directory [#68](https://github.com/saferwall/pe/pull/68).
 - Unit tests for resource directory and add functions to prettify resource (sub)languages [#66](https://github.com/saferwall/pe/pull/66).
 - Annotate PE structures with JSON tags during JSON encoding [#64](https://github.com/saferwall/pe/pull/64), [#65](https://github.com/saferwall/pe/pull/65)  and [#67](https://github.com/saferwall/pe/pull/67).

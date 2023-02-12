@@ -142,7 +142,8 @@ func parsePE(filename string, cfg config) {
 
 	data, _ := os.ReadFile(filename)
 	pe, err := peparser.NewBytes(data, &peparser.Options{
-		Logger: logger,
+		Logger:                logger,
+		DisableCertValidation: false,
 	})
 
 	if err != nil {
@@ -160,13 +161,13 @@ func parsePE(filename string, cfg config) {
 	}
 
 	// Dump all results to disk in JSON format.
-	b, _ := json.Marshal(pe)
-	f, err := os.Create("out.json")
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	f.WriteString(prettyPrint(b))
+	// b, _ := json.Marshal(pe)
+	// f, err := os.Create("out.json")
+	// if err != nil {
+	// 	return
+	// }
+	// defer f.Close()
+	// f.WriteString(prettyPrint(b))
 
 	// Calculate the PE authentihash.
 	pe.Authentihash()
@@ -620,7 +621,46 @@ func parsePE(filename string, cfg config) {
 			}
 			w.Flush()
 		}
+	}
 
+	if cfg.wantTLS && pe.FileInfo.HasTLS {
+		fmt.Printf("\nTLS\n*****\n\n")
+
+		tls := pe.TLS
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		if pe.Is64 {
+			imgTLSDirectory64 := tls.Struct.(peparser.ImageTLSDirectory64)
+			fmt.Fprintf(w, "Start Address Of Raw Data:\t 0x%x\n", imgTLSDirectory64.StartAddressOfRawData)
+			fmt.Fprintf(w, "End Address Of Raw Data:\t 0x%x\n", imgTLSDirectory64.EndAddressOfRawData)
+			fmt.Fprintf(w, "Address Of Index:\t %x\n", imgTLSDirectory64.AddressOfIndex)
+			fmt.Fprintf(w, "Address Of CallBacks:\t 0x%x\n", imgTLSDirectory64.AddressOfCallBacks)
+			fmt.Fprintf(w, "Size Of Zero Fill:\t 0x%x\n", imgTLSDirectory64.SizeOfZeroFill)
+			fmt.Fprintf(w, "Characteristics:\t 0x%x (%s)\n", imgTLSDirectory64.Characteristics,
+				imgTLSDirectory64.Characteristics.String())
+			fmt.Fprintf(w, "Callbacks:\n")
+			if len(tls.Callbacks.([]uint64)) > 0 {
+				for _, callback := range tls.Callbacks.([]uint64) {
+					fmt.Fprintf(w, "0x%x\t\n", callback)
+				}
+			}
+		} else {
+			imgTLSDirectory32 := tls.Struct.(peparser.ImageTLSDirectory32)
+			fmt.Fprintf(w, "Start Address Of Raw Data:\t 0x%x\n", imgTLSDirectory32.StartAddressOfRawData)
+			fmt.Fprintf(w, "End Address Of Raw Data:\t 0x%x\n", imgTLSDirectory32.EndAddressOfRawData)
+			fmt.Fprintf(w, "Address Of Index:\t %x\n", imgTLSDirectory32.AddressOfIndex)
+			fmt.Fprintf(w, "Address Of CallBacks:\t 0x%x\n", imgTLSDirectory32.AddressOfCallBacks)
+			fmt.Fprintf(w, "Size Of Zero Fill:\t 0x%x\n", imgTLSDirectory32.SizeOfZeroFill)
+			fmt.Fprintf(w, "Characteristics:\t 0x%x (%s)\n", imgTLSDirectory32.Characteristics,
+				imgTLSDirectory32.Characteristics.String())
+			fmt.Fprintf(w, "Callbacks:\n")
+			if len(tls.Callbacks.([]uint32)) > 0 {
+				for _, callback := range tls.Callbacks.([]uint32) {
+					fmt.Fprintf(w, "0x%x\t\n", callback)
+				}
+			}
+		}
+
+		w.Flush()
 	}
 
 	fmt.Print("\n")
