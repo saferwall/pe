@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -8,14 +8,18 @@ import (
 	"encoding/binary"
 )
 
+// TLSDirectoryCharacteristicsType represents the type of a TLS directory
+// Characteristics.
+type TLSDirectoryCharacteristicsType uint32
+
 // TLSDirectory represents tls directory information with callback entries.
 type TLSDirectory struct {
 
 	// of type *IMAGE_TLS_DIRECTORY32 or *IMAGE_TLS_DIRECTORY64 structure.
-	Struct interface{}
+	Struct interface{} `json:"struct"`
 
-	// of type uint32 or uint64.
-	Callbacks interface{}
+	// of type []uint32 or []uint64.
+	Callbacks interface{} `json:"callbacks"`
 }
 
 // ImageTLSDirectory32 represents the IMAGE_TLS_DIRECTORY32 structure.
@@ -24,33 +28,33 @@ type ImageTLSDirectory32 struct {
 
 	// The starting address of the TLS template. The template is a block of data
 	// that is used to initialize TLS data.
-	StartAddressOfRawData uint32
+	StartAddressOfRawData uint32 `json:"start_address_of_raw_data"`
 
 	// The address of the last byte of the TLS, except for the zero fill.
 	// As with the Raw Data Start VA field, this is a VA, not an RVA.
-	EndAddressOfRawData uint32
+	EndAddressOfRawData uint32 `json:"end_address_of_raw_data"`
 
 	// The location to receive the TLS index, which the loader assigns. This
 	// location is in an ordinary data section, so it can be given a symbolic
 	// name that is accessible to the program.
-	AddressOfIndex uint32
+	AddressOfIndex uint32 `json:"address_of_index"`
 
 	// The pointer to an array of TLS callback functions. The array is
 	// null-terminated, so if no callback function is supported, this field
 	// points to 4 bytes set to zero.
-	AddressOfCallBacks uint32
+	AddressOfCallBacks uint32 `json:"address_of_callbacks"`
 
 	// The size in bytes of the template, beyond the initialized data delimited
 	// by the Raw Data Start VA and Raw Data End VA fields. The total template
 	// size should be the same as the total size of TLS data in the image file.
 	// The zero fill is the amount of data that comes after the initialized
 	// nonzero data.
-	SizeOfZeroFill uint32
+	SizeOfZeroFill uint32 `json:"size_of_zero_fill"`
 
 	// The four bits [23:20] describe alignment info. Possible values are those
 	// defined as IMAGE_SCN_ALIGN_*, which are also used to describe alignment
 	// of section in object files. The other 28 bits are reserved for future use.
-	Characteristics uint32
+	Characteristics TLSDirectoryCharacteristicsType `json:"characteristics"`
 }
 
 // ImageTLSDirectory64 represents the IMAGE_TLS_DIRECTORY64 structure.
@@ -58,33 +62,33 @@ type ImageTLSDirectory32 struct {
 type ImageTLSDirectory64 struct {
 	// The starting address of the TLS template. The template is a block of data
 	// that is used to initialize TLS data.
-	StartAddressOfRawData uint64
+	StartAddressOfRawData uint64 `json:"start_address_of_raw_data"`
 
 	// The address of the last byte of the TLS, except for the zero fill. As
 	// with the Raw Data Start VA field, this is a VA, not an RVA.
-	EndAddressOfRawData uint64
+	EndAddressOfRawData uint64 `json:"end_address_of_raw_data"`
 
 	// The location to receive the TLS index, which the loader assigns. This
 	// location is in an ordinary data section, so it can be given a symbolic
 	// name that is accessible to the program.
-	AddressOfIndex uint64
+	AddressOfIndex uint64 `json:"address_of_index"`
 
 	// The pointer to an array of TLS callback functions. The array is
 	// null-terminated, so if no callback function is supported, this field
 	// points to 4 bytes set to zero.
-	AddressOfCallBacks uint64
+	AddressOfCallBacks uint64 `json:"address_of_callbacks"`
 
 	// The size in bytes of the template, beyond the initialized data delimited
 	// by the Raw Data Start VA and Raw Data End VA fields. The total template
 	// size should be the same as the total size of TLS data in the image file.
 	// The zero fill is the amount of data that comes after the initialized
 	// nonzero data.
-	SizeOfZeroFill uint32
+	SizeOfZeroFill uint32 `json:"size_of_zero_fill"`
 
 	// The four bits [23:20] describe alignment info. Possible values are those
 	// defined as IMAGE_SCN_ALIGN_*, which are also used to describe alignment
 	// of section in object files. The other 28 bits are reserved for future use.
-	Characteristics uint32
+	Characteristics TLSDirectoryCharacteristicsType `json:"characteristics"`
 }
 
 // TLS provides direct PE and COFF support for static thread local storage (TLS).
@@ -155,30 +159,30 @@ func (pe *File) parseTLSDirectory(rva, size uint32) error {
 	return nil
 }
 
-// PrettyTLSCharacteristics returns the string representations of the
-// `Characteristics` field of TLS directory.
-func (pe *File) PrettyTLSCharacteristics(Characteristics uint32) []string {
+// String returns the string representations of the `Characteristics` field of
+// TLS directory.
+func (characteristics TLSDirectoryCharacteristicsType) String() []string {
 	var values []string
 
-	TLSCharacteristicsMap := map[uint32]string{
-		ImageScnAlign1Bytes:    "Align1Bytes",
-		ImageScnAlign2Bytes:    "Align2Bytes",
-		ImageScnAlign4Bytes:    "Align4Bytes",
-		ImageScnAlign8Bytes:    "Align8Bytes",
-		ImageScnAlign16Bytes:   "Align16Bytes",
-		ImageScnAlign32Bytes:   "Align32Bytes",
-		ImageScnAlign64Bytes:   "Align64Bytes",
-		ImageScnAlign128Bytes:  "Align128Bytes",
-		ImageScnAlign256Bytes:  "Align265Bytes",
-		ImageScnAlign512Bytes:  "Align512Bytes",
-		ImageScnAlign1024Bytes: "Align1024Bytes",
-		ImageScnAlign2048Bytes: "Align2048Bytes",
-		ImageScnAlign4096Bytes: "Align4096Bytes",
-		ImageScnAlign8192Bytes: "Align8192Bytes",
+	TLSCharacteristicsMap := map[TLSDirectoryCharacteristicsType]string{
+		ImageSectionAlign1Bytes:    "Align 1-Byte",
+		ImageSectionAlign2Bytes:    "Align 2-Bytes",
+		ImageSectionAlign4Bytes:    "Align 4-Bytes",
+		ImageSectionAlign8Bytes:    "Align 8-Bytes",
+		ImageSectionAlign16Bytes:   "Align 16-Bytes",
+		ImageSectionAlign32Bytes:   "Align 32-Bytes",
+		ImageSectionAlign64Bytes:   "Align 64-Bytes",
+		ImageSectionAlign128Bytes:  "Align 128-Bytes",
+		ImageSectionAlign256Bytes:  "Align 265-Bytes",
+		ImageSectionAlign512Bytes:  "Align 512-Bytes",
+		ImageSectionAlign1024Bytes: "Align 1024-Bytes",
+		ImageSectionAlign2048Bytes: "Align 2048-Bytes",
+		ImageSectionAlign4096Bytes: "Align 4096-Bytes",
+		ImageSectionAlign8192Bytes: "Align 8192-Bytes",
 	}
 
 	for k, s := range TLSCharacteristicsMap {
-		if k&Characteristics != 0 {
+		if k&characteristics != 0 {
 			values = append(values, s)
 		}
 	}

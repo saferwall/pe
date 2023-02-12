@@ -13,153 +13,153 @@ import (
 )
 
 const (
-	// ImageScnReserved1 for future use.
-	ImageScnReserved1 = 0x00000000
+	// ImageSectionReserved1 for future use.
+	ImageSectionReserved1 = 0x00000000
 
-	// ImageScnReserved2 for future use.
-	ImageScnReserved2 = 0x00000001
+	// ImageSectionReserved2 for future use.
+	ImageSectionReserved2 = 0x00000001
 
-	// ImageScnReserved3 for future use.
-	ImageScnReserved3 = 0x00000002
+	// ImageSectionReserved3 for future use.
+	ImageSectionReserved3 = 0x00000002
 
-	// ImageScnReserved4 for future use.
-	ImageScnReserved4 = 0x00000004
+	// ImageSectionReserved4 for future use.
+	ImageSectionReserved4 = 0x00000004
 
-	// ImageScnTypeNoPad indicates the section should not be padded to the next
-	// boundary. This flag is obsolete and is replaced by ImageScnAlign1Bytes.
+	// ImageSectionTypeNoPad indicates the section should not be padded to the next
+	// boundary. This flag is obsolete and is replaced by ImageSectionAlign1Bytes.
 	// This is valid only for object files.
-	ImageScnTypeNoPad = 0x00000008
+	ImageSectionTypeNoPad = 0x00000008
 
-	// ImageScnReserved5 for future use.
-	ImageScnReserved5 = 0x00000010
+	// ImageSectionReserved5 for future use.
+	ImageSectionReserved5 = 0x00000010
 
-	// ImageScnCntCode indicates the section contains executable code.
-	ImageScnCntCode = 0x00000020
+	// ImageSectionCntCode indicates the section contains executable code.
+	ImageSectionCntCode = 0x00000020
 
-	// ImageScnCntInitializedData indicates the section contains initialized
+	// ImageSectionCntInitializedData indicates the section contains initialized
 	// data.
-	ImageScnCntInitializedData = 0x00000040
+	ImageSectionCntInitializedData = 0x00000040
 
-	// ImageScnCntUninitializedData indicates the section contains uninitialized
+	// ImageSectionCntUninitializedData indicates the section contains uninitialized
 	// data.
-	ImageScnCntUninitializedData = 0x00000080
+	ImageSectionCntUninitializedData = 0x00000080
 
-	// ImageScnLnkOther is reserved for future use.
-	ImageScnLnkOther = 0x00000100
+	// ImageSectionLnkOther is reserved for future use.
+	ImageSectionLnkOther = 0x00000100
 
-	// ImageScnLnkInfo indicates the section contains comments or other
+	// ImageSectionLnkInfo indicates the section contains comments or other
 	// information. The .drectve section has this type. This is valid for
 	// object files only.
-	ImageScnLnkInfo = 0x00000200
+	ImageSectionLnkInfo = 0x00000200
 
-	// ImageScnReserved6 for future use.
-	ImageScnReserved6 = 0x00000400
+	// ImageSectionReserved6 for future use.
+	ImageSectionReserved6 = 0x00000400
 
-	// ImageScnLnkRemove indicates the section will not become part of the image
+	// ImageSectionLnkRemove indicates the section will not become part of the image
 	// This is valid only for object files.
-	ImageScnLnkRemove = 0x00000800
+	ImageSectionLnkRemove = 0x00000800
 
-	// ImageScnLnkComdat indicates the section contains COMDAT data. For more
+	// ImageSectionLnkComdat indicates the section contains COMDAT data. For more
 	// information, see COMDAT Sections (Object Only). This is valid only for
 	// object files.
-	ImageScnLnkComdat = 0x00001000
+	ImageSectionLnkCOMDAT = 0x00001000
 
-	// ImageScnGpRel indicates the section contains data referenced through the
+	// ImageSectionGpRel indicates the section contains data referenced through the
 	// global pointer (GP).
-	ImageScnGpRel = 0x00008000
+	ImageSectionGpRel = 0x00008000
 
-	// ImageScnMemPurgeable is reserved for future use.
-	ImageScnMemPurgeable = 0x00020000
+	// ImageSectionMemPurgeable is reserved for future use.
+	ImageSectionMemPurgeable = 0x00020000
 
-	// ImageScnMem16Bit is reserved for future use.
-	ImageScnMem16Bit = 0x00020000
+	// ImageSectionMem16Bit is reserved for future use.
+	ImageSectionMem16Bit = 0x00020000
 
-	// ImageScnMemLocked is reserved for future use.
-	ImageScnMemLocked = 0x00040000
+	// ImageSectionMemLocked is reserved for future use.
+	ImageSectionMemLocked = 0x00040000
 
-	// ImageScnMemPreload is reserved for future use.
-	ImageScnMemPreload = 0x00080000
+	// ImageSectionMemPreload is reserved for future use.
+	ImageSectionMemPreload = 0x00080000
 
-	// ImageScnAlign1Bytes indicates to align data on a 1-byte boundary.
+	// ImageSectionAlign1Bytes indicates to align data on a 1-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign1Bytes = 0x00100000
+	ImageSectionAlign1Bytes = 0x00100000
 
-	// ImageScnAlign2Bytes indicates to align data on a 2-byte boundary.
+	// ImageSectionAlign2Bytes indicates to align data on a 2-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign2Bytes = 0x00200000
+	ImageSectionAlign2Bytes = 0x00200000
 
-	// ImageScnAlign4Bytes indicates to align data on a 4-byte boundary.
+	// ImageSectionAlign4Bytes indicates to align data on a 4-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign4Bytes = 0x00300000
+	ImageSectionAlign4Bytes = 0x00300000
 
-	// ImageScnAlign8Bytes indicates to align data on a 8-byte boundary.
+	// ImageSectionAlign8Bytes indicates to align data on a 8-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign8Bytes = 0x00400000
+	ImageSectionAlign8Bytes = 0x00400000
 
-	// ImageScnAlign16Bytes indicates to align data on a 16-byte boundary.
+	// ImageSectionAlign16Bytes indicates to align data on a 16-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign16Bytes = 0x00500000
+	ImageSectionAlign16Bytes = 0x00500000
 
-	// ImageScnAlign32Bytes indicates to align data on a 32-byte boundary.
+	// ImageSectionAlign32Bytes indicates to align data on a 32-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign32Bytes = 0x00600000
+	ImageSectionAlign32Bytes = 0x00600000
 
-	// ImageScnAlign64Bytes indicates to align data on a 64-byte boundary.
+	// ImageSectionAlign64Bytes indicates to align data on a 64-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign64Bytes = 0x00700000
+	ImageSectionAlign64Bytes = 0x00700000
 
-	// ImageScnAlign128Bytes indicates to align data on a 128-byte boundary.
+	// ImageSectionAlign128Bytes indicates to align data on a 128-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign128Bytes = 0x00800000
+	ImageSectionAlign128Bytes = 0x00800000
 
-	// ImageScnAlign256Bytes indicates to align data on a 256-byte boundary.
+	// ImageSectionAlign256Bytes indicates to align data on a 256-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign256Bytes = 0x00900000
+	ImageSectionAlign256Bytes = 0x00900000
 
-	// ImageScnAlign512Bytes indicates to align data on a 512-byte boundary.
+	// ImageSectionAlign512Bytes indicates to align data on a 512-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign512Bytes = 0x00A00000
+	ImageSectionAlign512Bytes = 0x00A00000
 
-	// ImageScnAlign1024Bytes indicates to align data on a 1024-byte boundary.
+	// ImageSectionAlign1024Bytes indicates to align data on a 1024-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign1024Bytes = 0x00B00000
+	ImageSectionAlign1024Bytes = 0x00B00000
 
-	// ImageScnAlign2048Bytes indicates to align data on a 2048-byte boundary.
+	// ImageSectionAlign2048Bytes indicates to align data on a 2048-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign2048Bytes = 0x00C00000
+	ImageSectionAlign2048Bytes = 0x00C00000
 
-	// ImageScnAlign4096Bytes indicates to align data on a 4096-byte boundary.
+	// ImageSectionAlign4096Bytes indicates to align data on a 4096-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign4096Bytes = 0x00D00000
+	ImageSectionAlign4096Bytes = 0x00D00000
 
-	// ImageScnAlign8192Bytes indicates to align data on a 8192-byte boundary.
+	// ImageSectionAlign8192Bytes indicates to align data on a 8192-byte boundary.
 	// Valid only for object files.
-	ImageScnAlign8192Bytes = 0x00E00000
+	ImageSectionAlign8192Bytes = 0x00E00000
 
-	// ImageScnLnkMRelocOvfl indicates the section contains extended
+	// ImageSectionLnkMRelocOvfl indicates the section contains extended
 	// relocations.
-	ImageScnLnkMRelocOvfl = 0x01000000
+	ImageSectionLnkMRelocOvfl = 0x01000000
 
-	// ImageScnMemDiscardable indicates the section can be discarded as needed.
-	ImageScnMemDiscardable = 0x02000000
+	// ImageSectionMemDiscardable indicates the section can be discarded as needed.
+	ImageSectionMemDiscardable = 0x02000000
 
-	// ImageScnMemNotCached indicates the  section cannot be cached.
-	ImageScnMemNotCached = 0x04000000
+	// ImageSectionMemNotCached indicates the  section cannot be cached.
+	ImageSectionMemNotCached = 0x04000000
 
-	// ImageScnMemNotPaged indicates the section is not pageable.
-	ImageScnMemNotPaged = 0x08000000
+	// ImageSectionMemNotPaged indicates the section is not pageable.
+	ImageSectionMemNotPaged = 0x08000000
 
-	// ImageScnMemShared indicates the section can be shared in memory.
-	ImageScnMemShared = 0x10000000
+	// ImageSectionMemShared indicates the section can be shared in memory.
+	ImageSectionMemShared = 0x10000000
 
-	// ImageScnMemExecute indicates the section can be executed as code.
-	ImageScnMemExecute = 0x20000000
+	// ImageSectionMemExecute indicates the section can be executed as code.
+	ImageSectionMemExecute = 0x20000000
 
-	// ImageScnMemRead indicates the section can be read.
-	ImageScnMemRead = 0x40000000
+	// ImageSectionMemRead indicates the section can be read.
+	ImageSectionMemRead = 0x40000000
 
-	// ImageScnMemWrite indicates the section can be written to.
-	ImageScnMemWrite = 0x80000000
+	// ImageSectionMemWrite indicates the section can be written to.
+	ImageSectionMemWrite = 0x80000000
 )
 
 // ImageSectionHeader is part of the section table , in fact section table is an
@@ -510,51 +510,52 @@ func (s byPointerToRawData) Less(i, j int) bool {
 	return s[i].Header.PointerToRawData < s[j].Header.PointerToRawData
 }
 
-// PrettySectionFlags returns the string representations of the `Flags` field of section header.
+// PrettySectionFlags returns the string representations of the `Flags` field
+// of section header.
 func (section *Section) PrettySectionFlags() []string {
 	var values []string
 
 	sectionFlags := map[uint32]string{
-		//ImageScnReserved1:            "Reserved1",
-		ImageScnReserved2:            "Reserved2",
-		ImageScnReserved3:            "Reserved3",
-		ImageScnReserved4:            "Reserved4",
-		ImageScnTypeNoPad:            "No Padd",
-		ImageScnReserved5:            "Reserved5",
-		ImageScnCntCode:              "Contains Code",
-		ImageScnCntInitializedData:   "Initialized Data",
-		ImageScnCntUninitializedData: "Uninitialized Data",
-		ImageScnLnkOther:             "Lnk Other",
-		ImageScnLnkInfo:              "Lnk Info",
-		ImageScnReserved6:            "Reserved6",
-		ImageScnLnkRemove:            "LnkRemove",
-		ImageScnLnkComdat:            "LnkComdat",
-		ImageScnGpRel:                "GpReferenced",
-		ImageScnMemPurgeable:         "Purgeable",
-		ImageScnMemLocked:            "Locked",
-		ImageScnMemPreload:           "Preload",
-		ImageScnAlign1Bytes:          "Align1Bytes",
-		ImageScnAlign2Bytes:          "Align2Bytes",
-		ImageScnAlign4Bytes:          "Align4Bytes",
-		ImageScnAlign8Bytes:          "Align8Bytes",
-		ImageScnAlign16Bytes:         "Align16Bytes",
-		ImageScnAlign32Bytes:         "Align32Bytes",
-		ImageScnAlign64Bytes:         "Align64Bytes",
-		ImageScnAlign128Bytes:        "Align128Bytes",
-		ImageScnAlign256Bytes:        "Align256Bytes",
-		ImageScnAlign512Bytes:        "Align512Bytes",
-		ImageScnAlign1024Bytes:       "Align1024Bytes",
-		ImageScnAlign2048Bytes:       "Align2048Bytes",
-		ImageScnAlign4096Bytes:       "Align4096Bytes",
-		ImageScnAlign8192Bytes:       "Align8192Bytes",
-		ImageScnLnkMRelocOvfl:        "ExtendedReloc",
-		ImageScnMemDiscardable:       "Discardable",
-		ImageScnMemNotCached:         "NotCached",
-		ImageScnMemNotPaged:          "NotPaged",
-		ImageScnMemShared:            "Shared",
-		ImageScnMemExecute:           "Executable",
-		ImageScnMemRead:              "Readable",
-		ImageScnMemWrite:             "Writable",
+		//ImageSectionReserved1:            "Reserved1",
+		ImageSectionReserved2:            "Reserved2",
+		ImageSectionReserved3:            "Reserved3",
+		ImageSectionReserved4:            "Reserved4",
+		ImageSectionTypeNoPad:            "No Padd",
+		ImageSectionReserved5:            "Reserved5",
+		ImageSectionCntCode:              "Contains Code",
+		ImageSectionCntInitializedData:   "Initialized Data",
+		ImageSectionCntUninitializedData: "Uninitialized Data",
+		ImageSectionLnkOther:             "Lnk Other",
+		ImageSectionLnkInfo:              "Lnk Info",
+		ImageSectionReserved6:            "Reserved6",
+		ImageSectionLnkRemove:            "LnkRemove",
+		ImageSectionLnkCOMDAT:            "LnkCOMDAT",
+		ImageSectionGpRel:                "GpReferenced",
+		ImageSectionMemPurgeable:         "Purgeable",
+		ImageSectionMemLocked:            "Locked",
+		ImageSectionMemPreload:           "Preload",
+		ImageSectionAlign1Bytes:          "Align1Bytes",
+		ImageSectionAlign2Bytes:          "Align2Bytes",
+		ImageSectionAlign4Bytes:          "Align4Bytes",
+		ImageSectionAlign8Bytes:          "Align8Bytes",
+		ImageSectionAlign16Bytes:         "Align16Bytes",
+		ImageSectionAlign32Bytes:         "Align32Bytes",
+		ImageSectionAlign64Bytes:         "Align64Bytes",
+		ImageSectionAlign128Bytes:        "Align128Bytes",
+		ImageSectionAlign256Bytes:        "Align256Bytes",
+		ImageSectionAlign512Bytes:        "Align512Bytes",
+		ImageSectionAlign1024Bytes:       "Align1024Bytes",
+		ImageSectionAlign2048Bytes:       "Align2048Bytes",
+		ImageSectionAlign4096Bytes:       "Align4096Bytes",
+		ImageSectionAlign8192Bytes:       "Align8192Bytes",
+		ImageSectionLnkMRelocOvfl:        "ExtendedReloc",
+		ImageSectionMemDiscardable:       "Discardable",
+		ImageSectionMemNotCached:         "NotCached",
+		ImageSectionMemNotPaged:          "NotPaged",
+		ImageSectionMemShared:            "Shared",
+		ImageSectionMemExecute:           "Executable",
+		ImageSectionMemRead:              "Readable",
+		ImageSectionMemWrite:             "Writable",
 	}
 
 	flags := section.Header.Characteristics
