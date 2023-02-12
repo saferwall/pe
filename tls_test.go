@@ -86,24 +86,24 @@ func TestTLSDirectoryCharacteristics(t *testing.T) {
 
 	tests := []struct {
 		in  TLSDirectoryCharacteristicsType
-		out []string
+		out string
 	}{
 		{
 
 			TLSDirectoryCharacteristicsType(0x00100000),
-			[]string{"Align 1-Byte"},
+			"Align 1-Byte",
 		},
 		{
 			0xff,
-			[]string{""},
+			"?",
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.out[0], func(t *testing.T) {
+		t.Run(tt.out, func(t *testing.T) {
 
 			TLSDirectoryCharacteristics := tt.in.String()
-			if !reflect.DeepEqual(TLSDirectoryCharacteristics, tt.out) {
+			if TLSDirectoryCharacteristics != tt.out {
 				t.Fatalf("TLS directory characteristics string assertion failed, got %v, want %v",
 					TLSDirectoryCharacteristics, tt.out)
 			}

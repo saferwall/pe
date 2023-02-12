@@ -136,7 +136,7 @@ func (pe *File) parseTLSDirectory(rva, size uint32) error {
 		tls.Struct = tlsDir
 
 		// 94a9dc17d47b03f6fb01cb639e25503b37761b452e7c07ec6b6c2280635f1df9
-		// Callbacks may be empty
+		// Callbacks may be empty.
 		if tlsDir.AddressOfCallBacks != 0 {
 			var callbacks []uint32
 			rvaAddressOfCallBacks := tlsDir.AddressOfCallBacks -
@@ -161,10 +161,9 @@ func (pe *File) parseTLSDirectory(rva, size uint32) error {
 
 // String returns the string representations of the `Characteristics` field of
 // TLS directory.
-func (characteristics TLSDirectoryCharacteristicsType) String() []string {
-	var values []string
+func (characteristics TLSDirectoryCharacteristicsType) String() string {
 
-	TLSCharacteristicsMap := map[TLSDirectoryCharacteristicsType]string{
+	m := map[TLSDirectoryCharacteristicsType]string{
 		ImageSectionAlign1Bytes:    "Align 1-Byte",
 		ImageSectionAlign2Bytes:    "Align 2-Bytes",
 		ImageSectionAlign4Bytes:    "Align 4-Bytes",
@@ -181,11 +180,10 @@ func (characteristics TLSDirectoryCharacteristicsType) String() []string {
 		ImageSectionAlign8192Bytes: "Align 8192-Bytes",
 	}
 
-	for k, s := range TLSCharacteristicsMap {
-		if k&characteristics != 0 {
-			values = append(values, s)
-		}
+	v, ok := m[characteristics]
+	if ok {
+		return v
 	}
 
-	return values
+	return "?"
 }
