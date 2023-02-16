@@ -31,14 +31,14 @@ const (
 	// use of the /GS security cookie.
 	ImageGuardSecurityCookieUnused = 0x00000800
 
-	// ImageGuardProtectDelayloadIAT indicates that the module supports read
+	// ImageGuardProtectDelayLoadIAT indicates that the module supports read
 	// only delay load IAT.
-	ImageGuardProtectDelayloadIAT = 0x00001000
+	ImageGuardProtectDelayLoadIAT = 0x00001000
 
-	// ImageGuardDelayloadIATInItsOwnSection indicates that the Delayload
+	// ImageGuardDelayLoadIATInItsOwnSection indicates that the Delayload
 	// import table in its own .didat section (with nothing else in it) that
 	// can be freely reprotected.
-	ImageGuardDelayloadIATInItsOwnSection = 0x00002000
+	ImageGuardDelayLoadIATInItsOwnSection = 0x00002000
 
 	// ImageGuardCfExportSuppressionInfoPresent indicates that the module
 	// contains suppressed export information. This also infers that the
@@ -49,9 +49,9 @@ const (
 	// suppression of exports.
 	ImageGuardCfEnableExportSuppression = 0x00008000
 
-	// ImageGuardCfLongjumpTablePresent indicates that the module contains
-	// longjmp target information.
-	ImageGuardCfLongjumpTablePresent = 0x00010000
+	// ImageGuardCfLongJumpTablePresent indicates that the module contains
+	// long jmp target information.
+	ImageGuardCfLongJumpTablePresent = 0x00010000
 
 	// ImageGuardCfFunctionTableSizeMask indicates that the mask for the
 	// subfield that contains the stride of Control Flow Guard function table
@@ -1323,7 +1323,7 @@ type VolatileMetadata struct {
 	InfoRangeTable []RangeTableEntry     `json:"info_range_table"`
 }
 type LoadConfig struct {
-	LoadCfgStruct    interface{}       `json:"struct"`
+	Struct           interface{}       `json:"struct"`
 	SEH              []uint32          `json:"seh"`
 	GFIDS            []CFGFunction     `json:"gfids"`
 	CFGIAT           []CFGIATEntry     `json:"cfgiat"`
@@ -1642,7 +1642,7 @@ func (pe *File) parseLoadConfigDirectory(rva, size uint32) error {
 
 	// Save the load config struct.
 	pe.HasLoadCFG = true
-	pe.LoadConfig.LoadCfgStruct = loadCfg
+	pe.LoadConfig.Struct = loadCfg
 
 	// Retrieve SEH handlers if there are any..
 	if pe.Is32 {
@@ -1710,11 +1710,11 @@ func StringifyGuardFlags(flags uint32) []string {
 		ImageGuardCfWInstrumented:                "WriteInstrumented",
 		ImageGuardCfFunctionTablePresent:         "TargetMetadata",
 		ImageGuardSecurityCookieUnused:           "SecurityCookieUnused",
-		ImageGuardProtectDelayloadIAT:            "DelayloadIAT",
-		ImageGuardDelayloadIATInItsOwnSection:    "DelayloadIATInItsOwnSection",
+		ImageGuardProtectDelayLoadIAT:            "DelayLoadIAT",
+		ImageGuardDelayLoadIATInItsOwnSection:    "DelayLoadIATInItsOwnSection",
 		ImageGuardCfExportSuppressionInfoPresent: "ExportSuppressionInfoPresent",
 		ImageGuardCfEnableExportSuppression:      "EnableExportSuppression",
-		ImageGuardCfLongjumpTablePresent:         "LongjumpTablePresent",
+		ImageGuardCfLongJumpTablePresent:         "LongJumpTablePresent",
 	}
 
 	for k, s := range guardFlagMap {
@@ -1728,7 +1728,7 @@ func StringifyGuardFlags(flags uint32) []string {
 func (pe *File) getSEHHandlers() []uint32 {
 
 	var handlers []uint32
-	v := reflect.ValueOf(pe.LoadConfig.LoadCfgStruct)
+	v := reflect.ValueOf(pe.LoadConfig.Struct)
 
 	// SEHandlerCount is found in index 19 of the struct.
 	if v.NumField() > 19 {
@@ -1754,7 +1754,7 @@ func (pe *File) getSEHHandlers() []uint32 {
 
 func (pe *File) getControlFlowGuardFunctions() []CFGFunction {
 
-	v := reflect.ValueOf(pe.LoadConfig.LoadCfgStruct)
+	v := reflect.ValueOf(pe.LoadConfig.Struct)
 	var GFIDS []CFGFunction
 	var err error
 
@@ -1835,7 +1835,7 @@ func (pe *File) getControlFlowGuardFunctions() []CFGFunction {
 
 func (pe *File) getControlFlowGuardIAT() []CFGIATEntry {
 
-	v := reflect.ValueOf(pe.LoadConfig.LoadCfgStruct)
+	v := reflect.ValueOf(pe.LoadConfig.Struct)
 	var GFGIAT []CFGIATEntry
 	var err error
 
@@ -1905,7 +1905,7 @@ func (pe *File) getControlFlowGuardIAT() []CFGIATEntry {
 
 func (pe *File) getLongJumpTargetTable() []uint32 {
 
-	v := reflect.ValueOf(pe.LoadConfig.LoadCfgStruct)
+	v := reflect.ValueOf(pe.LoadConfig.Struct)
 	var longJumpTargets []uint32
 
 	// GuardLongJumpTargetCount is found in index 29 of the struct.
@@ -1953,7 +1953,7 @@ func (pe *File) getLongJumpTargetTable() []uint32 {
 }
 
 func (pe *File) getHybridPE() *HybridPE {
-	v := reflect.ValueOf(pe.LoadConfig.LoadCfgStruct)
+	v := reflect.ValueOf(pe.LoadConfig.Struct)
 	hybridPE := HybridPE{}
 
 	// CHPEMetadataPointer is found in index 31 of the struct.
@@ -2090,7 +2090,7 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 	dvrt := DVRT{}
 	imgDynRelocTable := ImageDynamicRelocationTable{}
 
-	v := reflect.ValueOf(pe.LoadConfig.LoadCfgStruct)
+	v := reflect.ValueOf(pe.LoadConfig.Struct)
 	if v.NumField() <= 35 {
 		return nil
 	}
@@ -2202,7 +2202,7 @@ func (pe *File) getEnclaveConfiguration() *Enclave {
 
 	enclave := Enclave{}
 
-	v := reflect.ValueOf(pe.LoadConfig.LoadCfgStruct)
+	v := reflect.ValueOf(pe.LoadConfig.Struct)
 	if v.NumField() <= 40 {
 		return nil
 	}
@@ -2263,7 +2263,7 @@ func (pe *File) getVolatileMetadata() *VolatileMetadata {
 	imgVolatileMeta := ImageVolatileMetadata{}
 	rva := uint32(0)
 
-	v := reflect.ValueOf(pe.LoadConfig.LoadCfgStruct)
+	v := reflect.ValueOf(pe.LoadConfig.Struct)
 	if v.NumField() <= 41 {
 		return nil
 	}

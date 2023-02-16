@@ -10,9 +10,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"text/tabwriter"
 	"time"
+	"unicode"
 	"unsafe"
 
 	peparser "github.com/saferwall/pe"
@@ -99,6 +101,31 @@ func IntToByteArray(num uint64) []byte {
 		arr[i] = byt
 	}
 	return arr
+}
+
+func sentenceCase(s string) string {
+	newString := string(s[0])
+	for i, r := range s[1:] {
+		if unicode.IsLower(r) && unicode.IsLetter(r) {
+			newString += string(r)
+		} else {
+			if i < len(s)-2 {
+				nextChar := rune(s[i+2])
+				previousChar := rune(s[i])
+				if unicode.IsLower(previousChar) && unicode.IsLetter(previousChar) {
+					newString += " " + string(r)
+				} else {
+					if unicode.IsLower(nextChar) && unicode.IsLetter(nextChar) {
+						newString += " " + string(r)
+					} else {
+						newString += string(r)
+					}
+				}
+			}
+		}
+	}
+
+	return newString
 }
 
 func isDirectory(path string) bool {
@@ -660,6 +687,20 @@ func parsePE(filename string, cfg config) {
 			}
 		}
 
+		w.Flush()
+	}
+
+	if cfg.wantLoadCfg && pe.FileInfo.HasLoadCFG {
+		fmt.Printf("\nLOAD CONFIG\n************\n\n")
+
+		loadConfig := pe.LoadConfig
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.TabIndent)
+		v := reflect.ValueOf(loadConfig.Struct)
+		typeOfS := v.Type()
+		for i := 0; i < v.NumField(); i++ {
+			fmt.Fprintf(w, "  %s\t : 0x%v\n", sentenceCase(typeOfS.Field(i).Name),
+				v.Field(i).Interface())
+		}
 		w.Flush()
 	}
 
