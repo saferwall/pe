@@ -322,18 +322,22 @@ type ImageLoadConfigDirectory64 struct {
 	CodeIntegrity ImageLoadConfigCodeIntegrity `json:"code_integrity"`
 
 	// The VA where Control Flow Guard address taken IAT table is stored.
-	GuardAddressTakenIatEntryTable uint64 `json:"guard_address_taken_iat_entry_table"`
+	GuardAddressTakenIATEntryTable uint64 `json:"guard_address_taken_iat_entry_table"`
 
 	// The count of unique RVAs in the above table.
-	GuardAddressTakenIatEntryCount uint64 `json:"guard_address_taken_iat_entry_count"`
+	GuardAddressTakenIATEntryCount uint64 `json:"guard_address_taken_iat_entry_count"`
 
 	// The VA where Control Flow Guard long jump target table is stored.
 	GuardLongJumpTargetTable uint64 `json:"guard_long_jump_target_table"`
 
 	// The count of unique RVAs in the above table.
-	GuardLongJumpTargetCount                 uint64 `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable                   uint64 `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                      uint64 `json:"chpe_metadata_pointer"`
+	GuardLongJumpTargetCount uint64 `json:"guard_long_jump_target_count"`
+
+	DynamicValueRelocTable uint64 `json:"dynamic_value_reloc_table"`
+
+	// Not sure when this was renamed from HybridMetadataPointer.
+	CHPEMetadataPointer uint64 `json:"chpe_metadata_pointer"`
+
 	GuardRFFailureRoutine                    uint64 `json:"guard_rf_failure_routine"`
 	GuardRFFailureRoutineFunctionPointer     uint64 `json:"guard_rf_failure_routine_function_pointer"`
 	DynamicValueRelocTableOffset             uint32 `json:"dynamic_value_reloc_table_offset"`
@@ -406,6 +410,7 @@ type CompilerIAT struct {
 	Value       uint32 `json:"value"`
 	Description string `json:"description"`
 }
+
 type HybridPE struct {
 	CHPEMetadata interface{}   `json:"chpe_metadata"`
 	CodeRanges   []CodeRange   `json:"code_ranges"`

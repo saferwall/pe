@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -697,7 +698,15 @@ func parsePE(filename string, cfg config) {
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.TabIndent)
 		v := reflect.ValueOf(loadConfig.Struct)
 		typeOfS := v.Type()
+		imgLoadConfigDirectorySize := v.Field(0).Interface().(uint32)
+		tmp := uint32(0)
 		for i := 0; i < v.NumField(); i++ {
+			// Do not print the fields of the image load config directory structure
+			// that does not belong to it.
+			tmp += uint32(binary.Size((v.Field(i).Interface())))
+			if tmp > imgLoadConfigDirectorySize {
+				break
+			}
 			fmt.Fprintf(w, "  %s\t : 0x%v\n", sentenceCase(typeOfS.Field(i).Name),
 				v.Field(i).Interface())
 		}
