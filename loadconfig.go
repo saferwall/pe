@@ -227,6 +227,8 @@ type ImageLoadConfigDirectory32 struct {
 	GuardXFGCheckFunctionPointer             uint32 `json:"guard_xfg_check_function_pointer"`
 	GuardXFGDispatchFunctionPointer          uint32 `json:"guard_xfg_dispatch_function_pointer"`
 	GuardXFGTableDispatchFunctionPointer     uint32 `json:"guard_xfg_table_dispatch_function_pointer"`
+	CastGuardOSDeterminedFailureMode         uint32 `json:"cast_guard_os_determined_failure_mode"`
+	GuardMemcpyFunctionPointer               uint32 `json:"guard_memcpy_function_pointer"`
 }
 
 // ImageLoadConfigDirectory64 Contains the load configuration data of an image for x64 binaries.
@@ -347,6 +349,8 @@ type ImageLoadConfigDirectory64 struct {
 	GuardXFGCheckFunctionPointer             uint64 `json:"guard_xfg_check_function_pointer"`
 	GuardXFGDispatchFunctionPointer          uint64 `json:"guard_xfg_dispatch_function_pointer"`
 	GuardXFGTableDispatchFunctionPointer     uint64 `json:"guard_xfg_table_dispatch_function_pointer"`
+	CastGuardOSDeterminedFailureMode         uint64 `json:"cast_guard_os_determined_failure_mode"`
+	GuardMemcpyFunctionPointer               uint64 `json:"guard_memcpy_function_pointer"`
 }
 
 type ImageCHPEMetadataX86v1 struct {
