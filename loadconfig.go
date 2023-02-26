@@ -821,21 +821,19 @@ func (pe *File) getSEHHandlers() []uint32 {
 	v := reflect.ValueOf(pe.LoadConfig.Struct)
 
 	// SEHandlerCount is found in index 19 of the struct.
-	if v.NumField() > 19 {
-		SEHandlerCount := uint32(v.Field(19).Uint())
-		if SEHandlerCount > 0 {
-			SEHandlerTable := uint32(v.Field(18).Uint())
-			imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
-			rva := SEHandlerTable - imageBase
-			for i := uint32(0); i < SEHandlerCount; i++ {
-				offset := pe.GetOffsetFromRva(rva + i*4)
-				handler, err := pe.ReadUint32(offset)
-				if err != nil {
-					return handlers
-				}
-
-				handlers = append(handlers, handler)
+	SEHandlerCount := uint32(v.Field(19).Uint())
+	if SEHandlerCount > 0 {
+		SEHandlerTable := uint32(v.Field(18).Uint())
+		imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
+		rva := SEHandlerTable - imageBase
+		for i := uint32(0); i < SEHandlerCount; i++ {
+			offset := pe.GetOffsetFromRva(rva + i*4)
+			handler, err := pe.ReadUint32(offset)
+			if err != nil {
+				return handlers
 			}
+
+			handlers = append(handlers, handler)
 		}
 	}
 

@@ -5,6 +5,7 @@
 package pe
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -196,10 +197,65 @@ func TestLoadConfigDirectory(t *testing.T) {
 
 			imgLoadCfgDirectory := file.LoadConfig.Struct
 			if imgLoadCfgDirectory != tt.out {
-				t.Fatalf("debug entry assertion failed, got %v, want %v",
+				t.Fatalf("load config directory structure assertion failed, got %v, want %v",
 					imgLoadCfgDirectory, tt.out)
 			}
 
+		})
+	}
+}
+
+func TestLoadConfigDirectorySEHHandlers(t *testing.T) {
+
+	tests := []struct {
+		in  string
+		out []uint32
+	}{
+		{
+			in:  getAbsoluteFilePath("test/KernelBase.dll"),
+			out: []uint32{0x14ad30, 0x14af40, 0x14b0d0},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+
+			ops := Options{Fast: true}
+			file, err := New(tt.in, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
+			}
+
+			var va, size uint32
+
+			if file.Is64 {
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			} else {
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseLoadConfigDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseLoadConfigDirectory(%s) failed, reason: %v",
+					tt.in, err)
+			}
+
+			sehHandlers := file.LoadConfig.SEH
+			if !reflect.DeepEqual(sehHandlers, tt.out) {
+				t.Fatalf("load config SEH handlers assertion failed, got %v, want %v",
+					sehHandlers, tt.out)
+			}
 		})
 	}
 }
