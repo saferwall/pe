@@ -5,6 +5,7 @@
 package pe
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"reflect"
@@ -103,455 +104,6 @@ const (
 )
 
 // https://www.virtualbox.org/svn/vbox/trunk/include/iprt/formats/pecoff.h
-
-// ImageLoadConfigDirectory32v1 size is 0x40.
-type ImageLoadConfigDirectory32v1 struct {
-	Size                          uint32 `json:"size"`
-	TimeDateStamp                 uint32 `json:"time_date_stamp"`
-	MajorVersion                  uint16 `json:"major_version"`
-	MinorVersion                  uint16 `json:"minor_version"`
-	GlobalFlagsClear              uint32 `json:"global_flags_clear"`
-	GlobalFlagsSet                uint32 `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout uint32 `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold    uint32 `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold    uint32 `json:"de_commit_total_free_threshold"`
-	LockPrefixTable               uint32 `json:"lock_prefix_table"`
-	MaximumAllocationSize         uint32 `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold        uint32 `json:"virtual_memory_threshold"`
-	ProcessHeapFlags              uint32 `json:"process_heap_flags"`
-	ProcessAffinityMask           uint32 `json:"process_affinity_mask"`
-	CSDVersion                    uint16 `json:"csd_version"`
-	DependentLoadFlags            uint16 `json:"dependent_load_flags"`
-	EditList                      uint32 `json:"edit_list"`
-	SecurityCookie                uint32 `json:"security_cookie"`
-}
-
-// ImageLoadConfigDirectory32v2 size is 0x48.
-type ImageLoadConfigDirectory32v2 struct {
-	Size                          uint32 `json:"size"`
-	TimeDateStamp                 uint32 `json:"time_date_stamp"`
-	MajorVersion                  uint16 `json:"major_version"`
-	MinorVersion                  uint16 `json:"minor_version"`
-	GlobalFlagsClear              uint32 `json:"global_flags_clear"`
-	GlobalFlagsSet                uint32 `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout uint32 `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold    uint32 `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold    uint32 `json:"de_commit_total_free_threshold"`
-	LockPrefixTable               uint32 `json:"lock_prefix_table"`
-	MaximumAllocationSize         uint32 `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold        uint32 `json:"virtual_memory_threshold"`
-	ProcessHeapFlags              uint32 `json:"process_heap_flags"`
-	ProcessAffinityMask           uint32 `json:"process_affinity_mask"`
-	CSDVersion                    uint16 `json:"csd_version"`
-	DependentLoadFlags            uint16 `json:"dependent_load_flags"`
-	EditList                      uint32 `json:"edit_list"`
-	SecurityCookie                uint32 `json:"security_cookie"`
-	SEHandlerTable                uint32 `json:"se_handler_table"`
-	SEHandlerCount                uint32 `json:"se_handler_count"`
-}
-
-// ImageLoadConfigDirectory32v3 size is 0x5C.
-type ImageLoadConfigDirectory32v3 struct {
-	Size                           uint32 `json:"size"`
-	TimeDateStamp                  uint32 `json:"time_date_stamp"`
-	MajorVersion                   uint16 `json:"major_version"`
-	MinorVersion                   uint16 `json:"minor_version"`
-	GlobalFlagsClear               uint32 `json:"global_flags_clear"`
-	GlobalFlagsSet                 uint32 `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout  uint32 `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold     uint32 `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold     uint32 `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                uint32 `json:"lock_prefix_table"`
-	MaximumAllocationSize          uint32 `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold         uint32 `json:"virtual_memory_threshold"`
-	ProcessHeapFlags               uint32 `json:"process_heap_flags"`
-	ProcessAffinityMask            uint32 `json:"process_affinity_mask"`
-	CSDVersion                     uint16 `json:"csd_version"`
-	DependentLoadFlags             uint16 `json:"dependent_load_flags"`
-	EditList                       uint32 `json:"edit_list"`
-	SecurityCookie                 uint32 `json:"security_cookie"`
-	SEHandlerTable                 uint32 `json:"se_handler_table"`
-	SEHandlerCount                 uint32 `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer    uint32 `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer uint32 `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable           uint32 `json:"guard_cf_function_table"`
-	GuardCFFunctionCount           uint32 `json:"guard_cf_function_count"`
-	GuardFlags                     uint32 `json:"guard_flags"`
-}
-
-// ImageLoadConfigDirectory32v4 size is 0x6c, since Windows 10 (preview 9879)
-type ImageLoadConfigDirectory32v4 struct {
-	Size                           uint32                       `json:"size"`
-	TimeDateStamp                  uint32                       `json:"time_date_stamp"`
-	MajorVersion                   uint16                       `json:"major_version"`
-	MinorVersion                   uint16                       `json:"minor_version"`
-	GlobalFlagsClear               uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                 uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout  uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold     uint32                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold     uint32                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                uint32                       `json:"lock_prefix_table"`
-	MaximumAllocationSize          uint32                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold         uint32                       `json:"virtual_memory_threshold"`
-	ProcessHeapFlags               uint32                       `json:"process_heap_flags"`
-	ProcessAffinityMask            uint32                       `json:"process_affinity_mask"`
-	CSDVersion                     uint16                       `json:"csd_version"`
-	DependentLoadFlags             uint16                       `json:"dependent_load_flags"`
-	EditList                       uint32                       `json:"edit_list"`
-	SecurityCookie                 uint32                       `json:"security_cookie"`
-	SEHandlerTable                 uint32                       `json:"se_handler_table"`
-	SEHandlerCount                 uint32                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer    uint32                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer uint32                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable           uint32                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount           uint32                       `json:"guard_cf_function_count"`
-	GuardFlags                     uint32                       `json:"guard_flags"`
-	CodeIntegrity                  ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-}
-
-// ImageLoadConfigDirectory32v5 size is 0x78, since Windows 10 build 14286 (or maybe earlier).
-type ImageLoadConfigDirectory32v5 struct {
-	Size                           uint32                       `json:"size"`
-	TimeDateStamp                  uint32                       `json:"time_date_stamp"`
-	MajorVersion                   uint16                       `json:"major_version"`
-	MinorVersion                   uint16                       `json:"minor_version"`
-	GlobalFlagsClear               uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                 uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout  uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold     uint32                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold     uint32                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                uint32                       `json:"lock_prefix_table"`
-	MaximumAllocationSize          uint32                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold         uint32                       `json:"virtual_memory_threshold"`
-	ProcessHeapFlags               uint32                       `json:"process_heap_flags"`
-	ProcessAffinityMask            uint32                       `json:"process_affinity_mask"`
-	CSDVersion                     uint16                       `json:"csd_version"`
-	DependentLoadFlags             uint16                       `json:"dependent_load_flags"`
-	EditList                       uint32                       `json:"edit_list"`
-	SecurityCookie                 uint32                       `json:"security_cookie"`
-	SEHandlerTable                 uint32                       `json:"se_handler_table"`
-	SEHandlerCount                 uint32                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer    uint32                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer uint32                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable           uint32                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount           uint32                       `json:"guard_cf_function_count"`
-	GuardFlags                     uint32                       `json:"guard_flags"`
-	CodeIntegrity                  ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable uint32                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount uint32                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable       uint32                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount       uint32                       `json:"guard_long_jump_target_count"`
-}
-
-// ImageLoadConfigDirectory32v6 size is 0x80, since Windows 10 build 14383 (or maybe earlier).
-type ImageLoadConfigDirectory32v6 struct {
-	Size                           uint32                       `json:"size"`
-	TimeDateStamp                  uint32                       `json:"time_date_stamp"`
-	MajorVersion                   uint16                       `json:"major_version"`
-	MinorVersion                   uint16                       `json:"minor_version"`
-	GlobalFlagsClear               uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                 uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout  uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold     uint32                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold     uint32                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                uint32                       `json:"lock_prefix_table"`
-	MaximumAllocationSize          uint32                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold         uint32                       `json:"virtual_memory_threshold"`
-	ProcessHeapFlags               uint32                       `json:"process_heap_flags"`
-	ProcessAffinityMask            uint32                       `json:"process_affinity_mask"`
-	CSDVersion                     uint16                       `json:"csd_version"`
-	DependentLoadFlags             uint16                       `json:"dependent_load_flags"`
-	EditList                       uint32                       `json:"edit_list"`
-	SecurityCookie                 uint32                       `json:"security_cookie"`
-	SEHandlerTable                 uint32                       `json:"se_handler_table"`
-	SEHandlerCount                 uint32                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer    uint32                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer uint32                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable           uint32                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount           uint32                       `json:"guard_cf_function_count"`
-	GuardFlags                     uint32                       `json:"guard_flags"`
-	CodeIntegrity                  ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable uint32                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount uint32                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable       uint32                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount       uint32                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable         uint32                       `json:"dynamic_value_reloc_table"`
-	HybridMetadataPointer          uint32                       `json:"hybrid_metadata_pointer"`
-}
-
-// ImageLoadConfigDirectory32v7 size is 0x90, since Windows 10 build 14901 (or maybe earlier)
-type ImageLoadConfigDirectory32v7 struct {
-	Size                                 uint32                       `json:"size"`
-	TimeDateStamp                        uint32                       `json:"time_date_stamp"`
-	MajorVersion                         uint16                       `json:"major_version"`
-	MinorVersion                         uint16                       `json:"minor_version"`
-	GlobalFlagsClear                     uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                       uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout        uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold           uint32                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold           uint32                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                      uint32                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                uint32                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold               uint32                       `json:"virtual_memory_threshold"`
-	ProcessHeapFlags                     uint32                       `json:"process_heap_flags"`
-	ProcessAffinityMask                  uint32                       `json:"process_affinity_mask"`
-	CSDVersion                           uint16                       `json:"csd_version"`
-	DependentLoadFlags                   uint16                       `json:"dependent_load_flags"`
-	EditList                             uint32                       `json:"edit_list"`
-	SecurityCookie                       uint32                       `json:"security_cookie"`
-	SEHandlerTable                       uint32                       `json:"se_handler_table"`
-	SEHandlerCount                       uint32                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer          uint32                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer       uint32                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                 uint32                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                 uint32                       `json:"guard_cf_function_count"`
-	GuardFlags                           uint32                       `json:"guard_flags"`
-	CodeIntegrity                        ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable       uint32                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount       uint32                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable             uint32                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount             uint32                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable               uint32                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                  uint32                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                uint32                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer uint32                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset         uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection        uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                            uint16                       `json:"reserved_2"`
-}
-
-// ImageLoadConfigDirectory32v8 size is 0x98, since Windows 10 build 15002 (or maybe earlier).
-type ImageLoadConfigDirectory32v8 struct {
-	Size                                     uint32                       `json:"size"`
-	TimeDateStamp                            uint32                       `json:"time_date_stamp"`
-	MajorVersion                             uint16                       `json:"major_version"`
-	MinorVersion                             uint16                       `json:"minor_version"`
-	GlobalFlagsClear                         uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                           uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout            uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold               uint32                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold               uint32                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                          uint32                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                    uint32                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold                   uint32                       `json:"virtual_memory_threshold"`
-	ProcessHeapFlags                         uint32                       `json:"process_heap_flags"`
-	ProcessAffinityMask                      uint32                       `json:"process_affinity_mask"`
-	CSDVersion                               uint16                       `json:"csd_version"`
-	DependentLoadFlags                       uint16                       `json:"dependent_load_flags"`
-	EditList                                 uint32                       `json:"edit_list"`
-	SecurityCookie                           uint32                       `json:"security_cookie"`
-	SEHandlerTable                           uint32                       `json:"se_handler_table"`
-	SEHandlerCount                           uint32                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer              uint32                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer           uint32                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                     uint32                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                     uint32                       `json:"guard_cf_function_count"`
-	GuardFlags                               uint32                       `json:"guard_flags"`
-	CodeIntegrity                            ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable           uint32                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount           uint32                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable                 uint32                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount                 uint32                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable                   uint32                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                      uint32                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                    uint32                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer     uint32                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset             uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection            uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                                uint16                       `json:"reserved_2"`
-	GuardRFVerifyStackPointerFunctionPointer uint32                       `json:"guard_rf_verify_stack_pointer_function_pointer"`
-	HotPatchTableOffset                      uint32                       `json:"hot_patch_table_offset"`
-}
-
-// ImageLoadConfigDirectory32v9 size is 0xA0, since Windows 10 build 16237 (or maybe earlier).
-type ImageLoadConfigDirectory32v9 struct {
-	Size                                     uint32                       `json:"size"`
-	TimeDateStamp                            uint32                       `json:"time_date_stamp"`
-	MajorVersion                             uint16                       `json:"major_version"`
-	MinorVersion                             uint16                       `json:"minor_version"`
-	GlobalFlagsClear                         uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                           uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout            uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold               uint32                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold               uint32                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                          uint32                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                    uint32                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold                   uint32                       `json:"virtual_memory_threshold"`
-	ProcessHeapFlags                         uint32                       `json:"process_heap_flags"`
-	ProcessAffinityMask                      uint32                       `json:"process_affinity_mask"`
-	CSDVersion                               uint16                       `json:"csd_version"`
-	DependentLoadFlags                       uint16                       `json:"dependent_load_flags"`
-	EditList                                 uint32                       `json:"edit_list"`
-	SecurityCookie                           uint32                       `json:"security_cookie"`
-	SEHandlerTable                           uint32                       `json:"se_handler_table"`
-	SEHandlerCount                           uint32                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer              uint32                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer           uint32                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                     uint32                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                     uint32                       `json:"guard_cf_function_count"`
-	GuardFlags                               uint32                       `json:"guard_flags"`
-	CodeIntegrity                            ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable           uint32                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount           uint32                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable                 uint32                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount                 uint32                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable                   uint32                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                      uint32                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                    uint32                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer     uint32                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset             uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection            uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                                uint16                       `json:"reserved_2"`
-	GuardRFVerifyStackPointerFunctionPointer uint32                       `json:"guard_rf_verify_stack_pointer_function_pointer"`
-	HotPatchTableOffset                      uint32                       `json:"hot_patch_table_offset"`
-	Reserved3                                uint32                       `json:"reserved_3"`
-	EnclaveConfigurationPointer              uint32                       `json:"enclave_configuration_pointer"`
-}
-
-// ImageLoadConfigDirectory32v10 size is 0xA4, since Windows 10 build 18362 (or maybe earlier).
-type ImageLoadConfigDirectory32v10 struct {
-	Size                                     uint32                       `json:"size"`
-	TimeDateStamp                            uint32                       `json:"time_date_stamp"`
-	MajorVersion                             uint16                       `json:"major_version"`
-	MinorVersion                             uint16                       `json:"minor_version"`
-	GlobalFlagsClear                         uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                           uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout            uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold               uint32                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold               uint32                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                          uint32                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                    uint32                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold                   uint32                       `json:"virtual_memory_threshold"`
-	ProcessHeapFlags                         uint32                       `json:"process_heap_flags"`
-	ProcessAffinityMask                      uint32                       `json:"process_affinity_mask"`
-	CSDVersion                               uint16                       `json:"csd_version"`
-	DependentLoadFlags                       uint16                       `json:"dependent_load_flags"`
-	EditList                                 uint32                       `json:"edit_list"`
-	SecurityCookie                           uint32                       `json:"security_cookie"`
-	SEHandlerTable                           uint32                       `json:"se_handler_table"`
-	SEHandlerCount                           uint32                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer              uint32                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer           uint32                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                     uint32                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                     uint32                       `json:"guard_cf_function_count"`
-	GuardFlags                               uint32                       `json:"guard_flags"`
-	CodeIntegrity                            ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable           uint32                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount           uint32                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable                 uint32                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount                 uint32                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable                   uint32                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                      uint32                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                    uint32                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer     uint32                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset             uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection            uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                                uint16                       `json:"reserved_2"`
-	GuardRFVerifyStackPointerFunctionPointer uint32                       `json:"guard_rf_verify_stack_pointer_function_pointer"`
-	HotPatchTableOffset                      uint32                       `json:"hot_patch_table_offset"`
-	Reserved3                                uint32                       `json:"reserved_3"`
-	EnclaveConfigurationPointer              uint32                       `json:"enclave_configuration_pointer"`
-	VolatileMetadataPointer                  uint32                       `json:"volatile_metadata_pointer"`
-}
-
-// ImageLoadConfigDirectory32v11 size is 0xAC, since Windows 10 build 19564 (or maybe earlier).
-type ImageLoadConfigDirectory32v11 struct {
-	Size                                     uint32                       `json:"size"`
-	TimeDateStamp                            uint32                       `json:"time_date_stamp"`
-	MajorVersion                             uint16                       `json:"major_version"`
-	MinorVersion                             uint16                       `json:"minor_version"`
-	GlobalFlagsClear                         uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                           uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout            uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold               uint32                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold               uint32                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                          uint32                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                    uint32                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold                   uint32                       `json:"virtual_memory_threshold"`
-	ProcessHeapFlags                         uint32                       `json:"process_heap_flags"`
-	ProcessAffinityMask                      uint32                       `json:"process_affinity_mask"`
-	CSDVersion                               uint16                       `json:"csd_version"`
-	DependentLoadFlags                       uint16                       `json:"dependent_load_flags"`
-	EditList                                 uint32                       `json:"edit_list"`
-	SecurityCookie                           uint32                       `json:"security_cookie"`
-	SEHandlerTable                           uint32                       `json:"se_handler_table"`
-	SEHandlerCount                           uint32                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer              uint32                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer           uint32                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                     uint32                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                     uint32                       `json:"guard_cf_function_count"`
-	GuardFlags                               uint32                       `json:"guard_flags"`
-	CodeIntegrity                            ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable           uint32                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount           uint32                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable                 uint32                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount                 uint32                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable                   uint32                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                      uint32                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                    uint32                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer     uint32                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset             uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection            uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                                uint16                       `json:"reserved_2"`
-	GuardRFVerifyStackPointerFunctionPointer uint32                       `json:"guard_rf_verify_stack_pointer_function_pointer"`
-	HotPatchTableOffset                      uint32                       `json:"hot_patch_table_offset"`
-	Reserved3                                uint32                       `json:"reserved_3"`
-	EnclaveConfigurationPointer              uint32                       `json:"enclave_configuration_pointer"`
-	VolatileMetadataPointer                  uint32                       `json:"volatile_metadata_pointer"`
-	GuardEHContinuationTable                 uint32                       `json:"guard_eh_continuation_table"`
-	GuardEHContinuationCount                 uint32                       `json:"guard_eh_continuation_count"`
-}
-
-// ImageLoadConfigDirectory32v12 size is 0xB8, since Visual C++ 2019 / RS5_IMAGE_LOAD_CONFIG_DIRECTORY32.
-type ImageLoadConfigDirectory32v12 struct {
-	Size                                     uint32                       `json:"size"`
-	TimeDateStamp                            uint32                       `json:"time_date_stamp"`
-	MajorVersion                             uint16                       `json:"major_version"`
-	MinorVersion                             uint16                       `json:"minor_version"`
-	GlobalFlagsClear                         uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                           uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout            uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold               uint32                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold               uint32                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                          uint32                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                    uint32                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold                   uint32                       `json:"virtual_memory_threshold"`
-	ProcessHeapFlags                         uint32                       `json:"process_heap_flags"`
-	ProcessAffinityMask                      uint32                       `json:"process_affinity_mask"`
-	CSDVersion                               uint16                       `json:"csd_version"`
-	DependentLoadFlags                       uint16                       `json:"dependent_load_flags"`
-	EditList                                 uint32                       `json:"edit_list"`
-	SecurityCookie                           uint32                       `json:"security_cookie"`
-	SEHandlerTable                           uint32                       `json:"se_handler_table"`
-	SEHandlerCount                           uint32                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer              uint32                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer           uint32                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                     uint32                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                     uint32                       `json:"guard_cf_function_count"`
-	GuardFlags                               uint32                       `json:"guard_flags"`
-	CodeIntegrity                            ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable           uint32                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount           uint32                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable                 uint32                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount                 uint32                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable                   uint32                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                      uint32                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                    uint32                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer     uint32                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset             uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection            uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                                uint16                       `json:"reserved_2"`
-	GuardRFVerifyStackPointerFunctionPointer uint32                       `json:"guard_rf_verify_stack_pointer_function_pointer"`
-	HotPatchTableOffset                      uint32                       `json:"hot_patch_table_offset"`
-	Reserved3                                uint32                       `json:"reserved_3"`
-	EnclaveConfigurationPointer              uint32                       `json:"enclave_configuration_pointer"`
-	VolatileMetadataPointer                  uint32                       `json:"volatile_metadata_pointer"`
-	GuardEHContinuationTable                 uint32                       `json:"guard_eh_continuation_table"`
-	GuardEHContinuationCount                 uint32                       `json:"guard_eh_continuation_count"`
-	GuardXFGCheckFunctionPointer             uint32                       `json:"guard_xfg_check_function_pointer"`
-	GuardXFGDispatchFunctionPointer          uint32                       `json:"guard_xfg_dispatch_function_pointer"`
-	GuardXFGTableDispatchFunctionPointer     uint32                       `json:"guard_xfg_table_dispatch_function_pointer"`
-}
 
 // ImageLoadConfigDirectory32 Contains the load configuration data of an image for x86 binaries.
 type ImageLoadConfigDirectory32 struct {
@@ -677,485 +229,124 @@ type ImageLoadConfigDirectory32 struct {
 	GuardXFGTableDispatchFunctionPointer     uint32 `json:"guard_xfg_table_dispatch_function_pointer"`
 }
 
-// ImageLoadConfigDirectory64v2 is the first structure for x64.
-// No _IMAGE_LOAD_CONFIG_DIRECTORY64_V1 exists
-type ImageLoadConfigDirectory64v2 struct {
-	Size                          uint32 `json:"size"`
-	TimeDateStamp                 uint32 `json:"time_date_stamp"`
-	MajorVersion                  uint16 `json:"major_version"`
-	MinorVersion                  uint16 `json:"minor_version"`
-	GlobalFlagsClear              uint32 `json:"global_flags_clear"`
-	GlobalFlagsSet                uint32 `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout uint32 `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold    uint64 `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold    uint64 `json:"de_commit_total_free_threshold"`
-	LockPrefixTable               uint64 `json:"lock_prefix_table"`
-	MaximumAllocationSize         uint64 `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold        uint64 `json:"virtual_memory_threshold"`
-	ProcessAffinityMask           uint64 `json:"process_affinity_mask"`
-	ProcessHeapFlags              uint32 `json:"process_heap_flags"`
-	CSDVersion                    uint16 `json:"csd_version"`
-	DependentLoadFlags            uint16 `json:"dependent_load_flags"`
-	EditList                      uint64 `json:"edit_list"`
-	SecurityCookie                uint64 `json:"security_cookie"`
-	SEHandlerTable                uint64 `json:"se_handler_table"`
-	SEHandlerCount                uint64 `json:"se_handler_count"`
-}
-
-// ImageLoadConfigDirectory64v3 added #pragma pack(4).
-type ImageLoadConfigDirectory64v3 struct {
-	Size                           uint32 `json:"size"`
-	TimeDateStamp                  uint32 `json:"time_date_stamp"`
-	MajorVersion                   uint16 `json:"major_version"`
-	MinorVersion                   uint16 `json:"minor_version"`
-	GlobalFlagsClear               uint32 `json:"global_flags_clear"`
-	GlobalFlagsSet                 uint32 `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout  uint32 `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold     uint64 `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold     uint64 `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                uint64 `json:"lock_prefix_table"`
-	MaximumAllocationSize          uint64 `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold         uint64 `json:"virtual_memory_threshold"`
-	ProcessAffinityMask            uint64 `json:"process_affinity_mask"`
-	ProcessHeapFlags               uint32 `json:"process_heap_flags"`
-	CSDVersion                     uint16 `json:"csd_version"`
-	DependentLoadFlags             uint16 `json:"dependent_load_flags"`
-	EditList                       uint64 `json:"edit_list"`
-	SecurityCookie                 uint64 `json:"security_cookie"`
-	SEHandlerTable                 uint64 `json:"se_handler_table"`
-	SEHandlerCount                 uint64 `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer    uint64 `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer uint64 `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable           uint64 `json:"guard_cf_function_table"`
-	GuardCFFunctionCount           uint64 `json:"guard_cf_function_count"`
-	GuardFlags                     uint32 `json:"guard_flags"`
-}
-
-// ImageLoadConfigDirectory64v4 for binaries compiled since Windows 10 build 9879 (or maybe earlier).
-type ImageLoadConfigDirectory64v4 struct {
-	Size                           uint32                       `json:"size"`
-	TimeDateStamp                  uint32                       `json:"time_date_stamp"`
-	MajorVersion                   uint16                       `json:"major_version"`
-	MinorVersion                   uint16                       `json:"minor_version"`
-	GlobalFlagsClear               uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                 uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout  uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold     uint64                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold     uint64                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                uint64                       `json:"lock_prefix_table"`
-	MaximumAllocationSize          uint64                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold         uint64                       `json:"virtual_memory_threshold"`
-	ProcessAffinityMask            uint64                       `json:"process_affinity_mask"`
-	ProcessHeapFlags               uint32                       `json:"process_heap_flags"`
-	CSDVersion                     uint16                       `json:"csd_version"`
-	DependentLoadFlags             uint16                       `json:"dependent_load_flags"`
-	EditList                       uint64                       `json:"edit_list"`
-	SecurityCookie                 uint64                       `json:"security_cookie"`
-	SEHandlerTable                 uint64                       `json:"se_handler_table"`
-	SEHandlerCount                 uint64                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer    uint64                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer uint64                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable           uint64                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount           uint64                       `json:"guard_cf_function_count"`
-	GuardFlags                     uint32                       `json:"guard_flags"`
-	CodeIntegrity                  ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-}
-
-// ImageLoadConfigDirectory64v5 for binaries compiled since Windows 10 build 14286 (or maybe earlier).
-type ImageLoadConfigDirectory64v5 struct {
-	Size                           uint32                       `json:"size"`
-	TimeDateStamp                  uint32                       `json:"time_date_stamp"`
-	MajorVersion                   uint16                       `json:"major_version"`
-	MinorVersion                   uint16                       `json:"minor_version"`
-	GlobalFlagsClear               uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                 uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout  uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold     uint64                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold     uint64                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                uint64                       `json:"lock_prefix_table"`
-	MaximumAllocationSize          uint64                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold         uint64                       `json:"virtual_memory_threshold"`
-	ProcessAffinityMask            uint64                       `json:"process_affinity_mask"`
-	ProcessHeapFlags               uint32                       `json:"process_heap_flags"`
-	CSDVersion                     uint16                       `json:"csd_version"`
-	DependentLoadFlags             uint16                       `json:"dependent_load_flags"`
-	EditList                       uint64                       `json:"edit_list"`
-	SecurityCookie                 uint64                       `json:"security_cookie"`
-	SEHandlerTable                 uint64                       `json:"se_handler_table"`
-	SEHandlerCount                 uint64                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer    uint64                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer uint64                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable           uint64                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount           uint64                       `json:"guard_cf_function_count"`
-	GuardFlags                     uint32                       `json:"guard_flags"`
-	CodeIntegrity                  ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable uint64                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount uint64                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable       uint64                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount       uint64                       `json:"guard_long_jump_target_count"`
-}
-
-// ImageLoadConfigDirectory64v6 for binaries compiled since Windows 10 build 14393 (or maybe earlier).
-type ImageLoadConfigDirectory64v6 struct {
-	Size                           uint32                       `json:"size"`
-	TimeDateStamp                  uint32                       `json:"time_date_stamp"`
-	MajorVersion                   uint16                       `json:"major_version"`
-	MinorVersion                   uint16                       `json:"minor_version"`
-	GlobalFlagsClear               uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                 uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout  uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold     uint64                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold     uint64                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                uint64                       `json:"lock_prefix_table"`
-	MaximumAllocationSize          uint64                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold         uint64                       `json:"virtual_memory_threshold"`
-	ProcessAffinityMask            uint64                       `json:"process_affinity_mask"`
-	ProcessHeapFlags               uint32                       `json:"process_heap_flags"`
-	CSDVersion                     uint16                       `json:"csd_version"`
-	DependentLoadFlags             uint16                       `json:"dependent_load_flags"`
-	EditList                       uint64                       `json:"edit_list"`
-	SecurityCookie                 uint64                       `json:"security_cookie"`
-	SEHandlerTable                 uint64                       `json:"se_handler_table"`
-	SEHandlerCount                 uint64                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer    uint64                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer uint64                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable           uint64                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount           uint64                       `json:"guard_cf_function_count"`
-	GuardFlags                     uint32                       `json:"guard_flags"`
-	CodeIntegrity                  ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable uint64                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount uint64                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable       uint64                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount       uint64                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable         uint64                       `json:"dynamic_value_reloc_table"`
-	HybridMetadataPointer          uint64                       `json:"hybrid_metadata_pointer"`
-}
-
-// ImageLoadConfigDirectory64v7 for binaries compiled since Windows 10 build 14901 (or maybe earlier).
-type ImageLoadConfigDirectory64v7 struct {
-	Size                                 uint32                       `json:"size"`
-	TimeDateStamp                        uint32                       `json:"time_date_stamp"`
-	MajorVersion                         uint16                       `json:"major_version"`
-	MinorVersion                         uint16                       `json:"minor_version"`
-	GlobalFlagsClear                     uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                       uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout        uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold           uint64                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold           uint64                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                      uint64                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                uint64                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold               uint64                       `json:"virtual_memory_threshold"`
-	ProcessAffinityMask                  uint64                       `json:"process_affinity_mask"`
-	ProcessHeapFlags                     uint32                       `json:"process_heap_flags"`
-	CSDVersion                           uint16                       `json:"csd_version"`
-	DependentLoadFlags                   uint16                       `json:"dependent_load_flags"`
-	EditList                             uint64                       `json:"edit_list"`
-	SecurityCookie                       uint64                       `json:"security_cookie"`
-	SEHandlerTable                       uint64                       `json:"se_handler_table"`
-	SEHandlerCount                       uint64                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer          uint64                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer       uint64                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                 uint64                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                 uint64                       `json:"guard_cf_function_count"`
-	GuardFlags                           uint32                       `json:"guard_flags"`
-	CodeIntegrity                        ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable       uint64                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount       uint64                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable             uint64                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount             uint64                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable               uint64                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                  uint64                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                uint64                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer uint64                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset         uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection        uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                            uint16                       `json:"reserved_2"`
-}
-
-// ImageLoadConfigDirectory64v8 for binaries compiled since Windows 10 build 15002 (or maybe earlier).
-// #pragma pack(4) available here.
-type ImageLoadConfigDirectory64v8 struct {
-	Size                                     uint32                       `json:"size"`
-	TimeDateStamp                            uint32                       `json:"time_date_stamp"`
-	MajorVersion                             uint16                       `json:"major_version"`
-	MinorVersion                             uint16                       `json:"minor_version"`
-	GlobalFlagsClear                         uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                           uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout            uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold               uint64                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold               uint64                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                          uint64                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                    uint64                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold                   uint64                       `json:"virtual_memory_threshold"`
-	ProcessAffinityMask                      uint64                       `json:"process_affinity_mask"`
-	ProcessHeapFlags                         uint32                       `json:"process_heap_flags"`
-	CSDVersion                               uint16                       `json:"csd_version"`
-	DependentLoadFlags                       uint16                       `json:"dependent_load_flags"`
-	EditList                                 uint64                       `json:"edit_list"`
-	SecurityCookie                           uint64                       `json:"security_cookie"`
-	SEHandlerTable                           uint64                       `json:"se_handler_table"`
-	SEHandlerCount                           uint64                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer              uint64                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer           uint64                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                     uint64                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                     uint64                       `json:"guard_cf_function_count"`
-	GuardFlags                               uint32                       `json:"guard_flags"`
-	CodeIntegrity                            ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable           uint64                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount           uint64                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable                 uint64                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount                 uint64                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable                   uint64                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                      uint64                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                    uint64                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer     uint64                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset             uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection            uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                                uint16                       `json:"reserved_2"`
-	GuardRFVerifyStackPointerFunctionPointer uint64                       `json:"guard_rf_verify_stack_pointer_function_pointer"`
-	HotPatchTableOffset                      uint32                       `json:"hot_patch_table_offset"`
-}
-
-// ImageLoadConfigDirectory64v9 for binaries compiled since Windows 10 build 15002 (or maybe earlier).
-// #pragma pack(4) was taken.
-type ImageLoadConfigDirectory64v9 struct {
-	Size                                     uint32                       `json:"size"`
-	TimeDateStamp                            uint32                       `json:"time_date_stamp"`
-	MajorVersion                             uint16                       `json:"major_version"`
-	MinorVersion                             uint16                       `json:"minor_version"`
-	GlobalFlagsClear                         uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                           uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout            uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold               uint64                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold               uint64                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                          uint64                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                    uint64                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold                   uint64                       `json:"virtual_memory_threshold"`
-	ProcessAffinityMask                      uint64                       `json:"process_affinity_mask"`
-	ProcessHeapFlags                         uint32                       `json:"process_heap_flags"`
-	CSDVersion                               uint16                       `json:"csd_version"`
-	DependentLoadFlags                       uint16                       `json:"dependent_load_flags"`
-	EditList                                 uint64                       `json:"edit_list"`
-	SecurityCookie                           uint64                       `json:"security_cookie"`
-	SEHandlerTable                           uint64                       `json:"se_handler_table"`
-	SEHandlerCount                           uint64                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer              uint64                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer           uint64                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                     uint64                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                     uint64                       `json:"guard_cf_function_count"`
-	GuardFlags                               uint32                       `json:"guard_flags"`
-	CodeIntegrity                            ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable           uint64                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount           uint64                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable                 uint64                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount                 uint64                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable                   uint64                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                      uint64                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                    uint64                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer     uint64                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset             uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection            uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                                uint16                       `json:"reserved_2"`
-	GuardRFVerifyStackPointerFunctionPointer uint64                       `json:"guard_rf_verify_stack_pointer_function_pointer"`
-	HotPatchTableOffset                      uint32                       `json:"hot_patch_table_offset"`
-	Reserved3                                uint32                       `json:"reserved_3"`
-	EnclaveConfigurationPointer              uint64                       `json:"enclave_configuration_pointer"`
-}
-
-// ImageLoadConfigDirectory64v10 for binaries compiled since Windows 10 build 18362 (or maybe earlier).
-type ImageLoadConfigDirectory64v10 struct {
-	Size                                     uint32                       `json:"size"`
-	TimeDateStamp                            uint32                       `json:"time_date_stamp"`
-	MajorVersion                             uint16                       `json:"major_version"`
-	MinorVersion                             uint16                       `json:"minor_version"`
-	GlobalFlagsClear                         uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                           uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout            uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold               uint64                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold               uint64                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                          uint64                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                    uint64                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold                   uint64                       `json:"virtual_memory_threshold"`
-	ProcessAffinityMask                      uint64                       `json:"process_affinity_mask"`
-	ProcessHeapFlags                         uint32                       `json:"process_heap_flags"`
-	CSDVersion                               uint16                       `json:"csd_version"`
-	DependentLoadFlags                       uint16                       `json:"dependent_load_flags"`
-	EditList                                 uint64                       `json:"edit_list"`
-	SecurityCookie                           uint64                       `json:"security_cookie"`
-	SEHandlerTable                           uint64                       `json:"se_handler_table"`
-	SEHandlerCount                           uint64                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer              uint64                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer           uint64                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                     uint64                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                     uint64                       `json:"guard_cf_function_count"`
-	GuardFlags                               uint32                       `json:"guard_flags"`
-	CodeIntegrity                            ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable           uint64                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount           uint64                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable                 uint64                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount                 uint64                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable                   uint64                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                      uint64                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                    uint64                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer     uint64                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset             uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection            uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                                uint16                       `json:"reserved_2"`
-	GuardRFVerifyStackPointerFunctionPointer uint64                       `json:"guard_rf_verify_stack_pointer_function_pointer"`
-	HotPatchTableOffset                      uint32                       `json:"hot_patch_table_offset"`
-	Reserved3                                uint32                       `json:"reserved_3"`
-	EnclaveConfigurationPointer              uint64                       `json:"enclave_configuration_pointer"`
-	VolatileMetadataPointer                  uint64                       `json:"volatile_metadata_pointer"`
-}
-
-// ImageLoadConfigDirectory64v11 for binaries compiled since Windows 10 build 19534 (or maybe earlier).
-type ImageLoadConfigDirectory64v11 struct {
-	Size                                     uint32                       `json:"size"`
-	TimeDateStamp                            uint32                       `json:"time_date_stamp"`
-	MajorVersion                             uint16                       `json:"major_version"`
-	MinorVersion                             uint16                       `json:"minor_version"`
-	GlobalFlagsClear                         uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                           uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout            uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold               uint64                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold               uint64                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                          uint64                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                    uint64                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold                   uint64                       `json:"virtual_memory_threshold"`
-	ProcessAffinityMask                      uint64                       `json:"process_affinity_mask"`
-	ProcessHeapFlags                         uint32                       `json:"process_heap_flags"`
-	CSDVersion                               uint16                       `json:"csd_version"`
-	DependentLoadFlags                       uint16                       `json:"dependent_load_flags"`
-	EditList                                 uint64                       `json:"edit_list"`
-	SecurityCookie                           uint64                       `json:"security_cookie"`
-	SEHandlerTable                           uint64                       `json:"se_handler_table"`
-	SEHandlerCount                           uint64                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer              uint64                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer           uint64                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                     uint64                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                     uint64                       `json:"guard_cf_function_count"`
-	GuardFlags                               uint32                       `json:"guard_flags"`
-	CodeIntegrity                            ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable           uint64                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount           uint64                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable                 uint64                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount                 uint64                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable                   uint64                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                      uint64                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                    uint64                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer     uint64                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset             uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection            uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                                uint16                       `json:"reserved_2"`
-	GuardRFVerifyStackPointerFunctionPointer uint64                       `json:"guard_rf_verify_stack_pointer_function_pointer"`
-	HotPatchTableOffset                      uint32                       `json:"hot_patch_table_offset"`
-	Reserved3                                uint32                       `json:"reserved_3"`
-	EnclaveConfigurationPointer              uint64                       `json:"enclave_configuration_pointer"`
-	VolatileMetadataPointer                  uint64                       `json:"volatile_metadata_pointer"`
-	GuardEHContinuationTable                 uint64                       `json:"guard_eh_continuation_table"`
-	GuardEHContinuationCount                 uint64                       `json:"guard_eh_continuation_count"`
-}
-
-// ImageLoadConfigDirectory64v12 for binaries compiled since Visual C++ 2019 / RS5_IMAGE_LOAD_CONFIG_DIRECTORY64.
-type ImageLoadConfigDirectory64v12 struct {
-	Size                                     uint32                       `json:"size"`
-	TimeDateStamp                            uint32                       `json:"time_date_stamp"`
-	MajorVersion                             uint16                       `json:"major_version"`
-	MinorVersion                             uint16                       `json:"minor_version"`
-	GlobalFlagsClear                         uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                           uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout            uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold               uint64                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold               uint64                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                          uint64                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                    uint64                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold                   uint64                       `json:"virtual_memory_threshold"`
-	ProcessAffinityMask                      uint64                       `json:"process_affinity_mask"`
-	ProcessHeapFlags                         uint32                       `json:"process_heap_flags"`
-	CSDVersion                               uint16                       `json:"csd_version"`
-	DependentLoadFlags                       uint16                       `json:"dependent_load_flags"`
-	EditList                                 uint64                       `json:"edit_list"`
-	SecurityCookie                           uint64                       `json:"security_cookie"`
-	SEHandlerTable                           uint64                       `json:"se_handler_table"`
-	SEHandlerCount                           uint64                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer              uint64                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer           uint64                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                     uint64                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                     uint64                       `json:"guard_cf_function_count"`
-	GuardFlags                               uint32                       `json:"guard_flags"`
-	CodeIntegrity                            ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable           uint64                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount           uint64                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable                 uint64                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount                 uint64                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable                   uint64                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                      uint64                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                    uint64                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer     uint64                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset             uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection            uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                                uint16                       `json:"reserved_2"`
-	GuardRFVerifyStackPointerFunctionPointer uint64                       `json:"guard_rf_verify_stack_pointer_function_pointer"`
-	HotPatchTableOffset                      uint32                       `json:"hot_patch_table_offset"`
-	Reserved3                                uint32                       `json:"reserved_3"`
-	EnclaveConfigurationPointer              uint64                       `json:"enclave_configuration_pointer"`
-	VolatileMetadataPointer                  uint64                       `json:"volatile_metadata_pointer"`
-	GuardEHContinuationTable                 uint64                       `json:"guard_eh_continuation_table"`
-	GuardEHContinuationCount                 uint64                       `json:"guard_eh_continuation_count"`
-	GuardXFGCheckFunctionPointer             uint64                       `json:"guard_xfg_check_function_pointer"`
-	GuardXFGDispatchFunctionPointer          uint64                       `json:"guard_xfg_dispatch_function_pointer"`
-	GuardXFGTableDispatchFunctionPointer     uint64                       `json:"guard_xfg_table_dispatch_function_pointer"`
-}
-
 // ImageLoadConfigDirectory64 Contains the load configuration data of an image for x64 binaries.
 type ImageLoadConfigDirectory64 struct {
-	Size                                     uint32                       `json:"size"`
-	TimeDateStamp                            uint32                       `json:"time_date_stamp"`
-	MajorVersion                             uint16                       `json:"major_version"`
-	MinorVersion                             uint16                       `json:"minor_version"`
-	GlobalFlagsClear                         uint32                       `json:"global_flags_clear"`
-	GlobalFlagsSet                           uint32                       `json:"global_flags_set"`
-	CriticalSectionDefaultTimeout            uint32                       `json:"critical_section_default_timeout"`
-	DeCommitFreeBlockThreshold               uint64                       `json:"de_commit_free_block_threshold"`
-	DeCommitTotalFreeThreshold               uint64                       `json:"de_commit_total_free_threshold"`
-	LockPrefixTable                          uint64                       `json:"lock_prefix_table"`
-	MaximumAllocationSize                    uint64                       `json:"maximum_allocation_size"`
-	VirtualMemoryThreshold                   uint64                       `json:"virtual_memory_threshold"`
-	ProcessAffinityMask                      uint64                       `json:"process_affinity_mask"`
-	ProcessHeapFlags                         uint32                       `json:"process_heap_flags"`
-	CSDVersion                               uint16                       `json:"csd_version"`
-	DependentLoadFlags                       uint16                       `json:"dependent_load_flags"`
-	EditList                                 uint64                       `json:"edit_list"`
-	SecurityCookie                           uint64                       `json:"security_cookie"`
-	SEHandlerTable                           uint64                       `json:"se_handler_table"`
-	SEHandlerCount                           uint64                       `json:"se_handler_count"`
-	GuardCFCheckFunctionPointer              uint64                       `json:"guard_cf_check_function_pointer"`
-	GuardCFDispatchFunctionPointer           uint64                       `json:"guard_cf_dispatch_function_pointer"`
-	GuardCFFunctionTable                     uint64                       `json:"guard_cf_function_table"`
-	GuardCFFunctionCount                     uint64                       `json:"guard_cf_function_count"`
-	GuardFlags                               uint32                       `json:"guard_flags"`
-	CodeIntegrity                            ImageLoadConfigCodeIntegrity `json:"code_integrity"`
-	GuardAddressTakenIatEntryTable           uint64                       `json:"guard_address_taken_iat_entry_table"`
-	GuardAddressTakenIatEntryCount           uint64                       `json:"guard_address_taken_iat_entry_count"`
-	GuardLongJumpTargetTable                 uint64                       `json:"guard_long_jump_target_table"`
-	GuardLongJumpTargetCount                 uint64                       `json:"guard_long_jump_target_count"`
-	DynamicValueRelocTable                   uint64                       `json:"dynamic_value_reloc_table"`
-	CHPEMetadataPointer                      uint64                       `json:"chpe_metadata_pointer"`
-	GuardRFFailureRoutine                    uint64                       `json:"guard_rf_failure_routine"`
-	GuardRFFailureRoutineFunctionPointer     uint64                       `json:"guard_rf_failure_routine_function_pointer"`
-	DynamicValueRelocTableOffset             uint32                       `json:"dynamic_value_reloc_table_offset"`
-	DynamicValueRelocTableSection            uint16                       `json:"dynamic_value_reloc_table_section"`
-	Reserved2                                uint16                       `json:"reserved_2"`
-	GuardRFVerifyStackPointerFunctionPointer uint64                       `json:"guard_rf_verify_stack_pointer_function_pointer"`
-	HotPatchTableOffset                      uint32                       `json:"hot_patch_table_offset"`
-	Reserved3                                uint32                       `json:"reserved_3"`
-	EnclaveConfigurationPointer              uint64                       `json:"enclave_configuration_pointer"`
-	VolatileMetadataPointer                  uint64                       `json:"volatile_metadata_pointer"`
-	GuardEHContinuationTable                 uint64                       `json:"guard_eh_continuation_table"`
-	GuardEHContinuationCount                 uint64                       `json:"guard_eh_continuation_count"`
-	GuardXFGCheckFunctionPointer             uint64                       `json:"guard_xfg_check_function_pointer"`
-	GuardXFGDispatchFunctionPointer          uint64                       `json:"guard_xfg_dispatch_function_pointer"`
-	GuardXFGTableDispatchFunctionPointer     uint64                       `json:"guard_xfg_table_dispatch_function_pointer"`
+	// The actual size of the structure inclusive. May differ from the size
+	// given in the data directory for Windows XP and earlier compatibility.
+	Size uint32 `json:"size"`
+
+	// Date and time stamp value.
+	TimeDateStamp uint32 `json:"time_date_stamp"`
+
+	// Major version number.
+	MajorVersion uint16 `json:"major_version"`
+
+	// Minor version number.
+	MinorVersion uint16 `json:"minor_version"`
+
+	// The global loader flags to clear for this process as the loader starts
+	// the process.
+	GlobalFlagsClear uint32 `json:"global_flags_clear"`
+
+	// The global loader flags to set for this process as the loader starts the
+	// process.
+	GlobalFlagsSet uint32 `json:"global_flags_set"`
+
+	// The default timeout value to use for this process's critical sections
+	// that are abandoned.
+	CriticalSectionDefaultTimeout uint32 `json:"critical_section_default_timeout"`
+
+	// Memory that must be freed before it is returned to the system, in bytes.
+	DeCommitFreeBlockThreshold uint64 `json:"de_commit_free_block_threshold"`
+
+	// Total amount of free memory, in bytes.
+	DeCommitTotalFreeThreshold uint64 `json:"de_commit_total_free_threshold"`
+
+	// [x86 only] The VA of a list of addresses where the LOCK prefix is used so
+	// that they can be replaced with NOP on single processor machines.
+	LockPrefixTable uint64 `json:"lock_prefix_table"`
+
+	// Maximum allocation size, in bytes.
+	MaximumAllocationSize uint64 `json:"maximum_allocation_size"`
+
+	// Maximum virtual memory size, in bytes.
+	VirtualMemoryThreshold uint64 `json:"virtual_memory_threshold"`
+
+	// Setting this field to a non-zero value is equivalent to calling
+	// SetProcessAffinityMask with this value during process startup (.exe only)
+	ProcessAffinityMask uint64 `json:"process_affinity_mask"`
+
+	// Process heap flags that correspond to the first argument of the HeapCreate
+	// function. These flags apply to the process heap that is created during
+	// process startup.
+	ProcessHeapFlags uint32 `json:"process_heap_flags"`
+
+	// The service pack version identifier.
+	CSDVersion uint16 `json:"csd_version"`
+
+	// Must be zero.
+	DependentLoadFlags uint16 `json:"dependent_load_flags"`
+
+	// Reserved for use by the system.
+	EditList uint64 `json:"edit_list"`
+
+	// A pointer to a cookie that is used by Visual C++ or GS implementation.
+	SecurityCookie uint64 `json:"security_cookie"`
+
+	// [x86 only] The VA of the sorted table of RVAs of each valid, unique SE
+	// handler in the image.
+	SEHandlerTable uint64 `json:"se_handler_table"`
+
+	// [x86 only] The count of unique handlers in the table.
+	SEHandlerCount uint64 `json:"se_handler_count"`
+
+	// The VA where Control Flow Guard check-function pointer is stored.
+	GuardCFCheckFunctionPointer uint64 `json:"guard_cf_check_function_pointer"`
+
+	// The VA where Control Flow Guard dispatch-function pointer is stored.
+	GuardCFDispatchFunctionPointer uint64 `json:"guard_cf_dispatch_function_pointer"`
+
+	// The VA of the sorted table of RVAs of each Control Flow Guard function in
+	// the image.
+	GuardCFFunctionTable uint64 `json:"guard_cf_function_table"`
+
+	// The count of unique RVAs in the above table.
+	GuardCFFunctionCount uint64 `json:"guard_cf_function_count"`
+
+	// Control Flow Guard related flags.
+	GuardFlags uint32 `json:"guard_flags"`
+
+	// Code integrity information.
+	CodeIntegrity ImageLoadConfigCodeIntegrity `json:"code_integrity"`
+
+	// The VA where Control Flow Guard address taken IAT table is stored.
+	GuardAddressTakenIatEntryTable uint64 `json:"guard_address_taken_iat_entry_table"`
+
+	// The count of unique RVAs in the above table.
+	GuardAddressTakenIatEntryCount uint64 `json:"guard_address_taken_iat_entry_count"`
+
+	// The VA where Control Flow Guard long jump target table is stored.
+	GuardLongJumpTargetTable uint64 `json:"guard_long_jump_target_table"`
+
+	// The count of unique RVAs in the above table.
+	GuardLongJumpTargetCount                 uint64 `json:"guard_long_jump_target_count"`
+	DynamicValueRelocTable                   uint64 `json:"dynamic_value_reloc_table"`
+	CHPEMetadataPointer                      uint64 `json:"chpe_metadata_pointer"`
+	GuardRFFailureRoutine                    uint64 `json:"guard_rf_failure_routine"`
+	GuardRFFailureRoutineFunctionPointer     uint64 `json:"guard_rf_failure_routine_function_pointer"`
+	DynamicValueRelocTableOffset             uint32 `json:"dynamic_value_reloc_table_offset"`
+	DynamicValueRelocTableSection            uint16 `json:"dynamic_value_reloc_table_section"`
+	Reserved2                                uint16 `json:"reserved_2"`
+	GuardRFVerifyStackPointerFunctionPointer uint64 `json:"guard_rf_verify_stack_pointer_function_pointer"`
+	HotPatchTableOffset                      uint32 `json:"hot_patch_table_offset"`
+	Reserved3                                uint32 `json:"reserved_3"`
+	EnclaveConfigurationPointer              uint64 `json:"enclave_configuration_pointer"`
+	VolatileMetadataPointer                  uint64 `json:"volatile_metadata_pointer"`
+	GuardEHContinuationTable                 uint64 `json:"guard_eh_continuation_table"`
+	GuardEHContinuationCount                 uint64 `json:"guard_eh_continuation_count"`
+	GuardXFGCheckFunctionPointer             uint64 `json:"guard_xfg_check_function_pointer"`
+	GuardXFGDispatchFunctionPointer          uint64 `json:"guard_xfg_dispatch_function_pointer"`
+	GuardXFGTableDispatchFunctionPointer     uint64 `json:"guard_xfg_table_dispatch_function_pointer"`
 }
 
 type ImageCHPEMetadataX86v1 struct {
@@ -1526,114 +717,32 @@ func (pe *File) parseLoadConfigDirectory(rva, size uint32) error {
 	// PrintLoadConfigStruct()
 	var loadCfg interface{}
 
+	// Boundary check
+	totalSize := fileOffset + size
+
+	// Integer overflow
+	if (totalSize > fileOffset) != (size > 0) {
+		return ErrOutsideBoundary
+	}
+
+	if fileOffset >= pe.size || totalSize > pe.size {
+		return ErrOutsideBoundary
+	}
+
 	if pe.Is32 {
-		switch int(structSize) {
-		case 0x40:
-			loadCfgv1 := ImageLoadConfigDirectory32v1{}
-			err = pe.structUnpack(&loadCfgv1, fileOffset, structSize)
-			loadCfg = loadCfgv1
-		case 0x48:
-			loadCfgv2 := ImageLoadConfigDirectory32v2{}
-			err = pe.structUnpack(&loadCfgv2, fileOffset, structSize)
-			loadCfg = loadCfgv2
-		case 0x5c:
-			loadCfgv3 := ImageLoadConfigDirectory32v3{}
-			err = pe.structUnpack(&loadCfgv3, fileOffset, structSize)
-			loadCfg = loadCfgv3
-		case 0x68:
-			loadCfgv4 := ImageLoadConfigDirectory32v4{}
-			err = pe.structUnpack(&loadCfgv4, fileOffset, structSize)
-			loadCfg = loadCfgv4
-		case 0x78:
-			loadCfgv5 := ImageLoadConfigDirectory32v5{}
-			err = pe.structUnpack(&loadCfgv5, fileOffset, structSize)
-			loadCfg = loadCfgv5
-		case 0x80:
-			loadCfgv6 := ImageLoadConfigDirectory32v6{}
-			err = pe.structUnpack(&loadCfgv6, fileOffset, structSize)
-			loadCfg = loadCfgv6
-		case 0x90:
-			loadCfgv7 := ImageLoadConfigDirectory32v7{}
-			err = pe.structUnpack(&loadCfgv7, fileOffset, structSize)
-			loadCfg = loadCfgv7
-		case 0x98:
-			loadCfgv8 := ImageLoadConfigDirectory32v8{}
-			err = pe.structUnpack(&loadCfgv8, fileOffset, structSize)
-			loadCfg = loadCfgv8
-		case 0xa0:
-			loadCfgv9 := ImageLoadConfigDirectory32v9{}
-			err = pe.structUnpack(&loadCfgv9, fileOffset, structSize)
-			loadCfg = loadCfgv9
-		case 0xa4:
-			loadCfgv10 := ImageLoadConfigDirectory32v10{}
-			err = pe.structUnpack(&loadCfgv10, fileOffset, structSize)
-			loadCfg = loadCfgv10
-		case 0xac:
-			loadCfgv11 := ImageLoadConfigDirectory32v11{}
-			err = pe.structUnpack(&loadCfgv11, fileOffset, structSize)
-			loadCfg = loadCfgv11
-		case 0xb8:
-			loadCfgv12 := ImageLoadConfigDirectory32v12{}
-			err = pe.structUnpack(&loadCfgv12, fileOffset, structSize)
-			loadCfg = loadCfgv12
-		default:
-			// We use the oldest load config.
-			loadCfg32 := ImageLoadConfigDirectory32v1{}
-			err = pe.structUnpack(&loadCfg32, fileOffset, structSize)
-			loadCfg = loadCfg32
-		}
+		loadCfg32 := ImageLoadConfigDirectory32{}
+		imgLoadConfigDirectory := make([]byte, binary.Size(loadCfg32))
+		copy(imgLoadConfigDirectory, pe.data[fileOffset:fileOffset+structSize])
+		buf := bytes.NewReader(imgLoadConfigDirectory)
+		err = binary.Read(buf, binary.LittleEndian, &loadCfg32)
+		loadCfg = loadCfg32
 	} else {
-		switch int(structSize) {
-		case 0x70:
-			loadCfgv2 := ImageLoadConfigDirectory64v2{}
-			err = pe.structUnpack(&loadCfgv2, fileOffset, structSize)
-			loadCfg = loadCfgv2
-		case 0x94:
-			loadCfgv3 := ImageLoadConfigDirectory64v3{}
-			err = pe.structUnpack(&loadCfgv3, fileOffset, structSize)
-			loadCfg = loadCfgv3
-		case 0xa0:
-			loadCfgv4 := ImageLoadConfigDirectory64v4{}
-			err = pe.structUnpack(&loadCfgv4, fileOffset, structSize)
-			loadCfg = loadCfgv4
-		case 0xc0:
-			loadCfgv5 := ImageLoadConfigDirectory64v5{}
-			err = pe.structUnpack(&loadCfgv5, fileOffset, structSize)
-			loadCfg = loadCfgv5
-		case 0xd0:
-			loadCfgv6 := ImageLoadConfigDirectory64v6{}
-			err = pe.structUnpack(&loadCfgv6, fileOffset, structSize)
-			loadCfg = loadCfgv6
-		case 0xe8:
-			loadCfgv7 := ImageLoadConfigDirectory64v7{}
-			err = pe.structUnpack(&loadCfgv7, fileOffset, structSize)
-			loadCfg = loadCfgv7
-		case 0xf4:
-			loadCfgv8 := ImageLoadConfigDirectory64v8{}
-			err = pe.structUnpack(&loadCfgv8, fileOffset, structSize)
-			loadCfg = loadCfgv8
-		case 0x100:
-			loadCfgv9 := ImageLoadConfigDirectory64v9{}
-			err = pe.structUnpack(&loadCfgv9, fileOffset, structSize)
-			loadCfg = loadCfgv9
-		case 0x108:
-			loadCfgv10 := ImageLoadConfigDirectory64v10{}
-			err = pe.structUnpack(&loadCfgv10, fileOffset, structSize)
-			loadCfg = loadCfgv10
-		case 0x118:
-			loadCfgv11 := ImageLoadConfigDirectory64v11{}
-			err = pe.structUnpack(&loadCfgv11, fileOffset, structSize)
-			loadCfg = loadCfgv11
-		case 0x130:
-			loadCfgv12 := ImageLoadConfigDirectory64v12{}
-			err = pe.structUnpack(&loadCfgv12, fileOffset, structSize)
-			loadCfg = loadCfgv12
-		default:
-			// We use the oldest load config.
-			loadCfg64 := ImageLoadConfigDirectory64v2{}
-			err = pe.structUnpack(&loadCfg64, fileOffset, structSize)
-			loadCfg = loadCfg64
-		}
+		loadCfg64 := ImageLoadConfigDirectory64{}
+		imgLoadConfigDirectory := make([]byte, binary.Size(loadCfg64))
+		copy(imgLoadConfigDirectory, pe.data[fileOffset:fileOffset+structSize])
+		buf := bytes.NewReader(imgLoadConfigDirectory)
+		err = binary.Read(buf, binary.LittleEndian, &loadCfg64)
+		loadCfg = loadCfg64
 	}
 
 	if err != nil {
@@ -1672,34 +781,6 @@ func (pe *File) parseLoadConfigDirectory(rva, size uint32) error {
 	pe.LoadConfig.VolatileMetadata = pe.getVolatileMetadata()
 
 	return nil
-}
-
-// PrintLoadConfigStruct will print size of each load config struct.
-func PrintLoadConfigStruct() {
-	fmt.Printf("ImageLoadConfigDirectory32v1 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory32v1{}))
-	fmt.Printf("ImageLoadConfigDirectory32v2 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory32v2{}))
-	fmt.Printf("ImageLoadConfigDirectory32v3 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory32v3{}))
-	fmt.Printf("ImageLoadConfigDirectory32v4 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory32v4{}))
-	fmt.Printf("ImageLoadConfigDirectory32v5 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory32v5{}))
-	fmt.Printf("ImageLoadConfigDirectory32v6 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory32v6{}))
-	fmt.Printf("ImageLoadConfigDirectory32v7 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory32v7{}))
-	fmt.Printf("ImageLoadConfigDirectory32v8 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory32v8{}))
-	fmt.Printf("ImageLoadConfigDirectory32v9 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory32v9{}))
-	fmt.Printf("ImageLoadConfigDirectory32v10 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory32v10{}))
-	fmt.Printf("ImageLoadConfigDirectory32v11 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory32v11{}))
-	fmt.Printf("ImageLoadConfigDirectory32v12 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory32v12{}))
-
-	fmt.Printf("ImageLoadConfigDirectory64v2 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory64v2{}))
-	fmt.Printf("ImageLoadConfigDirectory64v3 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory64v3{}))
-	fmt.Printf("ImageLoadConfigDirectory64v4 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory64v4{}))
-	fmt.Printf("ImageLoadConfigDirectory64v5 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory64v5{}))
-	fmt.Printf("ImageLoadConfigDirectory64v6 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory64v6{}))
-	fmt.Printf("ImageLoadConfigDirectory64v7 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory64v7{}))
-	fmt.Printf("ImageLoadConfigDirectory64v8 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory64v8{}))
-	fmt.Printf("ImageLoadConfigDirectory64v9 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory64v9{}))
-	fmt.Printf("ImageLoadConfigDirectory64v10 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory64v10{}))
-	fmt.Printf("ImageLoadConfigDirectory64v11 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory64v11{}))
-	fmt.Printf("ImageLoadConfigDirectory64v12 size : 0x%x\n", binary.Size(ImageLoadConfigDirectory64v12{}))
 }
 
 // StringifyGuardFlags returns list of strings which describes the GuardFlags.

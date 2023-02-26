@@ -16,7 +16,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 	}{
 		{
 			in: getAbsoluteFilePath("test/pspluginwkr.dll"),
-			out: ImageLoadConfigDirectory32v2{
+			out: ImageLoadConfigDirectory32{
 				Size:           0x48,
 				SecurityCookie: 0x45e44220,
 				SEHandlerTable: 0x45e382e0,
@@ -25,7 +25,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 		},
 		{
 			in: getAbsoluteFilePath("test/00da1a2a9d9ebf447508bf6550f05f466f8eabb4ed6c4f2a524c0769b2d75bc1"),
-			out: ImageLoadConfigDirectory32v3{
+			out: ImageLoadConfigDirectory32{
 				Size:                        0x5c,
 				SecurityCookie:              0x43D668,
 				SEHandlerTable:              0x439C70,
@@ -38,7 +38,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 		},
 		{
 			in: getAbsoluteFilePath("test/3a081c7fe475ec68ed155c76d30cfddc4d41f7a09169810682d1c75421e98eaa"),
-			out: ImageLoadConfigDirectory32v9{
+			out: ImageLoadConfigDirectory32{
 				Size:                        0xa0,
 				SecurityCookie:              0x417008,
 				SEHandlerTable:              0x415410,
@@ -50,7 +50,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 
 		{
 			in: getAbsoluteFilePath("test/IEAdvpack.dll"),
-			out: ImageLoadConfigDirectory32v10{
+			out: ImageLoadConfigDirectory32{
 				Size:                           0xa4,
 				SecurityCookie:                 0x6501b074,
 				SEHandlerTable:                 0x650046d0,
@@ -67,7 +67,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 		},
 		{
 			in: getAbsoluteFilePath("test/KernelBase.dll"),
-			out: ImageLoadConfigDirectory32v12{
+			out: ImageLoadConfigDirectory32{
 				Size:                           0xb8,
 				DependentLoadFlags:             0x800,
 				SecurityCookie:                 0x101f3b50,
@@ -84,14 +84,14 @@ func TestLoadConfigDirectory(t *testing.T) {
 		},
 		{
 			in: getAbsoluteFilePath("test/WdfCoInstaller01011.dll"),
-			out: ImageLoadConfigDirectory64v2{
+			out: ImageLoadConfigDirectory64{
 				Size:           0x70,
 				SecurityCookie: 0x18000f108,
 			},
 		},
 		{
 			in: getAbsoluteFilePath("test/D2D1Debug2.dll"),
-			out: ImageLoadConfigDirectory64v3{
+			out: ImageLoadConfigDirectory64{
 				Size:                        0x94,
 				SecurityCookie:              0x180061008,
 				GuardCFCheckFunctionPointer: 0x180001000,
@@ -99,7 +99,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 		},
 		{
 			in: getAbsoluteFilePath("test/amdxata.sys"),
-			out: ImageLoadConfigDirectory64v4{
+			out: ImageLoadConfigDirectory64{
 				Size:                           0xa0,
 				SecurityCookie:                 0x1c00030b0,
 				GuardCFCheckFunctionPointer:    0x1c0005160,
@@ -111,7 +111,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 		},
 		{
 			in: getAbsoluteFilePath("test/amdi2c.sys"),
-			out: ImageLoadConfigDirectory64v6{
+			out: ImageLoadConfigDirectory64{
 				Size:                           0xd0,
 				SecurityCookie:                 0x140009090,
 				GuardCFCheckFunctionPointer:    0x140008100,
@@ -121,7 +121,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 		},
 		{
 			in: getAbsoluteFilePath("test/brave.exe"),
-			out: ImageLoadConfigDirectory64v9{
+			out: ImageLoadConfigDirectory64{
 				Size:                           0x100,
 				SecurityCookie:                 0x14017b648,
 				GuardCFCheckFunctionPointer:    0x140191000,
@@ -133,7 +133,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 		},
 		{
 			in: getAbsoluteFilePath("test/shimeng.dll"),
-			out: ImageLoadConfigDirectory64v10{
+			out: ImageLoadConfigDirectory64{
 				Size:                           0x108,
 				SecurityCookie:                 0x180003000,
 				GuardCFCheckFunctionPointer:    0x180002188,
@@ -145,7 +145,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 		},
 		{
 			in: getAbsoluteFilePath("test/kernel32.dll"),
-			out: ImageLoadConfigDirectory64v11{
+			out: ImageLoadConfigDirectory64{
 				Size:                           0x118,
 				SecurityCookie:                 0x1800b3220,
 				GuardCFCheckFunctionPointer:    0x180084218,
