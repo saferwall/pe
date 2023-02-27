@@ -1009,46 +1009,45 @@ func (pe *File) getLongJumpTargetTable() []uint32 {
 	v := reflect.ValueOf(pe.LoadConfig.Struct)
 	var longJumpTargets []uint32
 
-	// GuardLongJumpTargetCount is found in index 29 of the struct.
-	if v.NumField() > 29 {
-		// The long jump table represents a sorted array of RVAs that are valid
-		// long jump targets. If a long jump target module sets
-		// IMAGE_GUARD_CF_LONGJUMP_TABLE_PRESENT in its GuardFlags field, then
-		// all long jump targets must be enumerated in the LongJumpTargetTable.
-		GuardFlags := v.Field(24).Uint()
-		n := (GuardFlags & ImageGuardCfFunctionTableSizeMask) >>
-			ImageGuardCfFunctionTableSizeShift
-		GuardLongJumpTargetCount := v.Field(29).Uint()
-		if GuardLongJumpTargetCount > 0 {
-			if pe.Is32 {
-				GuardLongJumpTargetTable := uint32(v.Field(28).Uint())
-				imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
-				rva := GuardLongJumpTargetTable - imageBase
-				offset := pe.GetOffsetFromRva(rva)
-				for i := uint32(1); i <= uint32(GuardLongJumpTargetCount); i++ {
-					target, err := pe.ReadUint32(offset)
-					if err != nil {
-						return longJumpTargets
-					}
-					longJumpTargets = append(longJumpTargets, target)
-					offset += 4 + uint32(n)
-				}
-			} else {
-				GuardLongJumpTargetTable := v.Field(26).Uint()
-				imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).ImageBase
-				rva := uint32(GuardLongJumpTargetTable - imageBase)
-				offset := pe.GetOffsetFromRva(rva)
-				for i := uint64(1); i <= GuardLongJumpTargetCount; i++ {
-					target, err := pe.ReadUint32(offset)
-					if err != nil {
-						return longJumpTargets
-					}
-					longJumpTargets = append(longJumpTargets, target)
-					offset += 4 + uint32(n)
-				}
-			}
+	// The long jump table represents a sorted array of RVAs that are valid
+	// long jump targets. If a long jump target module sets
+	// IMAGE_GUARD_CF_LONGJUMP_TABLE_PRESENT in its GuardFlags field, then
+	// all long jump targets must be enumerated in the LongJumpTargetTable.
+	GuardFlags := v.Field(24).Uint()
+	n := (GuardFlags & ImageGuardCfFunctionTableSizeMask) >>
+		ImageGuardCfFunctionTableSizeShift
 
+	// GuardLongJumpTargetCount is found in index 29 of the struct.
+	GuardLongJumpTargetCount := v.Field(29).Uint()
+	if GuardLongJumpTargetCount > 0 {
+		if pe.Is32 {
+			GuardLongJumpTargetTable := uint32(v.Field(28).Uint())
+			imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
+			rva := GuardLongJumpTargetTable - imageBase
+			offset := pe.GetOffsetFromRva(rva)
+			for i := uint32(1); i <= uint32(GuardLongJumpTargetCount); i++ {
+				target, err := pe.ReadUint32(offset)
+				if err != nil {
+					return longJumpTargets
+				}
+				longJumpTargets = append(longJumpTargets, target)
+				offset += 4 + uint32(n)
+			}
+		} else {
+			GuardLongJumpTargetTable := v.Field(28).Uint()
+			imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).ImageBase
+			rva := uint32(GuardLongJumpTargetTable - imageBase)
+			offset := pe.GetOffsetFromRva(rva)
+			for i := uint64(1); i <= GuardLongJumpTargetCount; i++ {
+				target, err := pe.ReadUint32(offset)
+				if err != nil {
+					return longJumpTargets
+				}
+				longJumpTargets = append(longJumpTargets, target)
+				offset += 4 + uint32(n)
+			}
 		}
+
 	}
 	return longJumpTargets
 }

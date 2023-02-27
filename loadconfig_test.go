@@ -435,3 +435,63 @@ func TestLoadConfigDirectoryControlFlowGuardIAT(t *testing.T) {
 		})
 	}
 }
+
+func TestLoadConfigDirectoryControlFlowGuardLongJump(t *testing.T) {
+
+	tests := []struct {
+		in  string
+		out []uint32
+	}{
+		{
+			in: getAbsoluteFilePath("test/IEAdvpack.dll"),
+			out: []uint32{0x13EDD, 0x1434F},
+		},
+		{
+			in: getAbsoluteFilePath("test/PSCRIPT5.dll"),
+			out: []uint32{0x3FE11, 0x401F8, 0x4077D, 0x40B53, 0x40DFD, 0x40FB3},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+
+			ops := Options{Fast: true}
+			file, err := New(tt.in, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
+			}
+
+			var va, size uint32
+
+			if file.Is64 {
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			} else {
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseLoadConfigDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseLoadConfigDirectory(%s) failed, reason: %v",
+					tt.in, err)
+			}
+
+			cfgLongJumpTargetTable := file.LoadConfig.CFGLongJump
+			if !reflect.DeepEqual(cfgLongJumpTargetTable, tt.out) {
+				t.Fatalf("load config CFG long jump target table assertion failed, got %v, want %v",
+				cfgLongJumpTargetTable, tt.out)
+			}
+		})
+	}
+}
+
