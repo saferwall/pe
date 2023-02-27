@@ -14,6 +14,7 @@ import (
 // ImageGuardFlagType represents the type for load configuration image guard flags.
 type ImageGuardFlagType uint8
 
+// GFIDS table entry flags.
 const (
 	// ImageGuardFlagFIDSuppressed indicates that the call target is explicitly
 	// suppressed (do not treat it as valid for purposes of CFG).
@@ -80,6 +81,10 @@ const (
 const (
 	ImageDynamicRelocationGuardRfPrologue = 0x00000001
 	ImageDynamicRelocationGuardREpilogue  = 0x00000002
+)
+
+// Software enclave information.
+const (
 	ImageEnclaveLongIDLength              = 32
 	ImageEnclaveShortIDLength             = 16
 )
@@ -939,65 +944,62 @@ func (pe *File) getControlFlowGuardIAT() []CFGIATEntry {
 	var err error
 
 	// GuardAddressTakenIatEntryCount is found in index 27 of the struct.
-	if v.NumField() > 27 {
-		// An image that supports CFG ES includes a GuardAddressTakenIatEntryTable
-		// whose count is provided by the GuardAddressTakenIatEntryCount as part
-		// of its load configuration directory. This table is structurally
-		// formatted the same as the GFIDS table. It uses the same GuardFlags
-		// IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_MASK mechanism to encode extra
-		// optional metadata bytes in the address taken IAT table, though all
-		// metadata bytes must be zero for the address taken IAT table and are
-		// reserved.
-		GuardFlags := v.Field(24).Uint()
-		n := (GuardFlags & ImageGuardCfFunctionTableSizeMask) >>
-			ImageGuardCfFunctionTableSizeShift
-		GuardAddressTakenIatEntryCount := v.Field(27).Uint()
-		if GuardAddressTakenIatEntryCount > 0 {
-			if pe.Is32 {
-				GuardAddressTakenIatEntryTable := uint32(v.Field(26).Uint())
-				imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
-				rva := GuardAddressTakenIatEntryTable - imageBase
-				offset := pe.GetOffsetFromRva(rva)
-				for i := uint32(1); i <= uint32(GuardAddressTakenIatEntryCount); i++ {
-					cfgIATEntry := CFGIATEntry{}
-					cfgIATEntry.RVA, err = pe.ReadUint32(offset)
-					if err != nil {
-						return GFGIAT
-					}
-					imp, index := pe.GetImportEntryInfoByRVA(cfgIATEntry.RVA)
-					if len(imp.Functions) != 0 {
-						cfgIATEntry.INTValue = uint32(imp.Functions[index].OriginalThunkValue)
-						cfgIATEntry.IATValue = uint32(imp.Functions[index].ThunkValue)
-						cfgIATEntry.Description = imp.Name + "!" + imp.Functions[index].Name
-					}
-					GFGIAT = append(GFGIAT, cfgIATEntry)
-					offset += 4 + uint32(n)
+	// An image that supports CFG ES includes a GuardAddressTakenIatEntryTable
+	// whose count is provided by the GuardAddressTakenIatEntryCount as part
+	// of its load configuration directory. This table is structurally
+	// formatted the same as the GFIDS table. It uses the same GuardFlags
+	// IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_MASK mechanism to encode extra
+	// optional metadata bytes in the address taken IAT table, though all
+	// metadata bytes must be zero for the address taken IAT table and are
+	// reserved.
+	GuardFlags := v.Field(24).Uint()
+	n := (GuardFlags & ImageGuardCfFunctionTableSizeMask) >>
+		ImageGuardCfFunctionTableSizeShift
+	GuardAddressTakenIatEntryCount := v.Field(27).Uint()
+	if GuardAddressTakenIatEntryCount > 0 {
+		if pe.Is32 {
+			GuardAddressTakenIatEntryTable := uint32(v.Field(26).Uint())
+			imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
+			rva := GuardAddressTakenIatEntryTable - imageBase
+			offset := pe.GetOffsetFromRva(rva)
+			for i := uint32(1); i <= uint32(GuardAddressTakenIatEntryCount); i++ {
+				cfgIATEntry := CFGIATEntry{}
+				cfgIATEntry.RVA, err = pe.ReadUint32(offset)
+				if err != nil {
+					return GFGIAT
 				}
-			} else {
-				GuardAddressTakenIatEntryTable := v.Field(26).Uint()
-				imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).ImageBase
-				rva := uint32(GuardAddressTakenIatEntryTable - imageBase)
-				offset := pe.GetOffsetFromRva(rva)
-				for i := uint64(1); i <= GuardAddressTakenIatEntryCount; i++ {
-					cfgIATEntry := CFGIATEntry{}
-					cfgIATEntry.RVA, err = pe.ReadUint32(offset)
-					if err != nil {
-						return GFGIAT
-					}
-					imp, index := pe.GetImportEntryInfoByRVA(cfgIATEntry.RVA)
-					if len(imp.Functions) != 0 {
-						cfgIATEntry.INTValue = uint32(imp.Functions[index].OriginalThunkValue)
-						cfgIATEntry.IATValue = uint32(imp.Functions[index].ThunkValue)
-						cfgIATEntry.Description = imp.Name + "!" + imp.Functions[index].Name
-					}
-
-					GFGIAT = append(GFGIAT, cfgIATEntry)
-					GFGIAT = append(GFGIAT, cfgIATEntry)
-					offset += 4 + uint32(n)
+				imp, index := pe.GetImportEntryInfoByRVA(cfgIATEntry.RVA)
+				if len(imp.Functions) != 0 {
+					cfgIATEntry.INTValue = uint32(imp.Functions[index].OriginalThunkValue)
+					cfgIATEntry.IATValue = uint32(imp.Functions[index].ThunkValue)
+					cfgIATEntry.Description = imp.Name + "!" + imp.Functions[index].Name
 				}
+				GFGIAT = append(GFGIAT, cfgIATEntry)
+				offset += 4 + uint32(n)
 			}
+		} else {
+			GuardAddressTakenIatEntryTable := v.Field(26).Uint()
+			imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).ImageBase
+			rva := uint32(GuardAddressTakenIatEntryTable - imageBase)
+			offset := pe.GetOffsetFromRva(rva)
+			for i := uint64(1); i <= GuardAddressTakenIatEntryCount; i++ {
+				cfgIATEntry := CFGIATEntry{}
+				cfgIATEntry.RVA, err = pe.ReadUint32(offset)
+				if err != nil {
+					return GFGIAT
+				}
+				imp, index := pe.GetImportEntryInfoByRVA(cfgIATEntry.RVA)
+				if len(imp.Functions) != 0 {
+					cfgIATEntry.INTValue = uint32(imp.Functions[index].OriginalThunkValue)
+					cfgIATEntry.IATValue = uint32(imp.Functions[index].ThunkValue)
+					cfgIATEntry.Description = imp.Name + "!" + imp.Functions[index].Name
+				}
 
+				GFGIAT = append(GFGIAT, cfgIATEntry)
+				offset += 4 + uint32(n)
+			}
 		}
+
 	}
 	return GFGIAT
 }

@@ -260,7 +260,7 @@ func TestLoadConfigDirectorySEHHandlers(t *testing.T) {
 	}
 }
 
-func TestLoadConfigDirectoryGFIDS(t *testing.T) {
+func TestLoadConfigDirectoryControlFlowGuardFunctions(t *testing.T) {
 
 	type TestGFIDSEntry struct {
 		entriesCount int
@@ -342,6 +342,95 @@ func TestLoadConfigDirectoryGFIDS(t *testing.T) {
 			if !reflect.DeepEqual(guardedFunction, tt.out.CFGFunction) {
 				t.Fatalf("load config GFIDS entry assertion failed, got %v, want %v",
 					guardedFunction, tt.out.CFGFunction)
+			}
+		})
+	}
+}
+
+func TestLoadConfigDirectoryControlFlowGuardIAT(t *testing.T) {
+
+	type TestGFIDSEntry struct {
+		entriesCount int
+		entryIndex   int
+		CFGFunction  CFGIATEntry
+	}
+
+	tests := []struct {
+		in  string
+		out TestGFIDSEntry
+	}{
+		{
+			in: getAbsoluteFilePath("test/KernelBase.dll"),
+			out: TestGFIDSEntry{
+				entriesCount: 0xa,
+				entryIndex:   0x9,
+				CFGFunction: CFGIATEntry{
+					RVA:         0x1f7924,
+					IATValue:    0x80000008,
+					INTValue:    0x80000008,
+					Description: "ntdll.dll!#8",
+				},
+			},
+		},
+		{
+			in: getAbsoluteFilePath("test/kernel32.dll"),
+			out: TestGFIDSEntry{
+				entriesCount: 0x3,
+				entryIndex:   0x2,
+				CFGFunction: CFGIATEntry{
+					RVA:         0x83838,
+					IATValue:    0xac0e0,
+					INTValue:    0xac0e0,
+					Description: "ntdll.dll!RtlGetLengthWithoutLastFullDosOrNtPathElement",
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+
+			ops := Options{Fast: false}
+			file, err := New(tt.in, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
+			}
+
+			var va, size uint32
+
+			if file.Is64 {
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			} else {
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseLoadConfigDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseLoadConfigDirectory(%s) failed, reason: %v",
+					tt.in, err)
+			}
+
+			cfgIAT := file.LoadConfig.CFGIAT
+			if len(cfgIAT) != tt.out.entriesCount {
+				t.Fatalf("load config CFG IAT entries count assert failed, got %v, want %v",
+					len(cfgIAT), tt.out.entriesCount)
+			}
+
+			cfgIATEntry := cfgIAT[tt.out.entryIndex]
+			if !reflect.DeepEqual(cfgIATEntry, tt.out.CFGFunction) {
+				t.Fatalf("load config CFG IAT entry assertion failed, got %v, want %v",
+					cfgIATEntry, tt.out.CFGFunction)
 			}
 		})
 	}
