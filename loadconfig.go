@@ -11,11 +11,22 @@ import (
 	"reflect"
 )
 
+// ImageGuardFlagType represents the type for load configuration image guard flags.
+type ImageGuardFlagType uint8
+
 const (
+	// ImageGuardFlagFIDSuppressed indicates that the call target is explicitly
+	// suppressed (do not treat it as valid for purposes of CFG).
+	ImageGuardFlagFIDSuppressed = 0x1
 
-	// The GuardFlags field contains a combination of one or more of the
-	// following flags and subfields:
+	// ImageGuardFlagExportSuppressed indicates that the call target is export
+	// suppressed. See Export suppression for more details.
+	ImageGuardFlagExportSuppressed = 0x2
+)
 
+// The GuardFlags field contains a combination of one or more of the
+// following flags and subfields:
+const (
 	// ImageGuardCfInstrumented indicates that the module performs control flow
 	// integrity checks using system-supplied support.
 	ImageGuardCfInstrumented = 0x00000100
@@ -53,7 +64,9 @@ const (
 	// ImageGuardCfLongJumpTablePresent indicates that the module contains
 	// long jmp target information.
 	ImageGuardCfLongJumpTablePresent = 0x00010000
+)
 
+const (
 	// ImageGuardCfFunctionTableSizeMask indicates that the mask for the
 	// subfield that contains the stride of Control Flow Guard function table
 	// entries (that is, the additional count of bytes per table entry).
@@ -62,20 +75,16 @@ const (
 	// ImageGuardCfFunctionTableSizeShift indicates the shift to right-justify
 	// Guard CF function table stride.
 	ImageGuardCfFunctionTableSizeShift = 28
+)
 
-	// ImageGuardFlagFIDSuppressed indicates that the call target is explicitly
-	// suppressed (do not treat it as valid for purposes of CFG)
-	ImageGuardFlagFIDSuppressed = 0x1
-
-	// ImageGuardFlagExportSuppressed indicates that the call target is export
-	// suppressed. See Export suppression for more details
-	ImageGuardFlagExportSuppressed = 0x2
-
+const (
 	ImageDynamicRelocationGuardRfPrologue = 0x00000001
 	ImageDynamicRelocationGuardREpilogue  = 0x00000002
 	ImageEnclaveLongIDLength              = 32
 	ImageEnclaveShortIDLength             = 16
+)
 
+const (
 	// ImageEnclaveImportMatchNone indicates that none of the identifiers of the
 	// image need to match the value in the import record.
 	ImageEnclaveImportMatchNone = 0x00000000
@@ -470,9 +479,12 @@ type ImageEpilogueDynamicRelocationHeader struct {
 }
 
 type CFGFunction struct {
-	Target      uint32 `json:"target"`
-	Flags       *uint8 `json:"flags"`
-	Description string `json:"description"`
+	// RVA of the target CFG call.
+	RVA uint32 `json:"rva"`
+
+	// Flags attached to each GFIDS entry if any call targets have metadata.
+	Flags       ImageGuardFlagType `json:"flags"`
+	Description string             `json:"description"`
 }
 
 type CFGIATEntry struct {
@@ -534,12 +546,15 @@ type LoadConfig struct {
 	VolatileMetadata *VolatileMetadata `json:"volatile_metadata"`
 }
 
-// ImageLoadConfigCodeIntegrity Code Integrity in loadconfig (CI).
+// ImageLoadConfigCodeIntegrity Code Integrity in load config (CI).
 type ImageLoadConfigCodeIntegrity struct {
-	Flags         uint16 `json:"flags"`   // Flags to indicate if CI information is available, etc.
-	Catalog       uint16 `json:"catalog"` // 0xFFFF means not available
+	// Flags to indicate if CI information is available, etc.
+	Flags uint16 `json:"flags"`
+	// 0xFFFF means not available
+	Catalog       uint16 `json:"catalog"`
 	CatalogOffset uint32 `json:"catalog_offset"`
-	Reserved      uint32 `json:"reserved"` // Additional bitmask to be defined later
+	// Additional bitmask to be defined later
+	Reserved uint32 `json:"reserved"`
 }
 
 type ImageEnclaveConfig32 struct {
@@ -846,76 +861,72 @@ func (pe *File) getControlFlowGuardFunctions() []CFGFunction {
 	var GFIDS []CFGFunction
 	var err error
 
-	// GuardCFFunctionCount is found in index 23 of the struct.
-	if v.NumField() > 23 {
-		// The GFIDS table is an array of 4 + n bytes, where n is given by :
-		// ((GuardFlags & IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_MASK) >>
-		// IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_SHIFT).
+	// The GFIDS table is an array of 4 + n bytes, where n is given by :
+	// ((GuardFlags & IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_MASK) >>
+	// IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_SHIFT).
 
-		// This allows for extra metadata to be attached to CFG call targets in
-		// the future. The only currently defined metadata is an optional 1-byte
-		// extra flags field (“GFIDS flags”) that is attached to each GFIDS
-		// entry if any call targets have metadata.
-		GuardFlags := v.Field(24).Uint()
-		n := (GuardFlags & ImageGuardCfFunctionTableSizeMask) >>
-			ImageGuardCfFunctionTableSizeShift
-		GuardCFFunctionCount := v.Field(23).Uint()
-		if GuardCFFunctionCount > 0 {
-			if pe.Is32 {
-				GuardCFFunctionTable := uint32(v.Field(22).Uint())
-				imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
-				rva := GuardCFFunctionTable - imageBase
-				offset := pe.GetOffsetFromRva(rva)
-				for i := uint32(1); i <= uint32(GuardCFFunctionCount); i++ {
-					cfgFunction := CFGFunction{}
-					var cfgFlags uint8
-					cfgFunction.Target, err = pe.ReadUint32(offset)
+	// This allows for extra metadata to be attached to CFG call targets in
+	// the future. The only currently defined metadata is an optional 1-byte
+	// extra flags field (“GFIDS flags”) that is attached to each GFIDS
+	// entry if any call targets have metadata.
+	GuardFlags := v.Field(24).Uint()
+	n := (GuardFlags & ImageGuardCfFunctionTableSizeMask) >>
+		ImageGuardCfFunctionTableSizeShift
+	GuardCFFunctionCount := v.Field(23).Uint()
+	if GuardCFFunctionCount > 0 {
+		if pe.Is32 {
+			GuardCFFunctionTable := uint32(v.Field(22).Uint())
+			imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
+			rva := GuardCFFunctionTable - imageBase
+			offset := pe.GetOffsetFromRva(rva)
+			for i := uint32(1); i <= uint32(GuardCFFunctionCount); i++ {
+				cfgFunction := CFGFunction{}
+				var cfgFlags uint8
+				cfgFunction.RVA, err = pe.ReadUint32(offset)
+				if err != nil {
+					return GFIDS
+				}
+				if n > 0 {
+					err = pe.structUnpack(&cfgFlags, offset+4, uint32(n))
 					if err != nil {
 						return GFIDS
 					}
-					if n > 0 {
-						err = pe.structUnpack(&cfgFlags, offset+4, uint32(n))
-						if err != nil {
-							return GFIDS
-						}
-						cfgFunction.Flags = &cfgFlags
-						if cfgFlags == ImageGuardFlagFIDSuppressed ||
-							cfgFlags == ImageGuardFlagExportSuppressed {
-							exportName := pe.GetExportFunctionByRVA(cfgFunction.Target)
-							cfgFunction.Description = exportName.Name
-						}
+					cfgFunction.Flags = ImageGuardFlagType(cfgFlags)
+					if cfgFlags == ImageGuardFlagFIDSuppressed ||
+						cfgFlags == ImageGuardFlagExportSuppressed {
+						exportName := pe.GetExportFunctionByRVA(cfgFunction.RVA)
+						cfgFunction.Description = exportName.Name
 					}
-
-					GFIDS = append(GFIDS, cfgFunction)
-					offset += 4 + uint32(n)
 				}
-			} else {
-				GuardCFFunctionTable := v.Field(22).Uint()
-				imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).ImageBase
-				rva := uint32(GuardCFFunctionTable - imageBase)
-				offset := pe.GetOffsetFromRva(rva)
-				for i := uint64(1); i <= GuardCFFunctionCount; i++ {
-					var cfgFlags uint8
-					cfgFunction := CFGFunction{}
-					cfgFunction.Target, err = pe.ReadUint32(offset)
-					if err != nil {
-						return GFIDS
-					}
-					if n > 0 {
-						pe.structUnpack(&cfgFlags, offset+4, uint32(n))
-						cfgFunction.Flags = &cfgFlags
-						if cfgFlags == ImageGuardFlagFIDSuppressed ||
-							cfgFlags == ImageGuardFlagExportSuppressed {
-							exportName := pe.GetExportFunctionByRVA(cfgFunction.Target)
-							cfgFunction.Description = exportName.Name
-						}
-					}
 
-					GFIDS = append(GFIDS, cfgFunction)
-					offset += 4 + uint32(n)
-				}
+				GFIDS = append(GFIDS, cfgFunction)
+				offset += 4 + uint32(n)
 			}
+		} else {
+			GuardCFFunctionTable := v.Field(22).Uint()
+			imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).ImageBase
+			rva := uint32(GuardCFFunctionTable - imageBase)
+			offset := pe.GetOffsetFromRva(rva)
+			for i := uint64(1); i <= GuardCFFunctionCount; i++ {
+				var cfgFlags uint8
+				cfgFunction := CFGFunction{}
+				cfgFunction.RVA, err = pe.ReadUint32(offset)
+				if err != nil {
+					return GFIDS
+				}
+				if n > 0 {
+					pe.structUnpack(&cfgFlags, offset+4, uint32(n))
+					cfgFunction.Flags = ImageGuardFlagType(cfgFlags)
+					if cfgFlags == ImageGuardFlagFIDSuppressed ||
+						cfgFlags == ImageGuardFlagExportSuppressed {
+						exportName := pe.GetExportFunctionByRVA(cfgFunction.RVA)
+						cfgFunction.Description = exportName.Name
+					}
+				}
 
+				GFIDS = append(GFIDS, cfgFunction)
+				offset += 4 + uint32(n)
+			}
 		}
 	}
 	return GFIDS
@@ -1407,4 +1418,20 @@ func (pe *File) getVolatileMetadata() *VolatileMetadata {
 	}
 
 	return &volatileMeta
+}
+
+// String returns a string interpretation of the load config directory image
+// guard flag.
+func (flag ImageGuardFlagType) String() string {
+	imageGuardFlagTypeMap := map[ImageGuardFlagType]string{
+		ImageGuardFlagFIDSuppressed:    "FID Suppressed",
+		ImageGuardFlagExportSuppressed: "Export Suppressed",
+	}
+
+	v, ok := imageGuardFlagTypeMap[flag]
+	if ok {
+		return v
+	}
+
+	return "?"
 }

@@ -259,3 +259,90 @@ func TestLoadConfigDirectorySEHHandlers(t *testing.T) {
 		})
 	}
 }
+
+func TestLoadConfigDirectoryGFIDS(t *testing.T) {
+
+	type TestGFIDSEntry struct {
+		entriesCount int
+		entryIndex   int
+		CFGFunction  CFGFunction
+	}
+
+	tests := []struct {
+		in  string
+		out TestGFIDSEntry
+	}{
+		{
+			in: getAbsoluteFilePath("test/KernelBase.dll"),
+			out: TestGFIDSEntry{
+				entriesCount: 0xc4a,
+				entryIndex:   0x1,
+				CFGFunction: CFGFunction{
+					RVA:         0xfe2a0,
+					Flags:       ImageGuardFlagExportSuppressed,
+					Description: "GetCalendarInfoEx",
+				},
+			},
+		},
+		{
+			in: getAbsoluteFilePath("test/kernel32.dll"),
+			out: TestGFIDSEntry{
+				entriesCount: 0x5e6,
+				entryIndex:   0x5d3,
+				CFGFunction: CFGFunction{
+					RVA:         0x71390,
+					Flags:       ImageGuardFlagExportSuppressed,
+					Description: "QuirkIsEnabledForPackage2Worker",
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+
+			ops := Options{Fast: false}
+			file, err := New(tt.in, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
+			}
+
+			var va, size uint32
+
+			if file.Is64 {
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			} else {
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseLoadConfigDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseLoadConfigDirectory(%s) failed, reason: %v",
+					tt.in, err)
+			}
+
+			gfids := file.LoadConfig.GFIDS
+			if len(gfids) != tt.out.entriesCount {
+				t.Fatalf("load config GFIDS entries count assert failed, got %v, want %v",
+					len(gfids), tt.out.entriesCount)
+			}
+
+			guardedFunction := gfids[tt.out.entryIndex]
+			if !reflect.DeepEqual(guardedFunction, tt.out.CFGFunction) {
+				t.Fatalf("load config GFIDS entry assertion failed, got %v, want %v",
+					guardedFunction, tt.out.CFGFunction)
+			}
+		})
+	}
+}
