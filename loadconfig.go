@@ -2,6 +2,12 @@
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
+// References:
+// https://www.virtualbox.org/svn/vbox/trunk/include/iprt/formats/pecoff.h
+// https://github.com/hdoc/llvm-project/blob/release/15.x/llvm/include/llvm/Object/COFF.h
+// https://ffri.github.io/ProjectChameleon/new_reloc_chpev2/
+// https://blogs.blackberry.com/en/2019/09/teardown-windows-10-on-arm-x86-emulation
+
 package pe
 
 import (
@@ -85,8 +91,8 @@ const (
 
 // Software enclave information.
 const (
-	ImageEnclaveLongIDLength              = 32
-	ImageEnclaveShortIDLength             = 16
+	ImageEnclaveLongIDLength  = 32
+	ImageEnclaveShortIDLength = 16
 )
 
 const (
@@ -116,8 +122,6 @@ const (
 	// loading of the image fails.
 	ImageEnclaveImportMatchImageID = 0x00000004
 )
-
-// https://www.virtualbox.org/svn/vbox/trunk/include/iprt/formats/pecoff.h
 
 // ImageLoadConfigDirectory32 Contains the load configuration data of an image for x86 binaries.
 type ImageLoadConfigDirectory32 struct {
@@ -210,10 +214,10 @@ type ImageLoadConfigDirectory32 struct {
 	CodeIntegrity ImageLoadConfigCodeIntegrity `json:"code_integrity"`
 
 	// The VA where Control Flow Guard address taken IAT table is stored.
-	GuardAddressTakenIatEntryTable uint32 `json:"guard_address_taken_iat_entry_table"`
+	GuardAddressTakenIATEntryTable uint32 `json:"guard_address_taken_iat_entry_table"`
 
 	// The count of unique RVAs in the above table.
-	GuardAddressTakenIatEntryCount uint32 `json:"guard_address_taken_iat_entry_count"`
+	GuardAddressTakenIATEntryCount uint32 `json:"guard_address_taken_iat_entry_count"`
 
 	// The VA where Control Flow Guard long jump target table is stored.
 	GuardLongJumpTargetTable uint32 `json:"guard_long_jump_target_table"`
@@ -371,46 +375,20 @@ type ImageLoadConfigDirectory64 struct {
 	GuardMemcpyFunctionPointer               uint64 `json:"guard_memcpy_function_pointer"`
 }
 
-type ImageCHPEMetadataX86v1 struct {
+// ImageCHPEMetadataX86 represents the X86_IMAGE_CHPE_METADATA_X86.
+type ImageCHPEMetadataX86 struct {
 	Version                                  uint32 `json:"version"`
 	CHPECodeAddressRangeOffset               uint32 `json:"chpe_code_address_range_offset"`
 	CHPECodeAddressRangeCount                uint32 `json:"chpe_code_address_range_count"`
-	WowA64ExceptionHandlerFunctionPtr        uint32 `json:"wow_a_64_exception_handler_function_ptr"`
-	WowA64DispatchCallFunctionPtr            uint32 `json:"wow_a_64_dispatch_call_function_ptr"`
-	WowA64DispatchIndirectCallFunctionPtr    uint32 `json:"wow_a_64_dispatch_indirect_call_function_ptr"`
-	WowA64DispatchIndirectCallCfgFunctionPtr uint32 `json:"wow_a_64_dispatch_indirect_call_cfg_function_ptr"`
-	WowA64DispatchRetFunctionPtr             uint32 `json:"wow_a_64_dispatch_ret_function_ptr"`
-	WowA64DispatchRetLeafFunctionPtr         uint32 `json:"wow_a_64_dispatch_ret_leaf_function_ptr"`
-	WowA64DispatchJumpFunctionPtr            uint32 `json:"wow_a_64_dispatch_jump_function_ptr"`
-}
-
-type ImageCHPEMetadataX86v2 struct {
-	Version                                  uint32 `json:"version"`
-	CHPECodeAddressRangeOffset               uint32 `json:"chpe_code_address_range_offset"`
-	CHPECodeAddressRangeCount                uint32 `json:"chpe_code_address_range_count"`
-	WowA64ExceptionHandlerFunctionPtr        uint32 `json:"wow_a_64_exception_handler_function_ptr"`
-	WowA64DispatchCallFunctionPtr            uint32 `json:"wow_a_64_dispatch_call_function_ptr"`
-	WowA64DispatchIndirectCallFunctionPtr    uint32 `json:"wow_a_64_dispatch_indirect_call_function_ptr"`
-	WowA64DispatchIndirectCallCfgFunctionPtr uint32 `json:"wow_a_64_dispatch_indirect_call_cfg_function_ptr"`
-	WowA64DispatchRetFunctionPtr             uint32 `json:"wow_a_64_dispatch_ret_function_ptr"`
-	WowA64DispatchRetLeafFunctionPtr         uint32 `json:"wow_a_64_dispatch_ret_leaf_function_ptr"`
-	WowA64DispatchJumpFunctionPtr            uint32 `json:"wow_a_64_dispatch_jump_function_ptr"`
-	CompilerIATPointer                       uint32 `json:"compiler_iat_pointer"` // Present if Version >= 2
-}
-
-type ImageCHPEMetadataX86v3 struct {
-	Version                                  uint32 `json:"version"`
-	CHPECodeAddressRangeOffset               uint32 `json:"chpe_code_address_range_offset"`
-	CHPECodeAddressRangeCount                uint32 `json:"chpe_code_address_range_count"`
-	WowA64ExceptionHandlerFunctionPtr        uint32 `json:"wow_a_64_exception_handler_function_ptr"`
-	WowA64DispatchCallFunctionPtr            uint32 `json:"wow_a_64_dispatch_call_function_ptr"`
-	WowA64DispatchIndirectCallFunctionPtr    uint32 `json:"wow_a_64_dispatch_indirect_call_function_ptr"`
-	WowA64DispatchIndirectCallCfgFunctionPtr uint32 `json:"wow_a_64_dispatch_indirect_call_cfg_function_ptr"`
-	WowA64DispatchRetFunctionPtr             uint32 `json:"wow_a_64_dispatch_ret_function_ptr"`
-	WowA64DispatchRetLeafFunctionPtr         uint32 `json:"wow_a_64_dispatch_ret_leaf_function_ptr"`
-	WowA64DispatchJumpFunctionPtr            uint32 `json:"wow_a_64_dispatch_jump_function_ptr"`
-	CompilerIATPointer                       uint32 `json:"compiler_iat_pointer"`
-	WowA64RDTSCFunctionPtr                   uint32 `json:"wow_a_64_rdtsc_function_ptr"` // Present if Version >= 3
+	WoWA64ExceptionHandlerFunctionPtr        uint32 `json:"WoW_a64_exception_handler_function_ptr"`
+	WoWA64DispatchCallFunctionPtr            uint32 `json:"WoW_a64_dispatch_call_function_ptr"`
+	WoWA64DispatchIndirectCallFunctionPtr    uint32 `json:"WoW_a64_dispatch_indirect_call_function_ptr"`
+	WoWA64DispatchIndirectCallCfgFunctionPtr uint32 `json:"WoW_a64_dispatch_indirect_call_cfg_function_ptr"`
+	WoWA64DispatchRetFunctionPtr             uint32 `json:"WoW_a64_dispatch_ret_function_ptr"`
+	WoWA64DispatchRetLeafFunctionPtr         uint32 `json:"WoW_a64_dispatch_ret_leaf_function_ptr"`
+	WoWA64DispatchJumpFunctionPtr            uint32 `json:"WoW_a64_dispatch_jump_function_ptr"`
+	CompilerIATPointer                       uint32 `json:"compiler_iat_pointer"`       // Present if Version >= 2
+	WoWA64RDTSCFunctionPtr                   uint32 `json:"WoW_a64_rdtsc_function_ptr"` // Present if Version >= 3
 }
 
 type CodeRange struct {
@@ -1054,13 +1032,8 @@ func (pe *File) getLongJumpTargetTable() []uint32 {
 
 func (pe *File) getHybridPE() *HybridPE {
 	v := reflect.ValueOf(pe.LoadConfig.Struct)
-	hybridPE := HybridPE{}
 
 	// CHPEMetadataPointer is found in index 31 of the struct.
-	if v.NumField() <= 30 {
-		return nil
-	}
-
 	CHPEMetadataPointer := v.Field(31).Uint()
 	if CHPEMetadataPointer == 0 {
 		return nil
@@ -1083,41 +1056,46 @@ func (pe *File) getHybridPE() *HybridPE {
 		return nil
 	}
 
-	var ImageCHPEMetaX86 interface{}
+	structSize := uint32(0)
+	imgCHPEMetaX86 := ImageCHPEMetadataX86{}
 
 	switch version {
 	case 0x1:
-		ImageCHPEMetaX86v1 := ImageCHPEMetadataX86v1{}
-		structSize := uint32(binary.Size(ImageCHPEMetaX86v1))
-		err = pe.structUnpack(&ImageCHPEMetaX86v1, fileOffset, structSize)
-		if err != nil {
-			return nil
-		}
-		ImageCHPEMetaX86 = ImageCHPEMetaX86v1
+		structSize = uint32(binary.Size(imgCHPEMetaX86) - 8)
 	case 0x2:
-		ImageCHPEMetaX86v2 := ImageCHPEMetadataX86v2{}
-		structSize := uint32(binary.Size(ImageCHPEMetaX86v2))
-		err = pe.structUnpack(&ImageCHPEMetaX86v2, fileOffset, structSize)
-		if err != nil {
-			return nil
-		}
-		ImageCHPEMetaX86 = ImageCHPEMetaX86v2
+		structSize = uint32(binary.Size(imgCHPEMetaX86) - 4)
 	case 0x3:
+		structSize = uint32(binary.Size(imgCHPEMetaX86))
 	default:
-		ImageCHPEMetaX86v3 := ImageCHPEMetadataX86v3{}
-		structSize := uint32(binary.Size(ImageCHPEMetaX86v3))
-		err = pe.structUnpack(&ImageCHPEMetaX86v3, fileOffset, structSize)
-		if err != nil {
-			return nil
-		}
-		ImageCHPEMetaX86 = ImageCHPEMetaX86v3
+		// This should be a newer version, default to the latest CHPE version.
+		structSize = uint32(binary.Size(imgCHPEMetaX86))
 	}
 
-	hybridPE.CHPEMetadata = ImageCHPEMetaX86
+	// Boundary check
+	totalSize := fileOffset + structSize
 
-	v = reflect.ValueOf(ImageCHPEMetaX86)
-	CHPECodeAddressRangeOffset := uint32(v.Field(1).Uint())
-	CHPECodeAddressRangeCount := int(v.Field(2).Uint())
+	// Integer overflow
+	if (totalSize > fileOffset) != (structSize > 0) {
+		pe.logger.Debug("encountered an outside read boundary when reading CHPE structure")
+		return nil
+	}
+
+	if fileOffset >= pe.size || totalSize > pe.size {
+		pe.logger.Debug("encountered an outside read boundary when reading CHPE structure")
+		return nil
+	}
+
+	imgCHPEMeta := make([]byte, binary.Size(imgCHPEMetaX86))
+	copy(imgCHPEMeta, pe.data[fileOffset:fileOffset+structSize])
+	buf := bytes.NewReader(imgCHPEMeta)
+	err = binary.Read(buf, binary.LittleEndian, &imgCHPEMetaX86)
+	if err != nil {
+		pe.logger.Debug("encountered an error while unpacking image CHPE Meta")
+		return nil
+	}
+
+	hybridPE := HybridPE{}
+	hybridPE.CHPEMetadata = imgCHPEMetaX86
 
 	// Code Ranges
 
@@ -1135,8 +1113,8 @@ func (pe *File) getHybridPE() *HybridPE {
 		} IMAGE_CHPE_RANGE_ENTRY, *PIMAGE_CHPE_RANGE_ENTRY;
 	*/
 
-	rva = CHPECodeAddressRangeOffset
-	for i := 0; i < CHPECodeAddressRangeCount; i++ {
+	rva = imgCHPEMetaX86.CHPECodeAddressRangeOffset
+	for i := 0; i < int(imgCHPEMetaX86.CHPECodeAddressRangeCount); i++ {
 
 		codeRange := CodeRange{}
 		fileOffset := pe.GetOffsetFromRva(rva)
@@ -1163,9 +1141,8 @@ func (pe *File) getHybridPE() *HybridPE {
 	}
 
 	// Compiler IAT
-	CompilerIATPointer := uint32(v.Field(10).Uint())
-	if CompilerIATPointer != 0 {
-		rva := CompilerIATPointer
+	if imgCHPEMetaX86.CompilerIATPointer != 0 {
+		rva := imgCHPEMetaX86.CompilerIATPointer
 		for i := 0; i < 1024; i++ {
 			compilerIAT := CompilerIAT{}
 			compilerIAT.RVA = rva
@@ -1175,8 +1152,10 @@ func (pe *File) getHybridPE() *HybridPE {
 				break
 			}
 
-			pe.LoadConfig.CHPE.CompilerIAT = append(
-				pe.LoadConfig.CHPE.CompilerIAT, compilerIAT)
+			impFunc, _ := pe.GetImportEntryInfoByRVA(compilerIAT.RVA)
+			compilerIAT.Description = impFunc.Name
+			hybridPE.CompilerIAT = append(
+				hybridPE.CompilerIAT, compilerIAT)
 			rva += 4
 		}
 	}

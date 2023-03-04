@@ -172,6 +172,7 @@ func parsePE(filename string, cfg config) {
 	pe, err := peparser.NewBytes(data, &peparser.Options{
 		Logger:                logger,
 		DisableCertValidation: false,
+		Fast:                  false,
 	})
 
 	if err != nil {

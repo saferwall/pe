@@ -60,8 +60,8 @@ func TestLoadConfigDirectory(t *testing.T) {
 				GuardCFFunctionTable:           0x650010f0,
 				GuardCFFunctionCount:           0x55,
 				GuardFlags:                     0x10017500,
-				GuardAddressTakenIatEntryTable: 0x6500129c,
-				GuardAddressTakenIatEntryCount: 0x1,
+				GuardAddressTakenIATEntryTable: 0x6500129c,
+				GuardAddressTakenIATEntryCount: 0x1,
 				GuardLongJumpTargetTable:       0x650012a4,
 				GuardLongJumpTargetCount:       0x2,
 			},
@@ -78,8 +78,8 @@ func TestLoadConfigDirectory(t *testing.T) {
 				GuardCFFunctionTable:           0x1005ab70,
 				GuardCFFunctionCount:           0xc4a,
 				GuardFlags:                     0x10017500,
-				GuardAddressTakenIatEntryTable: 0x1005e8e4,
-				GuardAddressTakenIatEntryCount: 0xa,
+				GuardAddressTakenIATEntryTable: 0x1005e8e4,
+				GuardAddressTakenIATEntryCount: 0xa,
 				VolatileMetadataPointer:        0x10090c4c,
 			},
 		},
@@ -443,11 +443,11 @@ func TestLoadConfigDirectoryControlFlowGuardLongJump(t *testing.T) {
 		out []uint32
 	}{
 		{
-			in: getAbsoluteFilePath("test/IEAdvpack.dll"),
+			in:  getAbsoluteFilePath("test/IEAdvpack.dll"),
 			out: []uint32{0x13EDD, 0x1434F},
 		},
 		{
-			in: getAbsoluteFilePath("test/PSCRIPT5.dll"),
+			in:  getAbsoluteFilePath("test/PSCRIPT5.DLL"),
 			out: []uint32{0x3FE11, 0x401F8, 0x4077D, 0x40B53, 0x40DFD, 0x40FB3},
 		},
 	}
@@ -489,9 +489,113 @@ func TestLoadConfigDirectoryControlFlowGuardLongJump(t *testing.T) {
 			cfgLongJumpTargetTable := file.LoadConfig.CFGLongJump
 			if !reflect.DeepEqual(cfgLongJumpTargetTable, tt.out) {
 				t.Fatalf("load config CFG long jump target table assertion failed, got %v, want %v",
-				cfgLongJumpTargetTable, tt.out)
+					cfgLongJumpTargetTable, tt.out)
 			}
 		})
 	}
 }
 
+func TestLoadConfigDirectoryHybridPE(t *testing.T) {
+
+	type TestCHPE struct {
+		imgCHPEMetadata ImageCHPEMetadataX86
+		codeRanges      []CodeRange
+		compilerIAT     CompilerIAT
+	}
+
+	tests := []struct {
+		in  string
+		out TestCHPE
+	}{
+		{
+			in: getAbsoluteFilePath("test/msyuv.dll"),
+			out: TestCHPE{
+				imgCHPEMetadata: ImageCHPEMetadataX86{
+					Version:                                  0x4,
+					CHPECodeAddressRangeOffset:               0x26f8,
+					CHPECodeAddressRangeCount:                0x4,
+					WoWA64ExceptionHandlerFunctionPtr:        0x1000c,
+					WoWA64DispatchCallFunctionPtr:            0x10000,
+					WoWA64DispatchIndirectCallFunctionPtr:    0x10004,
+					WoWA64DispatchIndirectCallCfgFunctionPtr: 0x10008,
+					WoWA64DispatchRetFunctionPtr:             0x10010,
+					WoWA64DispatchRetLeafFunctionPtr:         0x10014,
+					WoWA64DispatchJumpFunctionPtr:            0x10018,
+					CompilerIATPointer:                       0x11000,
+					WoWA64RDTSCFunctionPtr:                   0x1001c,
+				},
+				codeRanges: []CodeRange{
+					{
+						Begin:   0x1000,
+						Length:  0x10,
+						Machine: 0x0,
+					},
+					{
+						Begin:   0x2a00,
+						Length:  0x4e28,
+						Machine: 0x1,
+					},
+					{
+						Begin:   0x8000,
+						Length:  0x4b1,
+						Machine: 0x0,
+					},
+					{
+						Begin:   0x9000,
+						Length:  0x2090,
+						Machine: 0x1,
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+
+			ops := Options{Fast: false}
+			file, err := New(tt.in, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
+			}
+
+			var va, size uint32
+
+			if file.Is64 {
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			} else {
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseLoadConfigDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseLoadConfigDirectory(%s) failed, reason: %v",
+					tt.in, err)
+			}
+
+			chpe := file.LoadConfig.CHPE
+			if chpe.CHPEMetadata != tt.out.imgCHPEMetadata {
+				t.Fatalf("load config CHPE metadata assertion failed, got %v, want %v",
+					chpe.CHPEMetadata, tt.out.imgCHPEMetadata)
+			}
+
+			if !reflect.DeepEqual(chpe.CodeRanges, tt.out.codeRanges) {
+				t.Fatalf("load config CHPE code ranges assertion failed, got %v, want %v",
+					chpe.CodeRanges, tt.out.codeRanges)
+			}
+
+			// TODO: test compiler IAT.
+		})
+	}
+}
