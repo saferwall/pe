@@ -599,3 +599,74 @@ func TestLoadConfigDirectoryHybridPE(t *testing.T) {
 		})
 	}
 }
+
+func TestLoadConfigDirectoryDVRT(t *testing.T) {
+
+	type TestDVRT struct {
+		imgDynRelocTable  ImageDynamicRelocationTable
+		relocEntriesCount int
+	}
+
+	tests := []struct {
+		in  string
+		out TestDVRT
+	}{
+		{
+			in: getAbsoluteFilePath("test/WdBoot.sys"),
+			out: TestDVRT{
+				imgDynRelocTable: ImageDynamicRelocationTable{
+					Version: 0x1,
+					Size:    0x2dc,
+				},
+				relocEntriesCount: 0x2,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+
+			ops := Options{Fast: false}
+			file, err := New(tt.in, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
+			}
+
+			var va, size uint32
+
+			if file.Is64 {
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			} else {
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseLoadConfigDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseLoadConfigDirectory(%s) failed, reason: %v",
+					tt.in, err)
+			}
+
+			DVRT := file.LoadConfig.DVRT
+			if DVRT.ImageDynamicRelocationTable != tt.out.imgDynRelocTable {
+				t.Fatalf("load config DVRT header assertion failed, got %v, want %v",
+					DVRT.ImageDynamicRelocationTable, tt.out.imgDynRelocTable)
+			}
+
+			if len(DVRT.Entries) != tt.out.relocEntriesCount {
+				t.Fatalf("load config DVRT entries count  assertion failed, got %v, want %v",
+					len(DVRT.Entries), tt.out.relocEntriesCount)
+			}
+		})
+	}
+}

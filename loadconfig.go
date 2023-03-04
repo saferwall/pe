@@ -7,6 +7,9 @@
 // https://github.com/hdoc/llvm-project/blob/release/15.x/llvm/include/llvm/Object/COFF.h
 // https://ffri.github.io/ProjectChameleon/new_reloc_chpev2/
 // https://blogs.blackberry.com/en/2019/09/teardown-windows-10-on-arm-x86-emulation
+// DVRT: https://www.alex-ionescu.com/?p=323
+// https://xlab.tencent.com/en/2016/11/02/return-flow-guard/
+// https://denuvosoftwaresolutions.github.io/DVRT/dvrt.html
 
 package pe
 
@@ -409,20 +412,39 @@ type HybridPE struct {
 	CompilerIAT  []CompilerIAT `json:"compiler_iat"`
 }
 
+// ImageDynamicRelocationTable represents the DVRT header.
 type ImageDynamicRelocationTable struct {
+	// Until now, there is only one version of the DVRT header (1)..
 	Version uint32 `json:"version"`
-	Size    uint32 `json:"size"`
+	// Size represents the number of bytes after the header that contains
+	// retpoline information.
+	Size uint32 `json:"size"`
 	//  IMAGE_DYNAMIC_RELOCATION DynamicRelocations[0];
 }
 
+// Dynamic value relocation entries following IMAGE_DYNAMIC_RELOCATION_TABLE.
+// Each block starts with the header.
+
+// ImageDynamicRelocation32 represents the 32-bit version of a reloc entry.
 type ImageDynamicRelocation32 struct {
-	Symbol        uint32 `json:"symbol"`
+	// Symbol field identifies one of the existing types of dynamic relocations
+	// so far (values 3, 4 and 5).
+	Symbol uint32 `json:"symbol"`
+
+	// Then, for each page, there is a block that starts with a relocation entry.
+	// BaseRelocSize represents the size of the block.
 	BaseRelocSize uint32 `json:"base_reloc_size"`
 	//  IMAGE_BASE_RELOCATION BaseRelocations[0];
 }
 
+// ImageDynamicRelocation64 represents the 64-bit version of a reloc entry.
 type ImageDynamicRelocation64 struct {
-	Symbol        uint64 `json:"symbol"`
+	// Symbol field identifies one of the existing types of dynamic relocations
+	// so far (values 3, 4 and 5).
+	Symbol uint64 `json:"symbol"`
+
+	// Then, for each page, there is a block that starts with a relocation entry.
+	// BaseRelocSize represents the size of the block.
 	BaseRelocSize uint32 `json:"base_reloc_size"`
 	//  IMAGE_BASE_RELOCATION BaseRelocations[0];
 }
@@ -489,14 +511,24 @@ type RelocBlock struct {
 }
 type RelocEntry struct {
 	// Could be ImageDynamicRelocation32{} or ImageDynamicRelocation64{}
-	ImgDynReloc interface{}  `json:"img_dyn_reloc"`
-	RelocBlocks []RelocBlock `json:"reloc_blocks"`
+	ImageDynamicRelocation interface{}  `json:"image_dynamic_relocation"`
+	RelocBlocks            []RelocBlock `json:"reloc_blocks"`
 }
 
-// DVRT Dynamic Value Relocation Table.
+// DVRT represents the Dynamic Value Relocation Table.
+// The DVRT was originally introduced back in the Windows 10 Creators Update to
+// improve kernel address space layout randomization (KASLR). It allowed the
+// memory manager’s page frame number (PFN) database and page table self-map to
+// be assigned dynamic addresses at runtime. The DVRT is stored directly in the
+// binary and contains a series of relocation entries for each symbol (i.e.
+// address) that is to be relocated. The relocation entries are themselves
+// arranged in a hierarchical fashion grouped first by symbol and then by
+// containing page to allow for a compact description of all locations in the
+// binary that reference a relocatable symbol.
+// Reference: https://techcommunity.microsoft.com/t5/windows-os-platform-blog/mitigating-spectre-variant-2-with-retpoline-on-windows/ba-p/295618
 type DVRT struct {
-	ImgDynRelocTable ImageDynamicRelocationTable `json:"img_dyn_reloc_table"`
-	Entries          []RelocEntry                `json:"entries"`
+	ImageDynamicRelocationTable `json:"image_dynamic_relocation_table"`
+	Entries                     []RelocEntry `json:"entries"`
 }
 
 type Enclave struct {
@@ -1170,10 +1202,6 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 	imgDynRelocTable := ImageDynamicRelocationTable{}
 
 	v := reflect.ValueOf(pe.LoadConfig.Struct)
-	if v.NumField() <= 35 {
-		return nil
-	}
-
 	DynamicValueRelocTableOffset := v.Field(34).Uint()
 	DynamicValueRelocTableSection := v.Field(35).Uint()
 	if DynamicValueRelocTableOffset == 0 || DynamicValueRelocTableSection == 0 {
@@ -1194,7 +1222,7 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 		return nil
 	}
 
-	dvrt.ImgDynRelocTable = imgDynRelocTable
+	dvrt.ImageDynamicRelocationTable = imgDynRelocTable
 	offset += structSize
 
 	// Get dynamic relocation entries according to version.
@@ -1214,7 +1242,7 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 				if err != nil {
 					return nil
 				}
-				relocEntry.ImgDynReloc = imgDynReloc
+				relocEntry.ImageDynamicRelocation = imgDynReloc
 				baseBlockSize = imgDynReloc.BaseRelocSize
 			} else {
 				imgDynReloc := ImageDynamicRelocation64{}
@@ -1223,7 +1251,7 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 				if err != nil {
 					return nil
 				}
-				relocEntry.ImgDynReloc = imgDynReloc
+				relocEntry.ImageDynamicRelocation = imgDynReloc
 				baseBlockSize = imgDynReloc.BaseRelocSize
 			}
 			offset += imgDynRelocSize
