@@ -1309,7 +1309,7 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 				branchIt := uint32(0)
 				switch retpolineType {
 				case 3:
-					for branchIt < baseReloc.SizeOfBlock/4-2 {
+					for branchIt < (baseReloc.SizeOfBlock-structSize)/4 {
 						imgImpCtrlTransDynReloc := ImageImportControlTransferDynamicRelocation{}
 
 						dword, err := pe.ReadUint32(offset)
@@ -1326,7 +1326,7 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 						relocBlock.TypeOffsets = append(relocBlock.TypeOffsets, imgImpCtrlTransDynReloc)
 					}
 				case 4:
-					for branchIt < baseReloc.SizeOfBlock/4-2 {
+					for branchIt < (baseReloc.SizeOfBlock-structSize)/2 {
 						imgIndirCtrlTransDynReloc := ImageIndirectControlTransferDynamicRelocation{}
 
 						word, err := pe.ReadUint16(offset)
@@ -1334,17 +1334,17 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 							return nil
 						}
 						imgIndirCtrlTransDynReloc.PageRelativeOffset = word & 0xfff
-						imgIndirCtrlTransDynReloc.IndirectCall = uint8(word & 0x8 >> 3)
-						imgIndirCtrlTransDynReloc.RexWPrefix = uint8(word & 0x4 >> 2)
-						imgIndirCtrlTransDynReloc.CfgCheck = uint8(word & 0x2 >> 1)
-						imgIndirCtrlTransDynReloc.Reserved = uint8(word & 0x1)
+						imgIndirCtrlTransDynReloc.IndirectCall = uint8(word & 0x1000 >> 12)
+						imgIndirCtrlTransDynReloc.RexWPrefix = uint8(word & 0x2000 >> 13)
+						imgIndirCtrlTransDynReloc.CfgCheck = uint8(word & 0x4000 >> 14)
+						imgIndirCtrlTransDynReloc.Reserved = uint8(word & 0x8000 >> 15)
 
 						offset += 2
 						branchIt += 1
 						relocBlock.TypeOffsets = append(relocBlock.TypeOffsets, imgIndirCtrlTransDynReloc)
 					}
 				case 5:
-					for branchIt < baseReloc.SizeOfBlock/4-2 {
+					for branchIt < (baseReloc.SizeOfBlock-structSize)/2 {
 						imgSwitchBranchDynReloc := ImageSwitchableBranchDynamicRelocation{}
 
 						word, err := pe.ReadUint16(offset)
