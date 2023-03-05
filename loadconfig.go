@@ -1286,7 +1286,7 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 
 			// Then, for each page, there is a block that starts with a relocation entry:
 			blockIt := uint32(0)
-			for blockIt < baseBlockSize-imgDynRelocSize {
+			for blockIt <= baseBlockSize-imgDynRelocSize {
 				relocBlock := RelocBlock{}
 
 				baseReloc := ImageBaseRelocation{}
@@ -1339,8 +1339,13 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 						imgIndirCtrlTransDynReloc.CfgCheck = uint8(word & 0x4000 >> 14)
 						imgIndirCtrlTransDynReloc.Reserved = uint8(word & 0x8000 >> 15)
 
-						offset += 2
 						branchIt += 1
+						offset += 2
+
+						// Padding might be added at the end of the block.
+						if (ImageIndirectControlTransferDynamicRelocation{}) == imgIndirCtrlTransDynReloc {
+							continue
+						}
 						relocBlock.TypeOffsets = append(relocBlock.TypeOffsets, imgIndirCtrlTransDynReloc)
 					}
 				case 5:
@@ -1352,7 +1357,7 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 							return nil
 						}
 						imgSwitchBranchDynReloc.PageRelativeOffset = word & 0xfff
-						imgSwitchBranchDynReloc.RegisterNumber = word & 0x100 >> 12
+						imgSwitchBranchDynReloc.RegisterNumber = word & 0xf000 >> 12
 
 						offset += 2
 						branchIt += 1
