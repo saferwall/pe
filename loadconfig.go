@@ -10,6 +10,7 @@
 // DVRT: https://www.alex-ionescu.com/?p=323
 // https://xlab.tencent.com/en/2016/11/02/return-flow-guard/
 // https://denuvosoftwaresolutions.github.io/DVRT/dvrt.html
+// BlueHat v18 || Retpoline: The Anti sectre type 2 mitigation in windows: https://www.youtube.com/watch?v=ZfxXjDQRpsU
 
 package pe
 
@@ -499,20 +500,41 @@ type CFGIATEntry struct {
 	Description string `json:"description"`
 }
 
-type TypeOffset struct {
-	Value               uint16 `json:"value"`
-	Type                uint8  `json:"type"`
-	DynamicSymbolOffset uint16 `json:"dynamic_symbol_offset"`
-}
-
 type RelocBlock struct {
 	ImgBaseReloc ImageBaseRelocation `json:"img_base_reloc"`
-	TypeOffsets  []TypeOffset        `json:"type_offsets"`
+	TypeOffsets  []interface{}       `json:"type_offsets"`
 }
 type RelocEntry struct {
 	// Could be ImageDynamicRelocation32{} or ImageDynamicRelocation64{}
 	ImageDynamicRelocation interface{}  `json:"image_dynamic_relocation"`
 	RelocBlocks            []RelocBlock `json:"reloc_blocks"`
+}
+
+// ImageImportControlTransferDynamicRelocation represents the Imported Address
+// Retpoline (type 3), size = 4 bytes.
+type ImageImportControlTransferDynamicRelocation struct {
+	PageRelativeOffset uint16 // (12 bits)
+	// 1 - the opcode is a CALL
+	// 0 - the opcode is a JMP.
+	IndirectCall uint16 // (1 bit)
+	IATIndex     uint32 // (19 bits)
+}
+
+// ImageIndirectControlTransferDynamicRelocation represents the Indirect Branch
+// Retpoline (type 4), size = 2 bytes.
+type ImageIndirectControlTransferDynamicRelocation struct {
+	PageRelativeOffset uint16 // (12 bits)
+	IndirectCall       uint8  // (1 bit)
+	RexWPrefix         uint8  // (1 bit)
+	CfgCheck           uint8  // (1 bit)
+	Reserved           uint8  // (1 bit)
+}
+
+// ImageSwitchableBranchDynamicRelocation represents the Switchable Retpoline
+// (type 5), size = 2 bytes.
+type ImageSwitchableBranchDynamicRelocation struct {
+	PageRelativeOffset uint16 // (12 bits)
+	RegisterNumber     uint16 // (4 bits)
 }
 
 // DVRT represents the Dynamic Value Relocation Table.
@@ -1198,6 +1220,7 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 
 	var structSize uint32
 	var imgDynRelocSize uint32
+	var retpolineType uint8
 	dvrt := DVRT{}
 	imgDynRelocTable := ImageDynamicRelocationTable{}
 
@@ -1213,7 +1236,7 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 		return nil
 	}
 
-	// Get the dynamic value relocation table.
+	// Get the dynamic value relocation table header.
 	rva := section.VirtualAddress + uint32(DynamicValueRelocTableOffset)
 	offset := pe.GetOffsetFromRva(rva)
 	structSize = uint32(binary.Size(imgDynRelocTable))
@@ -1235,6 +1258,8 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 		for relocTableIt < imgDynRelocTable.Size {
 
 			relocEntry := RelocEntry{}
+
+			// Each block starts with the header.
 			if pe.Is32 {
 				imgDynReloc := ImageDynamicRelocation32{}
 				imgDynRelocSize = uint32(binary.Size(imgDynReloc))
@@ -1244,6 +1269,7 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 				}
 				relocEntry.ImageDynamicRelocation = imgDynReloc
 				baseBlockSize = imgDynReloc.BaseRelocSize
+				retpolineType = uint8(imgDynReloc.Symbol)
 			} else {
 				imgDynReloc := ImageDynamicRelocation64{}
 				imgDynRelocSize = uint32(binary.Size(imgDynReloc))
@@ -1253,11 +1279,12 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 				}
 				relocEntry.ImageDynamicRelocation = imgDynReloc
 				baseBlockSize = imgDynReloc.BaseRelocSize
+				retpolineType = uint8(imgDynReloc.Symbol)
 			}
 			offset += imgDynRelocSize
 			relocTableIt += imgDynRelocSize
 
-			// Iterate over reach block.
+			// Then, for each page, there is a block that starts with a relocation entry:
 			blockIt := uint32(0)
 			for blockIt < baseBlockSize-imgDynRelocSize {
 				relocBlock := RelocBlock{}
@@ -1271,24 +1298,66 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 
 				relocBlock.ImgBaseReloc = baseReloc
 				offset += structSize
-				numTypeOffsets := (baseReloc.SizeOfBlock - structSize) / 2
-				for i := uint32(0); i < numTypeOffsets; i++ {
-					typeOffset := TypeOffset{}
-					typeOffset.Value, err = pe.ReadUint16(offset)
-					if err != nil {
-						return nil
+
+				// After that there are entries for all of the places which need
+				// to be overwritten by the retpoline jump. The structure used
+				// for those entries depends on the type (symbol) that was used
+				// above. There are three types of retpoline so far. Entry for
+				//each of them will contain pageRelativeOffset. The kernel uses
+				// that entry to apply the proper replacement under
+				// virtualAddress + pageRelativeOffset address.
+				branchIt := uint32(0)
+				switch retpolineType {
+				case 3:
+					for branchIt < baseReloc.SizeOfBlock/4-2 {
+						imgImpCtrlTransDynReloc := ImageImportControlTransferDynamicRelocation{}
+
+						dword, err := pe.ReadUint32(offset)
+						if err != nil {
+							return nil
+						}
+
+						imgImpCtrlTransDynReloc.PageRelativeOffset = uint16(dword) & 0xfff
+						imgImpCtrlTransDynReloc.IndirectCall = uint16(dword) & 0x1000 >> 12
+						imgImpCtrlTransDynReloc.IATIndex = dword & 0xFFFFE000 >> 13
+
+						offset += 4
+						branchIt += 1
+						relocBlock.TypeOffsets = append(relocBlock.TypeOffsets, imgImpCtrlTransDynReloc)
 					}
+				case 4:
+					for branchIt < baseReloc.SizeOfBlock/4-2 {
+						imgIndirCtrlTransDynReloc := ImageIndirectControlTransferDynamicRelocation{}
 
-					typeOffset.DynamicSymbolOffset = typeOffset.Value & 0xfff
-					typeOffset.Type = uint8(typeOffset.Value & 0xf000 >> 12)
-					offset += 2
+						word, err := pe.ReadUint16(offset)
+						if err != nil {
+							return nil
+						}
+						imgIndirCtrlTransDynReloc.PageRelativeOffset = word & 0xfff
+						imgIndirCtrlTransDynReloc.IndirectCall = uint8(word & 0x8 >> 3)
+						imgIndirCtrlTransDynReloc.RexWPrefix = uint8(word & 0x4 >> 2)
+						imgIndirCtrlTransDynReloc.CfgCheck = uint8(word & 0x2 >> 1)
+						imgIndirCtrlTransDynReloc.Reserved = uint8(word & 0x1)
 
-					// Padding at the end of the block ?
-					if (TypeOffset{}) == typeOffset && i+1 == numTypeOffsets {
-						break
+						offset += 2
+						branchIt += 1
+						relocBlock.TypeOffsets = append(relocBlock.TypeOffsets, imgIndirCtrlTransDynReloc)
 					}
+				case 5:
+					for branchIt < baseReloc.SizeOfBlock/4-2 {
+						imgSwitchBranchDynReloc := ImageSwitchableBranchDynamicRelocation{}
 
-					relocBlock.TypeOffsets = append(relocBlock.TypeOffsets, typeOffset)
+						word, err := pe.ReadUint16(offset)
+						if err != nil {
+							return nil
+						}
+						imgSwitchBranchDynReloc.PageRelativeOffset = word & 0xfff
+						imgSwitchBranchDynReloc.RegisterNumber = word & 0x100 >> 12
+
+						offset += 2
+						branchIt += 1
+						relocBlock.TypeOffsets = append(relocBlock.TypeOffsets, imgSwitchBranchDynReloc)
+					}
 				}
 
 				blockIt += baseReloc.SizeOfBlock
