@@ -570,7 +570,7 @@ func parsePE(filename string, cfg config) {
 						pdb.CVSignature.String())
 					fmt.Fprintf(w, "Signature:\t %s\n", pdb.Signature.String())
 					fmt.Fprintf(w, "Age:\t 0x%x\n", pdb.Age)
-					fmt.Fprintf(w, "PDBFileName:\t %s\n", pdb.PDBFileName)
+					fmt.Fprintf(w, "PDB FileName:\t %s\n", pdb.PDBFileName)
 				} else if debugSignature == peparser.CVSignatureNB10 {
 					pdb := debug.Info.(peparser.CVInfoPDB20)
 					fmt.Fprintf(w, "CV Header Signature:\t 0x%x (%s)\n",
@@ -587,8 +587,8 @@ func parsePE(filename string, cfg config) {
 				if len(pogo.Entries) > 0 {
 					fmt.Fprintf(w, "Signature:\t 0x%x (%s)\n\n", pogo.Signature,
 						pogo.Signature.String())
-					fmt.Fprintln(w, "RVA\tSize\tName\tDescription")
-					fmt.Fprintln(w, "---\t----\t----\t----\t")
+					fmt.Fprintln(w, "RVA\tSize\tName\tDescription\t")
+					fmt.Fprintln(w, "---\t----\t----\t-----------\t")
 					for _, pogoEntry := range pogo.Entries {
 						fmt.Fprintf(w, "0x%x\t0x%x\t%s\t%s\t\n", pogoEntry.RVA,
 							pogoEntry.Size, pogoEntry.Name,

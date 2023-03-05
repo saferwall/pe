@@ -1389,10 +1389,6 @@ func (pe *File) getEnclaveConfiguration() *Enclave {
 	enclave := Enclave{}
 
 	v := reflect.ValueOf(pe.LoadConfig.Struct)
-	if v.NumField() <= 40 {
-		return nil
-	}
-
 	EnclaveConfigurationPointer := v.Field(40).Uint()
 	if EnclaveConfigurationPointer == 0 {
 		return nil
@@ -1426,6 +1422,7 @@ func (pe *File) getEnclaveConfiguration() *Enclave {
 	val := reflect.ValueOf(enclave.Config)
 	ImportListRVA := val.FieldByName("ImportList").Interface().(uint32)
 	NumberOfImports := val.FieldByName("NumberOfImports").Interface().(uint32)
+	ImportEntrySize := val.FieldByName("ImportEntrySize").Interface().(uint32)
 
 	offset := pe.GetOffsetFromRva(ImportListRVA)
 	for i := uint32(0); i < NumberOfImports; i++ {
@@ -1436,11 +1433,16 @@ func (pe *File) getEnclaveConfiguration() *Enclave {
 			return nil
 		}
 
-		offset += imgEncImpSize
+		pe.getStringAtRVA(imgEncImp.ImportName, 64)
+		if imgEncImp.ImportName != 0 {
+			pe.GetStringFromData(0, pe.data[imgEncImp.ImportName:imgEncImp.ImportName+64])
+		}
+
+		offset += ImportEntrySize
 		enclave.Imports = append(enclave.Imports, imgEncImp)
 	}
 
-	return nil
+	return &enclave
 }
 
 func (pe *File) getVolatileMetadata() *VolatileMetadata {
