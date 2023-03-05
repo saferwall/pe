@@ -670,3 +670,148 @@ func TestLoadConfigDirectoryDVRT(t *testing.T) {
 		})
 	}
 }
+
+func TestLoadConfigDirectoryDVRTRetpolineType(t *testing.T) {
+
+	type DVRTRetpolineType struct {
+		relocEntryIdx   int
+		imgDynReloc     interface{}
+		RelocBlockCount int
+		relocBlockIdx   int
+		relocBlock      RelocBlock
+	}
+
+	tests := []struct {
+		in  string
+		out DVRTRetpolineType
+	}{
+		{
+			in: getAbsoluteFilePath("test/WdBoot.sys"),
+			out: DVRTRetpolineType{
+				relocEntryIdx: 0x0,
+				imgDynReloc: ImageDynamicRelocation64{
+					Symbol:        0x3,
+					BaseRelocSize: 0x278,
+				},
+				RelocBlockCount: 0x7,
+				relocBlockIdx:   0x0,
+				relocBlock: RelocBlock{
+					ImgBaseReloc: ImageBaseRelocation{
+						VirtualAddress: 0x2000,
+						SizeOfBlock:    0xc,
+					},
+					TypeOffsets: []interface{}{
+						ImageImportControlTransferDynamicRelocation{
+							PageRelativeOffset: 0x611,
+							IndirectCall:       0x0,
+							IATIndex:           0x28,
+						},
+					},
+				},
+			},
+		},
+		{
+			in: getAbsoluteFilePath("test/WdBoot.sys"),
+			out: DVRTRetpolineType{
+				relocEntryIdx: 0x1,
+				imgDynReloc: ImageDynamicRelocation64{
+					Symbol:        0x4,
+					BaseRelocSize: 0x4c,
+				},
+				RelocBlockCount: 0x5,
+				relocBlockIdx:   0x4,
+				relocBlock: RelocBlock{
+					ImgBaseReloc: ImageBaseRelocation{
+						VirtualAddress: 0xb000,
+						SizeOfBlock:    0xc,
+					},
+					TypeOffsets: []interface{}{
+						ImageIndirectControlTransferDynamicRelocation{
+							PageRelativeOffset: 0x58e,
+							IndirectCall:       0x1,
+							CfgCheck:           0x1,
+						},
+					},
+				},
+			},
+		},
+		{
+			in: getAbsoluteFilePath("test/acpi.sys"),
+			out: DVRTRetpolineType{
+				relocEntryIdx: 0x2,
+				imgDynReloc: ImageDynamicRelocation64{
+					Symbol:        0x5,
+					BaseRelocSize: 0x4c,
+				},
+				RelocBlockCount: 0x6,
+				relocBlockIdx:   0x5,
+				relocBlock: RelocBlock{
+					ImgBaseReloc: ImageBaseRelocation{
+						VirtualAddress: 0x43000,
+						SizeOfBlock:    0xc,
+					},
+					TypeOffsets: []interface{}{
+						ImageSwitchableBranchDynamicRelocation{
+							PageRelativeOffset: 0xd1,
+							RegisterNumber:     0x1,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+
+			ops := Options{Fast: true}
+			file, err := New(tt.in, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
+			}
+
+			var va, size uint32
+
+			if file.Is64 {
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			} else {
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseLoadConfigDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseLoadConfigDirectory(%s) failed, reason: %v",
+					tt.in, err)
+			}
+
+			DVRT := file.LoadConfig.DVRT
+			relocEntry := DVRT.Entries[tt.out.relocEntryIdx]
+			if relocEntry.ImageDynamicRelocation != tt.out.imgDynReloc {
+				t.Fatalf("load config DVRT reloc entry imaged dynamic relocation assertion failed, got %#v, want %#v",
+					relocEntry.ImageDynamicRelocation, tt.out.imgDynReloc)
+			}
+
+			if len(relocEntry.RelocBlocks) != tt.out.RelocBlockCount {
+				t.Fatalf("load config DVRT reloc block count dynamic relocation assertion failed, got %v, want %v",
+					len(relocEntry.RelocBlocks), tt.out.RelocBlockCount)
+			}
+
+			relocBlock := relocEntry.RelocBlocks[tt.out.relocBlockIdx]
+			if !reflect.DeepEqual(relocBlock, tt.out.relocBlock) {
+				t.Fatalf("load config DVRT reloc block assertion failed, got %#v, want %#v",
+					relocBlock, tt.out.relocBlock)
+			}
+		})
+	}
+}

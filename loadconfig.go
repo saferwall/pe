@@ -1361,6 +1361,11 @@ func (pe *File) getDynamicValueRelocTable() *DVRT {
 
 						offset += 2
 						branchIt += 1
+
+						// Padding might be added at the end of the block.
+						if (ImageSwitchableBranchDynamicRelocation{}) == imgSwitchBranchDynReloc {
+							continue
+						}
 						relocBlock.TypeOffsets = append(relocBlock.TypeOffsets, imgSwitchBranchDynReloc)
 					}
 				}
