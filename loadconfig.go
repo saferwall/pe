@@ -562,7 +562,7 @@ type Enclave struct {
 }
 
 type RangeTableEntry struct {
-	Rva  uint32 `json:"rva"`
+	RVA  uint32 `json:"rva"`
 	Size uint32 `json:"size"`
 }
 
@@ -727,7 +727,7 @@ type ImageEnclaveImport struct {
 	// The unique identifier of the primary module for the enclave, if the
 	// MatchType member is IMAGE_ENCLAVE_IMPORT_MATCH_UNIQUE_ID. Otherwise,
 	// the author identifier of the primary module for the enclave..
-	UniqueOrAuthorID [ImageEnclaveShortIDLength]uint8 `json:"unique_or_author_id"`
+	UniqueOrAuthorID [ImageEnclaveLongIDLength]uint8 `json:"unique_or_author_id"`
 
 	// The family identifier of the primary module for the enclave.
 	FamilyID [ImageEnclaveShortIDLength]uint8 `json:"family_id"`
@@ -1431,11 +1431,6 @@ func (pe *File) getEnclaveConfiguration() *Enclave {
 		err := pe.structUnpack(&imgEncImp, offset, imgEncImpSize)
 		if err != nil {
 			return nil
-		}
-
-		pe.getStringAtRVA(imgEncImp.ImportName, 64)
-		if imgEncImp.ImportName != 0 {
-			pe.GetStringFromData(0, pe.data[imgEncImp.ImportName:imgEncImp.ImportName+64])
 		}
 
 		offset += ImportEntrySize

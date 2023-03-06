@@ -815,3 +815,98 @@ func TestLoadConfigDirectoryDVRTRetpolineType(t *testing.T) {
 		})
 	}
 }
+
+func TestLoadConfigDirectoryEnclave(t *testing.T) {
+
+	tests := []struct {
+		in  string
+		out Enclave
+	}{
+		{
+			in: getAbsoluteFilePath("test/SgrmEnclave_secure.dll"),
+			out: Enclave{
+				Config: ImageEnclaveConfig64{
+					Size:                      0x50,
+					MinimumRequiredConfigSize: 0x4c,
+					NumberOfImports:           0x4,
+					ImportList:                0x55224,
+					ImportEntrySize:           0x50,
+					FamilyID:                  [ImageEnclaveShortIDLength]uint8{0xb1, 0x35, 0x7c, 0x2b, 0x69, 0x9f, 0x47, 0xf9, 0xbb, 0xc9, 0x4f, 0x44, 0xf2, 0x54, 0xdb, 0x9d},
+					ImageID:                   [ImageEnclaveShortIDLength]uint8{0x24, 0x56, 0x46, 0x36, 0xcd, 0x4a, 0x4a, 0xd8, 0x86, 0xa2, 0xf4, 0xec, 0x25, 0xa9, 0x72, 0x2},
+					ImageVersion:              0x1,
+					SecurityVersion:           0x1,
+					EnclaveSize:               0x10000000,
+					NumberOfThreads:           0x8,
+					EnclaveFlags:              0x1,
+				},
+				Imports: []ImageEnclaveImport{
+					{
+						MatchType:  0x0,
+						ImportName: 0xffff,
+					},
+					{
+						MatchType: 0x4,
+						ImageID: [ImageEnclaveShortIDLength]uint8{
+							0xf0, 0x3c, 0xcd, 0xa7, 0xe8, 0x7b, 0x46, 0xeb, 0xaa, 0xe7, 0x1f, 0x13, 0xd5, 0xcd, 0xde, 0x5d},
+						ImportName: 0x5b268,
+					},
+					{
+						MatchType: 0x4,
+						ImageID: [ImageEnclaveShortIDLength]uint8{
+							0x20, 0x27, 0xbd, 0x68, 0x75, 0x59, 0x49, 0xb7, 0xbe, 0x6, 0x34, 0x50, 0xe2, 0x16, 0xd7, 0xed},
+						ImportName: 0x5b428,
+					},
+					{
+						MatchType: 0x4,
+						ImageID: [ImageEnclaveShortIDLength]uint8{
+							0x72, 0x84, 0x41, 0x72, 0x67, 0xa8, 0x4e, 0x8d, 0xbf, 0x1, 0x28, 0x4b, 0x7, 0x43, 0x2b, 0x1e},
+						ImportName: 0x5b63c,
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+
+			ops := Options{Fast: false}
+			file, err := New(tt.in, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
+			}
+
+			var va, size uint32
+
+			if file.Is64 {
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			} else {
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseLoadConfigDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseLoadConfigDirectory(%s) failed, reason: %v",
+					tt.in, err)
+			}
+
+			enclave := file.LoadConfig.Enclave
+			if !reflect.DeepEqual(*enclave, tt.out) {
+				t.Fatalf("load config enclave assertion failed, got %#v, want %#v",
+					enclave, tt.out)
+			}
+
+		})
+	}
+}
