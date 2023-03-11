@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Support parsing the different `retpoline` types: Imported Address, Indirect Branch and Switchable retpoline [#70](https://github.com/saferwall/pe/pull/69).
+- Unit tests for load config directory [#70](https://github.com/saferwall/pe/pull/69).
 - Unit tests for TLS directory [#69](https://github.com/saferwall/pe/pull/69).
 - Unit tests for debug directory [#68](https://github.com/saferwall/pe/pull/68).
 - Unit tests for resource directory and add functions to prettify resource (sub)languages [#66](https://github.com/saferwall/pe/pull/66).
@@ -23,17 +25,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
--  Bug while parsing `POGO` debug entry types [#68](https://github.com/saferwall/pe/pull/68).
+- Bug while iterating over VolatileInfoRangeTable entries [#70](https://github.com/saferwall/pe/pull/70).
+- Bug while iterating  (additional padding and loop condition) over DVRT relocation block entries [#70](https://github.com/saferwall/pe/pull/70).
+- Bug while appending (twice) Control Flow Guard IAT entries [#70](https://github.com/saferwall/pe/pull/70).
+- Bug while parsing `POGO` debug entry types [#68](https://github.com/saferwall/pe/pull/68).
 - `Authentihash()` for instances w/o fd thanks to [flanfly](https://github.com/flanfly) [#47](https://github.com/saferwall/pe/pull/47).
 
 ### Changed
 
 - Some fields has been renamed for consistency:
   - `RichHeader.XorKey` -> `RichHeader.XORKey`.
+  - Any `Rva` substring -> `RVA` and any `Iat` substring -> `IAT`.
+  - And many more.
 - Some fields used internally in imports parsing were changed from a slice of pointers to a simple slice.
 - Certificate.Content changed from `*pkcs7.PKCS7` to `pkcs7.PKCS7`.
-- `Section.Entropy` changed from float64 to float64* to distinguish between the case when the section entropy is equal to zero and the case when the entropy is equal to nil - meaning that it was never calculated.
-- Remove `cobra` dependency from cmd/pedumper [#56](https://github.com/saferwall/pe/pull/56).
+- `Section.Entropy` changed from `float64` to `float64*` to distinguish between the case when the section entropy is equal to zero and the case when the entropy is equal to nil - meaning that it was never calculated.
+- Remove `cobra` dependency from `cmd/pedumper` [#56](https://github.com/saferwall/pe/pull/56).
 
 ## [1.3.0] - 2022-08-04
 
