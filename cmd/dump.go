@@ -6,13 +6,16 @@ package main
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"text/tabwriter"
 	"time"
+	"unicode"
 	"unsafe"
 
 	peparser "github.com/saferwall/pe"
@@ -101,6 +104,31 @@ func IntToByteArray(num uint64) []byte {
 	return arr
 }
 
+func sentenceCase(s string) string {
+	newString := string(s[0])
+	for i, r := range s[1:] {
+		if unicode.IsLower(r) && unicode.IsLetter(r) {
+			newString += string(r)
+		} else {
+			if i < len(s)-2 {
+				nextChar := rune(s[i+2])
+				previousChar := rune(s[i])
+				if unicode.IsLower(previousChar) && unicode.IsLetter(previousChar) {
+					newString += " " + string(r)
+				} else {
+					if unicode.IsLower(nextChar) && unicode.IsLetter(nextChar) {
+						newString += " " + string(r)
+					} else {
+						newString += string(r)
+					}
+				}
+			}
+		}
+	}
+
+	return newString
+}
+
 func isDirectory(path string) bool {
 	fileInfo, err := os.Stat(path)
 	if err != nil {
@@ -144,6 +172,7 @@ func parsePE(filename string, cfg config) {
 	pe, err := peparser.NewBytes(data, &peparser.Options{
 		Logger:                logger,
 		DisableCertValidation: false,
+		Fast:                  false,
 	})
 
 	if err != nil {
@@ -541,7 +570,7 @@ func parsePE(filename string, cfg config) {
 						pdb.CVSignature.String())
 					fmt.Fprintf(w, "Signature:\t %s\n", pdb.Signature.String())
 					fmt.Fprintf(w, "Age:\t 0x%x\n", pdb.Age)
-					fmt.Fprintf(w, "PDBFileName:\t %s\n", pdb.PDBFileName)
+					fmt.Fprintf(w, "PDB FileName:\t %s\n", pdb.PDBFileName)
 				} else if debugSignature == peparser.CVSignatureNB10 {
 					pdb := debug.Info.(peparser.CVInfoPDB20)
 					fmt.Fprintf(w, "CV Header Signature:\t 0x%x (%s)\n",
@@ -558,8 +587,8 @@ func parsePE(filename string, cfg config) {
 				if len(pogo.Entries) > 0 {
 					fmt.Fprintf(w, "Signature:\t 0x%x (%s)\n\n", pogo.Signature,
 						pogo.Signature.String())
-					fmt.Fprintln(w, "RVA\tSize\tName\tDescription")
-					fmt.Fprintln(w, "---\t----\t----\t----\t")
+					fmt.Fprintln(w, "RVA\tSize\tName\tDescription\t")
+					fmt.Fprintln(w, "---\t----\t----\t-----------\t")
 					for _, pogoEntry := range pogo.Entries {
 						fmt.Fprintf(w, "0x%x\t0x%x\t%s\t%s\t\n", pogoEntry.RVA,
 							pogoEntry.Size, pogoEntry.Name,
@@ -660,6 +689,28 @@ func parsePE(filename string, cfg config) {
 			}
 		}
 
+		w.Flush()
+	}
+
+	if cfg.wantLoadCfg && pe.FileInfo.HasLoadCFG {
+		fmt.Printf("\nLOAD CONFIG\n************\n\n")
+
+		loadConfig := pe.LoadConfig
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.TabIndent)
+		v := reflect.ValueOf(loadConfig.Struct)
+		typeOfS := v.Type()
+		imgLoadConfigDirectorySize := v.Field(0).Interface().(uint32)
+		tmp := uint32(0)
+		for i := 0; i < v.NumField(); i++ {
+			// Do not print the fields of the image load config directory structure
+			// that does not belong to it.
+			tmp += uint32(binary.Size((v.Field(i).Interface())))
+			if tmp > imgLoadConfigDirectorySize {
+				break
+			}
+			fmt.Fprintf(w, "  %s\t : 0x%v\n", sentenceCase(typeOfS.Field(i).Name),
+				v.Field(i).Interface())
+		}
 		w.Flush()
 	}
 
