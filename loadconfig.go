@@ -1486,10 +1486,10 @@ func (pe *File) getVolatileMetadata() *VolatileMetadata {
 		}
 	}
 
-	if imgVolatileMeta.VolatileInfoRangeTable != 0 && imgVolatileMeta.VolatileAccessTableSize != 0 {
+	if imgVolatileMeta.VolatileInfoRangeTable != 0 && imgVolatileMeta.VolatileInfoRangeTableSize != 0 {
 		offset := pe.GetOffsetFromRva(imgVolatileMeta.VolatileInfoRangeTable)
 		rangeEntrySize := uint32(binary.Size(RangeTableEntry{}))
-		for i := uint32(0); i < imgVolatileMeta.VolatileAccessTableSize/rangeEntrySize; i++ {
+		for i := uint32(0); i < imgVolatileMeta.VolatileInfoRangeTableSize/rangeEntrySize; i++ {
 			entry := RangeTableEntry{}
 			err := pe.structUnpack(&entry, offset, rangeEntrySize)
 			if err != nil {

@@ -910,3 +910,108 @@ func TestLoadConfigDirectoryEnclave(t *testing.T) {
 		})
 	}
 }
+
+func TestLoadConfigDirectoryVolatileMetadata(t *testing.T) {
+
+	type TestVolatileMetadata struct {
+		imgVolatileMetadata ImageVolatileMetadata
+		accessRVATableCount int
+		accessRVATableIndex int
+		accessRVAEntry      uint32
+		infoRangeTableCount int
+		infoRangeTableIndex int
+		infoRangeEntry      RangeTableEntry
+	}
+
+	tests := []struct {
+		in  string
+		out TestVolatileMetadata
+	}{
+		{
+			in: getAbsoluteFilePath("test/KernelBase.dll"),
+			out: TestVolatileMetadata{
+				imgVolatileMetadata: ImageVolatileMetadata{
+					Size:                       0x18,
+					Version:                    0x1,
+					VolatileAccessTable:        0x00090C64,
+					VolatileAccessTableSize:    0x00002E48,
+					VolatileInfoRangeTable:     0x00093AAC,
+					VolatileInfoRangeTableSize: 0x000001D0,
+				},
+				accessRVATableCount: 0xB92,
+				accessRVATableIndex: 0xB91,
+				accessRVAEntry:      0x1DF998,
+				infoRangeTableCount: 0x3A,
+				infoRangeTableIndex: 0x39,
+				infoRangeEntry: RangeTableEntry{
+					RVA:  0x16BB10,
+					Size: 0x75550,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+
+			ops := Options{Fast: false}
+			file, err := New(tt.in, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
+			}
+
+			var va, size uint32
+
+			if file.Is64 {
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			} else {
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryLoadConfig]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseLoadConfigDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseLoadConfigDirectory(%s) failed, reason: %v",
+					tt.in, err)
+			}
+
+			volatileMetadata := file.LoadConfig.VolatileMetadata
+			if volatileMetadata.Struct != tt.out.imgVolatileMetadata {
+				t.Fatalf("load config image volatile metadata assertion failed, got %v, want %v",
+					volatileMetadata, tt.out.imgVolatileMetadata)
+			}
+
+			if len(volatileMetadata.AccessRVATable) != tt.out.accessRVATableCount {
+				t.Fatalf("load config access RVA table entries count assert failed, got %v, want %v",
+					len(volatileMetadata.AccessRVATable), tt.out.accessRVATableCount)
+			}
+
+			accessRVAEntry := volatileMetadata.AccessRVATable[tt.out.accessRVATableIndex]
+			if accessRVAEntry != tt.out.accessRVAEntry {
+				t.Fatalf("load config access RVA table entry assertion failed, got %v, want %v",
+					accessRVAEntry, tt.out.accessRVAEntry)
+			}
+
+			if len(volatileMetadata.InfoRangeTable) != tt.out.infoRangeTableCount {
+				t.Fatalf("load config info range table entries count assert failed, got %v, want %v",
+					len(volatileMetadata.InfoRangeTable), tt.out.infoRangeTableCount)
+			}
+
+			infoRangeEntry := volatileMetadata.InfoRangeTable[tt.out.infoRangeTableIndex]
+			if infoRangeEntry != tt.out.infoRangeEntry {
+				t.Fatalf("load config info range table entry assertion failed, got %v, want %v",
+					infoRangeEntry, tt.out.infoRangeEntry)
+			}
+		})
+	}
+}
