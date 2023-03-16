@@ -323,7 +323,7 @@ func (pe *File) ParseDataDirectories() error {
 	if !pe.opts.OmitBoundImportDirectory {
 		funcMaps[ImageDirectoryEntryBoundImport] = pe.parseBoundImportDirectory
 	}
-	if !pe.opts.OmitTLSDirectory {
+	if !pe.opts.OmitIATDirectory {
 		funcMaps[ImageDirectoryEntryIAT] = pe.parseIATDirectory
 	}
 	if !pe.opts.OmitDelayImportDirectory {
