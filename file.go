@@ -44,7 +44,7 @@ type File struct {
 	logger        *log.Helper
 }
 
-// Options for Parsing
+// Options that influence the PE parsing behaviour.
 type Options struct {
 
 	// Parse only the PE header and do not parse data directories, by default (false).
@@ -64,6 +64,51 @@ type Options struct {
 
 	// A custom logger.
 	Logger log.Logger
+
+	// OmitExportDirectory determines if export directory parsing is skipped, by default (false).
+	OmitExportDirectory bool
+
+	// OmitImportDirectory determines if import directory parsing is skipped, by default (false).
+	OmitImportDirectory bool
+
+	// OmitExceptionDirectory determines if exception directory parsing is skipped, by default (false).
+	OmitExceptionDirectory bool
+
+	// OmitResourceDirectory determines if resource directory parsing is skipped, by default (false).
+	OmitResourceDirectory bool
+
+	// OmitSecurityDirectory determines if security directory parsing is skipped, by default (false).
+	OmitSecurityDirectory bool
+
+	// OmitRelocDirectory determines if relocation directory parsing is skipped, by default (false).
+	OmitRelocDirectory bool
+
+	// OmitDebugDirectory determines if debug directory parsing is skipped, by default (false).
+	OmitDebugDirectory bool
+
+	// OmitArchitectureDirectory determines if architecture directory parsing is skipped, by default (false).
+	OmitArchitectureDirectory bool
+
+	// OmitGlobalPtrDirectory determines if global pointer directory parsing is skipped, by default (false).
+	OmitGlobalPtrDirectory bool
+
+	// OmitTLSDirectory determines if TLS directory parsing is skipped, by default (false).
+	OmitTLSDirectory bool
+
+	// OmitLoadConfigDirectory determines if load config directory parsing is skipped, by default (false).
+	OmitLoadConfigDirectory bool
+
+	// OmitBoundImportDirectory determines if bound import directory parsing is skipped, by default (false).
+	OmitBoundImportDirectory bool
+
+	// OmitIATDirectory determines if IAT directory parsing is skipped, by default (false).
+	OmitIATDirectory bool
+
+	// OmitDelayImportDirectory determines if delay import directory parsing is skipped, by default (false).
+	OmitDelayImportDirectory bool
+
+	// OmitCLRHeaderDirectory determines if CLR header directory parsing is skipped, by default (false).
+	OmitCLRHeaderDirectory bool
 }
 
 // New instantiates a file instance with options given a file name.
@@ -241,22 +286,51 @@ func (pe *File) ParseDataDirectories() error {
 	}
 
 	// Maps data directory index to function which parses that directory.
-	funcMaps := map[ImageDirectoryEntry](func(uint32, uint32) error){
-		ImageDirectoryEntryExport:       pe.parseExportDirectory,
-		ImageDirectoryEntryImport:       pe.parseImportDirectory,
-		ImageDirectoryEntryResource:     pe.parseResourceDirectory,
-		ImageDirectoryEntryException:    pe.parseExceptionDirectory,
-		ImageDirectoryEntryCertificate:  pe.parseSecurityDirectory,
-		ImageDirectoryEntryBaseReloc:    pe.parseRelocDirectory,
-		ImageDirectoryEntryDebug:        pe.parseDebugDirectory,
-		ImageDirectoryEntryArchitecture: pe.parseArchitectureDirectory,
-		ImageDirectoryEntryGlobalPtr:    pe.parseGlobalPtrDirectory,
-		ImageDirectoryEntryTLS:          pe.parseTLSDirectory,
-		ImageDirectoryEntryLoadConfig:   pe.parseLoadConfigDirectory,
-		ImageDirectoryEntryBoundImport:  pe.parseBoundImportDirectory,
-		ImageDirectoryEntryIAT:          pe.parseIATDirectory,
-		ImageDirectoryEntryDelayImport:  pe.parseDelayImportDirectory,
-		ImageDirectoryEntryCLR:          pe.parseCLRHeaderDirectory,
+	funcMaps := make(map[ImageDirectoryEntry]func(uint32, uint32) error)
+	if !pe.opts.OmitExportDirectory {
+		funcMaps[ImageDirectoryEntryExport] = pe.parseExportDirectory
+	}
+	if !pe.opts.OmitImportDirectory {
+		funcMaps[ImageDirectoryEntryImport] = pe.parseImportDirectory
+	}
+	if !pe.opts.OmitExceptionDirectory {
+		funcMaps[ImageDirectoryEntryException] = pe.parseExceptionDirectory
+	}
+	if !pe.opts.OmitResourceDirectory {
+		funcMaps[ImageDirectoryEntryResource] = pe.parseResourceDirectory
+	}
+	if !pe.opts.OmitSecurityDirectory {
+		funcMaps[ImageDirectoryEntryCertificate] = pe.parseSecurityDirectory
+	}
+	if !pe.opts.OmitRelocDirectory {
+		funcMaps[ImageDirectoryEntryBaseReloc] = pe.parseRelocDirectory
+	}
+	if !pe.opts.OmitDebugDirectory {
+		funcMaps[ImageDirectoryEntryDebug] = pe.parseDebugDirectory
+	}
+	if !pe.opts.OmitArchitectureDirectory {
+		funcMaps[ImageDirectoryEntryArchitecture] = pe.parseArchitectureDirectory
+	}
+	if !pe.opts.OmitGlobalPtrDirectory {
+		funcMaps[ImageDirectoryEntryGlobalPtr] = pe.parseGlobalPtrDirectory
+	}
+	if !pe.opts.OmitTLSDirectory {
+		funcMaps[ImageDirectoryEntryTLS] = pe.parseTLSDirectory
+	}
+	if !pe.opts.OmitLoadConfigDirectory {
+		funcMaps[ImageDirectoryEntryLoadConfig] = pe.parseLoadConfigDirectory
+	}
+	if !pe.opts.OmitBoundImportDirectory {
+		funcMaps[ImageDirectoryEntryBoundImport] = pe.parseBoundImportDirectory
+	}
+	if !pe.opts.OmitIATDirectory {
+		funcMaps[ImageDirectoryEntryIAT] = pe.parseIATDirectory
+	}
+	if !pe.opts.OmitDelayImportDirectory {
+		funcMaps[ImageDirectoryEntryDelayImport] = pe.parseDelayImportDirectory
+	}
+	if !pe.opts.OmitCLRHeaderDirectory {
+		funcMaps[ImageDirectoryEntryCLR] = pe.parseCLRHeaderDirectory
 	}
 
 	// Iterate over data directories and call the appropriate function.
@@ -291,7 +365,11 @@ func (pe *File) ParseDataDirectories() error {
 					return
 				}
 
-				err := funcMaps[entryIndex](va, size)
+				parseDirectory, ok := funcMaps[entryIndex]
+				if !ok {
+					return
+				}
+				err := parseDirectory(va, size)
 				if err != nil {
 					pe.logger.Warnf("failed to parse data directory %s, reason: %v",
 						entryIndex.String(), err)

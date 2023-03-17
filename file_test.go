@@ -32,6 +32,26 @@ func TestParse(t *testing.T) {
 	}
 }
 
+func TestParseOmitDirectories(t *testing.T) {
+	for _, tt := range peTests {
+		t.Run(tt.in, func(t *testing.T) {
+			file, err := New(tt.in, &Options{OmitSecurityDirectory: true})
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			got := file.Parse()
+			if got != nil {
+				t.Errorf("Parse(%s) got %v, want %v", tt.in, got, tt.out)
+			}
+			// Should expect an empty certificate
+			if file.Certificates.Raw != nil {
+				t.Errorf("Parse(%s) expected empty certificate", tt.in)
+			}
+		})
+	}
+}
+
 func TestNewBytes(t *testing.T) {
 	for _, tt := range peTests {
 		t.Run(tt.in, func(t *testing.T) {
