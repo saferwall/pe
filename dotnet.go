@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -20,7 +20,7 @@ const (
 
 	// This flag is obsolete and should not be set. Setting it—as the IL
 	// assembler allows, using the .corflags directive—will render your module
-	// unloadable.
+	// un-loadable.
 	COMImageFlagILLibrary = 0x00000004
 
 	// The image file is protected with a strong name signature.
@@ -97,7 +97,7 @@ const (
 	// Custom attribute descriptors.
 	CustomAttribute = 12
 	// Field or parameter marshaling descriptors for managed/unmanaged
-	// interoperations.
+	// inter-operations.
 	FieldMarshal = 13
 	// Security descriptors.
 	DeclSecurity = 14
@@ -137,7 +137,7 @@ const (
 	// Type specification descriptors.
 	TypeSpec = 27
 	// Implementation map descriptors used for the platform invocation
-	// (P/Invoke) type of managed/unmanaged code interoperation.
+	// (P/Invoke) type of managed/unmanaged code inter-operation.
 	ImplMap = 28
 	// Field-to-data mapping descriptors.
 	FieldRVA = 29
@@ -191,9 +191,9 @@ const (
 	BlobStream   = 2
 )
 
-// MetadataTableIndextToString returns the string representation of the metadata
+// MetadataTableIndexToString returns the string representation of the metadata
 // table index.
-func MetadataTableIndextToString(k int) string {
+func MetadataTableIndexToString(k int) string {
 	metadataTablesMap := map[int]string{
 		Module:                 "Module",
 		TypeRef:                "TypeRef",
@@ -664,7 +664,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 			return err
 		}
 
-		// Name requires a special treatement.
+		// Name requires a special treatment.
 		offset += 8
 		for j := uint32(0); j <= 32; j++ {
 			var c uint8
@@ -682,7 +682,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 		}
 
 		// The streams #~ and #- are mutually exclusive; that is, the metadata
-		// structure of the module is either optimized or unoptimized; it
+		// structure of the module is either optimized or un-optimized; it
 		// cannot be both at the same time or be something in between.
 		if sh.Name == "#~" || sh.Name == "#-" {
 			mdStreamHdrOff = sh.Offset
@@ -724,7 +724,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	for i := 0; i < GenericParamConstraint; i++ {
 		if IsBitSet(mdTableStreamHdr.MaskValid, i) {
 			mdTable := MetadataTable{}
-			mdTable.Name = MetadataTableIndextToString(i)
+			mdTable.Name = MetadataTableIndexToString(i)
 			mdTable.CountCols, err = pe.ReadUint8(offset)
 			if err != nil {
 				break
