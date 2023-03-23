@@ -68,6 +68,15 @@ func hexDump(b []byte) {
 
 func hexDumpSize(b []byte, size int) {
 	var a [16]byte
+
+	// Append null bytes when length of the buffer
+	// is smaller than the requested size.
+	if len(b) < size {
+		temp := make([]byte, size)
+		copy(temp, b)
+		b = temp
+	}
+
 	n := (size + 15) &^ 15
 	for i := 0; i < n; i++ {
 		if i%16 == 0 {
@@ -742,8 +751,20 @@ func parsePE(filename string, cfg config) {
 		fmt.Fprintf(w, "Version String Length:\t 0x%x\n", mdHdr.VersionString)
 		fmt.Fprintf(w, "Version String:\t %s\n", mdHdr.Version)
 		fmt.Fprintf(w, "Flags:\t 0x%x\n", mdHdr.Flags)
-		fmt.Fprintf(w, "Streams:\t 0x%x\n", mdHdr.Streams)
+		fmt.Fprintf(w, "Streams Count:\t 0x%x\n", mdHdr.Streams)
 		w.Flush()
+
+		fmt.Print("\n\t------[ MetaData Streams ]------\n\n")
+
+		for _, sh := range clr.MetadataStreamHeaders {
+			fmt.Fprintf(w, "Stream Name:\t %s\n", sh.Name)
+			fmt.Fprintf(w, "Offset:\t 0x%x\n", sh.Offset)
+			fmt.Fprintf(w, "Size:\t 0x%x (%s)\n", sh.Size, BytesSize(float64(sh.Size)))
+			w.Flush()
+			fmt.Print("\n   ---Stream Content---\n")
+			hexDumpSize(clr.MetadataStreams[sh.Name], 128)
+			fmt.Print("\n")
+		}
 
 		// if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {
 		// 	if modTable.Content != nil {
