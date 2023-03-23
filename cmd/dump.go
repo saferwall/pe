@@ -732,6 +732,19 @@ func parsePE(filename string, cfg config) {
 		fmt.Fprintf(w, "Managed Native Header Size:\t 0x%x (%s)\n", clrHdr.ManagedNativeHeader.Size, BytesSize(float64(clrHdr.ManagedNativeHeader.Size)))
 		w.Flush()
 
+		fmt.Print("\n\t------[ MetaData Header ]------\n\n")
+		mdHdr := clr.MetadataHeader
+		fmt.Fprintf(w, "Signature:\t 0x%x (%s)\n", mdHdr.Signature,
+			string(IntToByteArray(uint64(mdHdr.Signature))))
+		fmt.Fprintf(w, "Major Version:\t 0x%x\n", mdHdr.MajorVersion)
+		fmt.Fprintf(w, "Minor Version:\t 0x%x\n", mdHdr.MinorVersion)
+		fmt.Fprintf(w, "Extra Data:\t 0x%x\n", mdHdr.ExtraData)
+		fmt.Fprintf(w, "Version String Length:\t 0x%x\n", mdHdr.VersionString)
+		fmt.Fprintf(w, "Version String:\t %s\n", mdHdr.Version)
+		fmt.Fprintf(w, "Flags:\t 0x%x\n", mdHdr.Flags)
+		fmt.Fprintf(w, "Streams:\t 0x%x\n", mdHdr.Streams)
+		w.Flush()
+
 		// if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {
 		// 	if modTable.Content != nil {
 		// 		modTableRow := modTable.Content.(peparser.ModuleTableRow)

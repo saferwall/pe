@@ -385,7 +385,7 @@ type MetadataHeader struct {
 	VersionString uint32
 
 	// Version string.
-	Version string
+	 Version string
 
 	// The storage header follows the storage signature, aligned on a 4-byte
 	// boundary.
@@ -463,7 +463,7 @@ type MetadataTable struct {
 	SizeRecord uint16
 
 	// Every table has a different layout, defined in the ECMA-335 spec.
-	// Content asbtract the type each table is pointing to.
+	// Content abstract the type each table is pointing to.
 	Content interface{}
 }
 
