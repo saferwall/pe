@@ -8,6 +8,9 @@ import (
 	"encoding/binary"
 )
 
+// COMImageFlagsType represents a COM+ header entry point flag type.
+type COMImageFlagsType uint32
+
 // COM+ Header entry point flags.
 const (
 	// The image file contains IL code only, with no embedded native unmanaged
@@ -292,7 +295,7 @@ type ImageCOR20Header struct {
 	MetaData ImageDataDirectory
 
 	// Bitwise flags indicating attributes of this executable.
-	Flags uint32
+	Flags COMImageFlagsType
 
 	// Metadata identifier (token) of the entry point for the image file; can
 	// be 0 for DLL images. This field identifies a method belonging to this
@@ -746,4 +749,26 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	}
 
 	return nil
+}
+
+// String returns a string interpretation of a COMImageFlags type.
+func (flags COMImageFlagsType) String() []string {
+	COMImageFlags := map[COMImageFlagsType]string{
+		COMImageFlagsILOnly:           "IL Only",
+		COMImageFlags32BitRequired:    "32-Bit Required",
+		COMImageFlagILLibrary:         "IL Library",
+		COMImageFlagsStrongNameSigned: "Strong Name Signed",
+		COMImageFlagsNativeEntrypoint: "Native Entrypoint",
+		COMImageFlagsTrackDebugData:   "Track Debug Data",
+		COMImageFlags32BitPreferred:   "32-Bit Preferred",
+	}
+
+	var values []string
+	for k, v := range COMImageFlags {
+		if (k & flags) == k {
+			values = append(values, v)
+		}
+	}
+
+	return values
 }

@@ -108,9 +108,9 @@ func TestParseExceptionDirectory(t *testing.T) {
 				t.Errorf("RuntimeFunction assertion failed, got %v, want %v", len(got), tt.out.entryCount)
 			}
 
-			unwinInfo := file.Exceptions[tt.out.entryIndex].UnwinInfo
-			if !reflect.DeepEqual(unwinInfo, tt.out.unwindInfo) {
-				t.Errorf("UnwinInfo assertion failed, got %v, want %v", unwinInfo, tt.out.unwindInfo)
+			unwindInfo := file.Exceptions[tt.out.entryIndex].UnwindInfo
+			if !reflect.DeepEqual(unwindInfo, tt.out.unwindInfo) {
+				t.Errorf("UnwindInfo assertion failed, got %v, want %v", unwindInfo, tt.out.unwindInfo)
 			}
 
 		})
