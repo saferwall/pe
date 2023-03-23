@@ -92,7 +92,7 @@ func TestDotNet(t *testing.T) {
 					MajorVersion: 0x2,
 					MinorVersion: 0x0,
 					Heaps:        0x0,
-					Rid:          0x1,
+					RID:          0x1,
 					MaskValid:    0x8900005407,
 					Sorted:       0x16003301fa00,
 				},

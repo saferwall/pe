@@ -755,7 +755,6 @@ func parsePE(filename string, cfg config) {
 		w.Flush()
 
 		fmt.Print("\n\t------[ MetaData Streams ]------\n\n")
-
 		for _, sh := range clr.MetadataStreamHeaders {
 			fmt.Fprintf(w, "Stream Name:\t %s\n", sh.Name)
 			fmt.Fprintf(w, "Offset:\t 0x%x\n", sh.Offset)
@@ -765,6 +764,17 @@ func parsePE(filename string, cfg config) {
 			hexDumpSize(clr.MetadataStreams[sh.Name], 128)
 			fmt.Print("\n")
 		}
+
+		fmt.Print("\n\t------[ MetaData Tables Stream Header ]------\n\n")
+		mdTableStreamHdr := clr.MetadataTablesStreamHeader
+		fmt.Fprintf(w, "Reserved:\t 0x%x\n", mdTableStreamHdr.Reserved)
+		fmt.Fprintf(w, "Major Version:\t 0x%x\n", mdTableStreamHdr.MajorVersion)
+		fmt.Fprintf(w, "Minor Version:\t 0x%x\n", mdTableStreamHdr.MinorVersion)
+		fmt.Fprintf(w, "Heaps:\t 0x%x\n", mdTableStreamHdr.Heaps)
+		fmt.Fprintf(w, "RID:\t 0x%x\n", mdTableStreamHdr.RID)
+		fmt.Fprintf(w, "MaskValid:\t 0x%x\n", mdTableStreamHdr.MaskValid)
+		fmt.Fprintf(w, "Sorted:\t 0x%x\n", mdTableStreamHdr.Sorted)
+		w.Flush()
 
 		// if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {
 		// 	if modTable.Content != nil {
