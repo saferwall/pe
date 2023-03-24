@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support parsing the different `retpoline` types: Imported Address, Indirect Branch and Switchable retpoline [#70](https://github.com/saferwall/pe/pull/69).
+- Permit more granular control over which data directories are parsed by [rabbitstack](https://github.com/rabbitstack) [#72](https://github.com/saferwall/pe/pull/72).
+- Support parsing the different `retpoline` types: Imported Address, Indirect Branch and Switchable retpoline [#70](https://github.com/saferwall/pe/pull/70).
 - Unit tests for load config directory [#70](https://github.com/saferwall/pe/pull/69).
 - Unit tests for TLS directory [#69](https://github.com/saferwall/pe/pull/69).
 - Unit tests for debug directory [#68](https://github.com/saferwall/pe/pull/68).

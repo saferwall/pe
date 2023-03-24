@@ -7,6 +7,7 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -68,6 +69,15 @@ func hexDump(b []byte) {
 
 func hexDumpSize(b []byte, size int) {
 	var a [16]byte
+
+	// Append null bytes when length of the buffer
+	// is smaller than the requested size.
+	if len(b) < size {
+		temp := make([]byte, size)
+		copy(temp, b)
+		b = temp
+	}
+
 	n := (size + 15) &^ 15
 	for i := 0; i < n; i++ {
 		if i%16 == 0 {
@@ -220,7 +230,7 @@ func parsePE(filename string, cfg config) {
 		magic := string(IntToByteArray(uint64(DOSHeader.Magic)))
 		signature := string(IntToByteArray(uint64(pe.NtHeader.Signature)))
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
-		fmt.Print("\n---DOS Header ---\n\n")
+		fmt.Print("\n\t------[ DOS Header ]------\n\n")
 		fmt.Fprintf(w, "Magic:\t 0x%x (%s)\n", DOSHeader.Magic, magic)
 		fmt.Fprintf(w, "Bytes On Last Page Of File:\t 0x%x\n", DOSHeader.BytesOnLastPageOfFile)
 		fmt.Fprintf(w, "Pages In File:\t 0x%x\n", DOSHeader.PagesInFile)
@@ -243,7 +253,7 @@ func parsePE(filename string, cfg config) {
 
 	if cfg.wantRichHeader && pe.FileInfo.HasRichHdr {
 		richHeader := pe.RichHeader
-		fmt.Printf("RICH HEADER\n\n")
+		fmt.Printf("\nRICH HEADER\n***********\n")
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
 		fmt.Fprintf(w, "\t0x%x\t XOR Key\n", richHeader.XORKey)
 		fmt.Fprintf(w, "\t0x%x\t DanS offset\n", richHeader.DansOffset)
@@ -390,7 +400,7 @@ func parsePE(filename string, cfg config) {
 	}
 
 	if cfg.wantImport && pe.FileInfo.HasImport {
-		fmt.Printf("IMPORTS\n\n")
+		fmt.Printf("\nIMPORTS\n********\n")
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
 		for _, imp := range pe.Imports {
 			desc := imp.Descriptor
@@ -474,31 +484,18 @@ func parsePE(filename string, cfg config) {
 
 		}
 
-		fmt.Printf("\n\nRESOURCES\n**********\n")
+		fmt.Printf("\nRESOURCES\n**********\n")
 		printRsrcDir(pe.Resources)
 	}
 
-	if cfg.wantCLR && pe.FileInfo.HasCLR {
-		dotnetMetadata, _ := json.Marshal(pe.CLR)
-		log.Info(prettyPrint(dotnetMetadata))
-		if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {
-			if modTable.Content != nil {
-				modTableRow := modTable.Content.(peparser.ModuleTableRow)
-				modName := pe.GetStringFromData(modTableRow.Name, pe.CLR.MetadataStreams["#Strings"])
-				moduleName := string(modName)
-				log.Info(moduleName)
-			}
-		}
-	}
-
 	if cfg.wantException && pe.FileInfo.HasException {
-		fmt.Printf("\n\nEXCEPTIONS\n***********\n")
+		fmt.Printf("\nEXCEPTIONS\n***********\n")
 		for _, exception := range pe.Exceptions {
 			entry := exception.RuntimeFunction
 			fmt.Printf("\n\u27A1 BeginAddress: 0x%x EndAddress:0x%x UnwindInfoAddress:0x%x\t\n",
 				entry.BeginAddress, entry.EndAddress, entry.UnwindInfoAddress)
 
-			ui := exception.UnwinInfo
+			ui := exception.UnwindInfo
 			handlerFlags := peparser.PrettyUnwindInfoHandlerFlags(ui.Flags)
 			prettyFlags := strings.Join(handlerFlags, ",")
 			fmt.Printf("|- Version: 0x%x\n", ui.Version)
@@ -631,7 +628,8 @@ func parsePE(filename string, cfg config) {
 	}
 
 	if cfg.wantBoundImp && pe.FileInfo.HasBoundImp {
-		fmt.Printf("BOUND IMPORTS\n\n")
+		fmt.Printf("\nBOUND IMPORTS\n************\n")
+
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
 		for _, bndImp := range pe.BoundImports {
 			fmt.Printf("\n\t------[ %s ]------\n\n", bndImp.Name)
@@ -712,6 +710,97 @@ func parsePE(filename string, cfg config) {
 				v.Field(i).Interface())
 		}
 		w.Flush()
+	}
+
+	if cfg.wantCLR && pe.FileInfo.HasCLR {
+		fmt.Printf("\nCLR\n****\n")
+
+		fmt.Print("\n\t------[ CLR Header ]------\n\n")
+		clr := pe.CLR
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+
+		clrHdr := clr.CLRHeader
+		flags := strings.Join(clrHdr.Flags.String(), " | ")
+		fmt.Fprintf(w, "Size Of Header:\t 0x%x\n", clrHdr.Cb)
+		fmt.Fprintf(w, "Major Runtime Version:\t 0x%x\n", clrHdr.MajorRuntimeVersion)
+		fmt.Fprintf(w, "Minor Runtime Version:\t 0x%x\n", clrHdr.MinorRuntimeVersion)
+		fmt.Fprintf(w, "MetaData RVA:\t 0x%x\n", clrHdr.MetaData.VirtualAddress)
+		fmt.Fprintf(w, "MetaData Size:\t 0x%x\n", clrHdr.MetaData.Size)
+		fmt.Fprintf(w, "Flags:\t 0x%x (%v)\n", clrHdr.Flags, flags)
+		fmt.Fprintf(w, "EntryPoint RVA or Token:\t 0x%x\n", clrHdr.EntryPointRVAorToken)
+		fmt.Fprintf(w, "Resources RVA:\t 0x%x\n", clrHdr.Resources.VirtualAddress)
+		fmt.Fprintf(w, "Resources Size:\t 0x%x (%s)\n", clrHdr.Resources.Size, BytesSize(float64(clrHdr.Resources.Size)))
+		fmt.Fprintf(w, "Strong Name Signature RVA:\t 0x%x\n", clrHdr.StrongNameSignature.VirtualAddress)
+		fmt.Fprintf(w, "Strong Name Signature Size:\t 0x%x (%s)\n", clrHdr.StrongNameSignature.Size, BytesSize(float64(clrHdr.StrongNameSignature.Size)))
+		fmt.Fprintf(w, "Code Manager Table RVA:\t 0x%x\n", clrHdr.CodeManagerTable.VirtualAddress)
+		fmt.Fprintf(w, "Code Manager Table Size:\t 0x%x (%s)\n", clrHdr.CodeManagerTable.Size, BytesSize(float64(clrHdr.CodeManagerTable.Size)))
+		fmt.Fprintf(w, "VTable Fixups RVA:\t 0x%x\n", clrHdr.VTableFixups.VirtualAddress)
+		fmt.Fprintf(w, "VTable Fixups Size:\t 0x%x (%s)\n", clrHdr.VTableFixups.Size, BytesSize(float64(clrHdr.VTableFixups.Size)))
+		fmt.Fprintf(w, "Export Address Table Jumps RVA:\t 0x%x\n", clrHdr.ExportAddressTableJumps.VirtualAddress)
+		fmt.Fprintf(w, "Export Address Table Jumps Size:\t 0x%x (%s)\n", clrHdr.ExportAddressTableJumps.Size, BytesSize(float64(clrHdr.ExportAddressTableJumps.Size)))
+		fmt.Fprintf(w, "Managed Native Header RVA:\t 0x%x\n", clrHdr.ManagedNativeHeader.VirtualAddress)
+		fmt.Fprintf(w, "Managed Native Header Size:\t 0x%x (%s)\n", clrHdr.ManagedNativeHeader.Size, BytesSize(float64(clrHdr.ManagedNativeHeader.Size)))
+		w.Flush()
+
+		fmt.Print("\n\t------[ MetaData Header ]------\n\n")
+		mdHdr := clr.MetadataHeader
+		fmt.Fprintf(w, "Signature:\t 0x%x (%s)\n", mdHdr.Signature,
+			string(IntToByteArray(uint64(mdHdr.Signature))))
+		fmt.Fprintf(w, "Major Version:\t 0x%x\n", mdHdr.MajorVersion)
+		fmt.Fprintf(w, "Minor Version:\t 0x%x\n", mdHdr.MinorVersion)
+		fmt.Fprintf(w, "Extra Data:\t 0x%x\n", mdHdr.ExtraData)
+		fmt.Fprintf(w, "Version String Length:\t 0x%x\n", mdHdr.VersionString)
+		fmt.Fprintf(w, "Version String:\t %s\n", mdHdr.Version)
+		fmt.Fprintf(w, "Flags:\t 0x%x\n", mdHdr.Flags)
+		fmt.Fprintf(w, "Streams Count:\t 0x%x\n", mdHdr.Streams)
+		w.Flush()
+
+		fmt.Print("\n\t------[ MetaData Streams ]------\n\n")
+		for _, sh := range clr.MetadataStreamHeaders {
+			fmt.Fprintf(w, "Stream Name:\t %s\n", sh.Name)
+			fmt.Fprintf(w, "Offset:\t 0x%x\n", sh.Offset)
+			fmt.Fprintf(w, "Size:\t 0x%x (%s)\n", sh.Size, BytesSize(float64(sh.Size)))
+			w.Flush()
+			fmt.Print("\n   ---Stream Content---\n")
+			hexDumpSize(clr.MetadataStreams[sh.Name], 128)
+			fmt.Print("\n")
+		}
+
+		fmt.Print("\n\t------[ MetaData Tables Stream Header ]------\n\n")
+		mdTablesStreamHdr := clr.MetadataTablesStreamHeader
+		fmt.Fprintf(w, "Reserved:\t 0x%x\n", mdTablesStreamHdr.Reserved)
+		fmt.Fprintf(w, "Major Version:\t 0x%x\n", mdTablesStreamHdr.MajorVersion)
+		fmt.Fprintf(w, "Minor Version:\t 0x%x\n", mdTablesStreamHdr.MinorVersion)
+		fmt.Fprintf(w, "Heaps:\t 0x%x\n", mdTablesStreamHdr.Heaps)
+		fmt.Fprintf(w, "RID:\t 0x%x\n", mdTablesStreamHdr.RID)
+		fmt.Fprintf(w, "MaskValid:\t 0x%x\n", mdTablesStreamHdr.MaskValid)
+		fmt.Fprintf(w, "Sorted:\t 0x%x\n", mdTablesStreamHdr.Sorted)
+		w.Flush()
+
+		fmt.Print("\n\t------[ MetaData Tables ]------\n\n")
+		mdTables := clr.MetadataTables
+		for _, mdTable := range mdTables {
+			fmt.Fprintf(w, "Name:\t %s | Items Count:\t 0x%x\n", mdTable.Name, mdTable.CountCols)
+		}
+		w.Flush()
+
+		for table, modTable := range pe.CLR.MetadataTables {
+			switch table {
+			case peparser.Module:
+				fmt.Print("\n\t[Modules]\n\t---------\n")
+				modTableRow := modTable.Content.(peparser.ModuleTableRow)
+				modName := pe.GetStringFromData(modTableRow.Name, pe.CLR.MetadataStreams["#Strings"])
+				Mvid := pe.GetStringFromData(modTableRow.Mvid, pe.CLR.MetadataStreams["#GUID"])
+				MvidStr := hex.EncodeToString(Mvid)
+				fmt.Fprintf(w, "Generation:\t 0x%x\n", modTableRow.Generation)
+				fmt.Fprintf(w, "Name:\t 0x%x (%s)\n", modTableRow.Name, string(modName))
+				fmt.Fprintf(w, "Mvid:\t 0x%x (%s)\n", modTableRow.Mvid, MvidStr)
+				fmt.Fprintf(w, "EncID:\t 0x%x\n", modTableRow.EncID)
+				fmt.Fprintf(w, "EncBaseID:\t 0x%x\n", modTableRow.EncBaseID)
+				w.Flush()
+
+			}
+		}
 	}
 
 	fmt.Print("\n")

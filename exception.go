@@ -356,7 +356,7 @@ type ScopeTable struct {
 // Exception represent an entry in the function table.
 type Exception struct {
 	RuntimeFunction ImageRuntimeFunctionEntry `json:"runtime_function"`
-	UnwinInfo       UnwindInfo                `json:"unwind_info"`
+	UnwindInfo       UnwindInfo                `json:"unwind_info"`
 }
 
 func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) {
@@ -364,7 +364,7 @@ func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) 
 	unwindCode := UnwindCode{}
 	advanceBy := 0
 
-	// Read the unwince code at offset (2 bytes)
+	// Read the unwind code at offset (2 bytes)
 	uc, err := pe.ReadUint16(offset)
 	if err != nil {
 		return unwindCode, advanceBy
@@ -410,7 +410,7 @@ func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) 
 	case UwOpSaveXmm128:
 		fo := binary.LittleEndian.Uint16(pe.data[offset+2:])
 		unwindCode.FrameOffset = fo * 16
-		unwindCode.Operand = "Rgister=XMM" + strconv.Itoa(int(unwindCode.OpInfo)) +
+		unwindCode.Operand = "Register=XMM" + strconv.Itoa(int(unwindCode.OpInfo)) +
 			", Offset=" + strconv.Itoa(int(unwindCode.FrameOffset))
 		advanceBy += 2
 	case UwOpSaveXmm128Far:
@@ -439,7 +439,7 @@ func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) 
 	return unwindCode, advanceBy
 }
 
-func (pe *File) parseUnwinInfo(unwindInfo uint32) UnwindInfo {
+func (pe *File) parseUnwindInfo(unwindInfo uint32) UnwindInfo {
 
 	ui := UnwindInfo{}
 
@@ -536,7 +536,7 @@ func (pe *File) parseExceptionDirectory(rva, size uint32) error {
 		exception := Exception{RuntimeFunction: functionEntry}
 
 		if pe.Is64 {
-			exception.UnwinInfo = pe.parseUnwinInfo(functionEntry.UnwindInfoAddress)
+			exception.UnwindInfo = pe.parseUnwindInfo(functionEntry.UnwindInfoAddress)
 		}
 
 		exceptions = append(exceptions, exception)

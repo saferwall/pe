@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -7,6 +7,12 @@ package pe
 import (
 	"encoding/binary"
 )
+
+// References
+// https://www.ntcore.com/files/dotnetformat.htm
+
+// COMImageFlagsType represents a COM+ header entry point flag type.
+type COMImageFlagsType uint32
 
 // COM+ Header entry point flags.
 const (
@@ -20,7 +26,7 @@ const (
 
 	// This flag is obsolete and should not be set. Setting it—as the IL
 	// assembler allows, using the .corflags directive—will render your module
-	// unloadable.
+	// un-loadable.
 	COMImageFlagILLibrary = 0x00000004
 
 	// The image file is protected with a strong name signature.
@@ -97,7 +103,7 @@ const (
 	// Custom attribute descriptors.
 	CustomAttribute = 12
 	// Field or parameter marshaling descriptors for managed/unmanaged
-	// interoperations.
+	// inter-operations.
 	FieldMarshal = 13
 	// Security descriptors.
 	DeclSecurity = 14
@@ -137,7 +143,7 @@ const (
 	// Type specification descriptors.
 	TypeSpec = 27
 	// Implementation map descriptors used for the platform invocation
-	// (P/Invoke) type of managed/unmanaged code interoperation.
+	// (P/Invoke) type of managed/unmanaged code inter-operation.
 	ImplMap = 28
 	// Field-to-data mapping descriptors.
 	FieldRVA = 29
@@ -191,9 +197,9 @@ const (
 	BlobStream   = 2
 )
 
-// MetadataTableIndextToString returns the string representation of the metadata
+// MetadataTableIndexToString returns the string representation of the metadata
 // table index.
-func MetadataTableIndextToString(k int) string {
+func MetadataTableIndexToString(k int) string {
 	metadataTablesMap := map[int]string{
 		Module:                 "Module",
 		TypeRef:                "TypeRef",
@@ -269,30 +275,30 @@ func (pe *File) GetMetadataStreamIndexSize(BitPosition int) int {
 type ImageDataDirectory struct {
 
 	// The relative virtual address of the table.
-	VirtualAddress uint32
+	VirtualAddress uint32 `json:"virtual_address"`
 
 	// The size of the table, in bytes.
-	Size uint32
+	Size uint32 `json:"size"`
 }
 
 // ImageCOR20Header represents the CLR 2.0 header structure.
 type ImageCOR20Header struct {
 
 	// Size of the header in bytes.
-	Cb uint32
+	Cb uint32 `json:"cb"`
 
 	// Major number of the minimum version of the runtime required to run the
 	// program.
-	MajorRuntimeVersion uint16
+	MajorRuntimeVersion uint16 `json:"major_runtime_version"`
 
 	// Minor number of the version of the runtime required to run the program.
-	MinorRuntimeVersion uint16
+	MinorRuntimeVersion uint16 `json:"minor_runtime_version"`
 
 	// RVA and size of the metadata.
-	MetaData ImageDataDirectory
+	MetaData ImageDataDirectory `json:"meta_data"`
 
 	// Bitwise flags indicating attributes of this executable.
-	Flags uint32
+	Flags COMImageFlagsType `json:"flags"`
 
 	// Metadata identifier (token) of the entry point for the image file; can
 	// be 0 for DLL images. This field identifies a method belonging to this
@@ -309,40 +315,40 @@ type ImageCOR20Header struct {
 	// EntryPointRVA represents an RVA to a native entrypoint
 	//	DWORD               EntryPointRVA;
 	//};
-	EntryPointRVAorToken uint32
+	EntryPointRVAorToken uint32 `json:"entry_point_rva_or_token"`
 
 	// This is the blob of managed resources. Fetched using
 	// code:AssemblyNative.GetResource and code:PEFile.GetResource and accessible
 	// from managed code from System.Assembly.GetManifestResourceStream. The
 	// metadata has a table that maps names to offsets into this blob, so
 	// logically the blob is a set of resources.
-	Resources ImageDataDirectory
+	Resources ImageDataDirectory `json:"resources"`
 
 	// RVA and size of the hash data for this PE file, used by the loader for
 	// binding and versioning. IL assemblies can be signed with a public-private
 	// key to validate who created it. The signature goes here if this feature
 	// is used.
-	StrongNameSignature ImageDataDirectory
+	StrongNameSignature ImageDataDirectory `json:"strong_name_signature"`
 
 	// RVA and size of the Code Manager table. In the existing releases of the
 	// runtime, this field is reserved and must be set to 0.
-	CodeManagerTable ImageDataDirectory
+	CodeManagerTable ImageDataDirectory `json:"code_manager_table"`
 
 	// RVA and size in bytes of an array of virtual table (v-table) fixups.
 	// Among current managed compilers, only the VC++ linker and the IL
 	// assembler can produce this array.
-	VTableFixups ImageDataDirectory
+	VTableFixups ImageDataDirectory `json:"vtable_fixups"`
 
 	// RVA and size of an array of addresses of jump thunks. Among managed
 	// compilers, only the VC++ of versions pre-8.0 could produce this table,
 	// which allows the export of unmanaged native methods embedded in the
 	// managed PE file. In v2.0+ of CLR this entry is obsolete and must be set
 	// to 0.
-	ExportAddressTableJumps ImageDataDirectory
+	ExportAddressTableJumps ImageDataDirectory `json:"export_address_table_jumps"`
 
 	// Reserved for precompiled images; set to 0
 	// NGEN images it points at a code:CORCOMPILE_HEADER structure
-	ManagedNativeHeader ImageDataDirectory
+	ManagedNativeHeader ImageDataDirectory `json:"managed_native_header"`
 }
 
 // ImageCORVTableFixup defines the v-table fixups that contains the
@@ -354,9 +360,9 @@ type ImageCOR20Header struct {
 // turn each entry into a pointer to machine code for the CPU and can be
 // called directly.
 type ImageCORVTableFixup struct {
-	RVA   uint32 // Offset of v-table array in image.
-	Count uint16 // How many entries at location.
-	Type  uint16 // COR_VTABLE_xxx type of entries.
+	RVA   uint32 `json:"rva"`   // Offset of v-table array in image.
+	Count uint16 `json:"count"` // How many entries at location.
+	Type  uint16 `json:"type"`  // COR_VTABLE_xxx type of entries.
 }
 
 // MetadataHeader consists of a storage signature and a storage header.
@@ -367,61 +373,61 @@ type MetadataHeader struct {
 	// as characters, BSJB—the initials of four “founding fathers” Brian Harry,
 	// Susa Radke-Sproull, Jason Zander, and Bill Evans, who started the
 	// runtime development in 1998.
-	Signature uint32
+	Signature uint32 `json:"signature"`
 
 	// Major version.
-	MajorVersion uint16
+	MajorVersion uint16 `json:"major_version"`
 
 	// Minor version.
-	MinorVersion uint16
+	MinorVersion uint16 `json:"minor_version"`
 
 	// Reserved; set to 0.
-	ExtraData uint32
+	ExtraData uint32 `json:"extra_data"`
 
 	// Length of the version string.
-	VersionString uint32
+	VersionString uint32 `json:"version_string"`
 
 	// Version string.
-	Version string
+	Version string `json:"version"`
 
 	// The storage header follows the storage signature, aligned on a 4-byte
 	// boundary.
 	//
 
 	// Reserved; set to 0.
-	Flags uint8
+	Flags uint8 `json:"flags"`
 
 	// Another byte used for [padding]
 
 	// Number of streams.
-	Streams uint16
+	Streams uint16 `json:"streams"`
 }
 
 // MetadataStreamHeader represents a Metadata Stream Header Structure.
 type MetadataStreamHeader struct {
 	// Offset in the file for this stream.
-	Offset uint32
+	Offset uint32 `json:"offset"`
 
 	// Size of the stream in bytes.
-	Size uint32
+	Size uint32 `json:"size"`
 
 	// Name of the stream; a zero-terminated ASCII string no longer than 31
 	// characters (plus zero terminator). The name might be shorter, in which
 	// case the size of the stream header is correspondingly reduced, padded to
 	// the 4-byte boundary.
-	Name string
+	Name string `json:"name"`
 }
 
 // MetadataTableStreamHeader represents the Metadata Table Stream Header Structure.
 type MetadataTableStreamHeader struct {
 	// Reserved; set to 0.
-	Reserved uint32
+	Reserved uint32 `json:"reserved"`
 
 	// Major version of the table schema (1 for v1.0 and v1.1; 2 for v2.0 or later).
-	MajorVersion uint8
+	MajorVersion uint8 `json:"major_version"`
 
 	// Minor version of the table schema (0 for all versions).
-	MinorVersion uint8
+	MinorVersion uint8 `json:"minor_version"`
 
 	// Binary flags indicate the offset sizes to be used within the heaps.
 	// 4-byte unsigned integer offset is indicated by:
@@ -432,36 +438,33 @@ type MetadataTableStreamHeader struct {
 	// during an edit-and-continue session, and;
 	// - flag 0x80, indicating that the  metadata might contain items marked as
 	// deleted.
-	Heaps uint8
+	Heaps uint8 `json:"heaps"`
 
-	// it width of the maximal record index to all tables of the metadata;
+	// Bit width of the maximal record index to all tables of the metadata;
 	// calculated at run time (during the metadata stream initialization).
-	Rid uint8
+	RID uint8 `json:"rid"`
 
 	// Bit vector of present tables, each bit representing one table (1 if
 	// present).
-	MaskValid uint64
+	MaskValid uint64 `json:"mask_valid"`
 
 	// Bit vector of sorted tables, each bit representing a respective table (1
 	// if sorted)
-	Sorted uint64
+	Sorted uint64 `json:"sorted"`
 }
 
 // MetadataTable represents the content of a particular table in the metadata.
 // The metadata schema defines 45 tables.
 type MetadataTable struct {
 	// The name of the table.
-	Name string
+	Name string `json:"name"`
 
-	// Number of columns in the table
-	CountCols uint8
-
-	// Size of a record in the table/
-	SizeRecord uint16
+	// Number of columns in the table.
+	CountCols uint32 `json:"count_cols"`
 
 	// Every table has a different layout, defined in the ECMA-335 spec.
-	// Content asbtract the type each table is pointing to.
-	Content interface{}
+	// Content abstract the type each table is pointing to.
+	Content interface{} `json:"content"`
 }
 
 // ModuleTableRow represents the `Module` metadata table contains a single
@@ -469,24 +472,24 @@ type MetadataTable struct {
 // structure of the table is as follows:
 type ModuleTableRow struct {
 	// Used only at run time, in edit-and-continue mode.
-	Generation uint16
+	Generation uint16 `json:"generation"`
 
 	// (offset in the #Strings stream) The module name, which is the same as
 	// the name of the executable file with its extension but without a path.
 	// The length should not exceed 512 bytes in UTF-8 encoding, counting the
 	// zero terminator.
-	Name uint32
+	Name uint32 `json:"name"`
 
 	// (offset in the #GUID stream) A globally unique identifier, assigned
 	// to the module as it is generated.
-	Mvid uint32
+	Mvid uint32 `json:"mvid"`
 
 	// (offset in the #GUID stream): Used only at run time, in
 	// edit-and-continue mode.
-	EncID uint32
+	EncID uint32 `json:"enc_id"`
 
 	// (offset in the #GUID stream): Used only at run time, in edit-and-continue mode.
-	EncBaseID uint32
+	EncBaseID uint32 `json:"enc_base_id"`
 }
 
 // CLRData embeds the Common Language Runtime Header structure as well as the
@@ -664,7 +667,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 			return err
 		}
 
-		// Name requires a special treatement.
+		// Name requires a special treatment.
 		offset += 8
 		for j := uint32(0); j <= 32; j++ {
 			var c uint8
@@ -682,7 +685,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 		}
 
 		// The streams #~ and #- are mutually exclusive; that is, the metadata
-		// structure of the module is either optimized or unoptimized; it
+		// structure of the module is either optimized or un-optimized; it
 		// cannot be both at the same time or be something in between.
 		if sh.Name == "#~" || sh.Name == "#-" {
 			mdStreamHdrOff = sh.Offset
@@ -718,18 +721,16 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	// This header is followed by a sequence of 4-byte unsigned integers
 	// indicating the number of records in each table marked 1 in the MaskValid
 	// bit vector.
-	tablesCount := 0
 	offset += uint32(binary.Size(mdTableStreamHdr))
 	pe.CLR.MetadataTables = make(map[int]*MetadataTable)
 	for i := 0; i < GenericParamConstraint; i++ {
 		if IsBitSet(mdTableStreamHdr.MaskValid, i) {
 			mdTable := MetadataTable{}
-			mdTable.Name = MetadataTableIndextToString(i)
-			mdTable.CountCols, err = pe.ReadUint8(offset)
+			mdTable.Name = MetadataTableIndexToString(i)
+			mdTable.CountCols, err = pe.ReadUint32(offset)
 			if err != nil {
 				break
 			}
-			tablesCount++
 			offset += 4
 			pe.CLR.MetadataTables[i] = &mdTable
 		}
@@ -746,4 +747,26 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	}
 
 	return nil
+}
+
+// String returns a string interpretation of a COMImageFlags type.
+func (flags COMImageFlagsType) String() []string {
+	COMImageFlags := map[COMImageFlagsType]string{
+		COMImageFlagsILOnly:           "IL Only",
+		COMImageFlags32BitRequired:    "32-Bit Required",
+		COMImageFlagILLibrary:         "IL Library",
+		COMImageFlagsStrongNameSigned: "Strong Name Signed",
+		COMImageFlagsNativeEntrypoint: "Native Entrypoint",
+		COMImageFlagsTrackDebugData:   "Track Debug Data",
+		COMImageFlags32BitPreferred:   "32-Bit Preferred",
+	}
+
+	var values []string
+	for k, v := range COMImageFlags {
+		if (k & flags) == k {
+			values = append(values, v)
+		}
+	}
+
+	return values
 }
