@@ -229,8 +229,8 @@ func TestClrDirectorCOMImageFlagsType(t *testing.T) {
 	for _, tt := range tests {
 		t.Run("CaseFlagsEqualTo_"+strconv.Itoa(tt.in), func(t *testing.T) {
 			got := COMImageFlagsType(tt.in).String()
-			got = sort.StringSlice(got)
-			tt.out = sort.StringSlice(tt.out)
+			sort.Strings(got)
+			sort.Strings(tt.out)
 			if !reflect.DeepEqual(got, tt.out) {
 				t.Errorf("CLR header flags assertion failed, got %v, want %v",
 					got, tt.out)
