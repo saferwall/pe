@@ -6,6 +6,7 @@ package pe
 
 import (
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -204,9 +205,32 @@ func TestClrDirectoryMetadataTables(t *testing.T) {
 
 			clr := file.CLR
 			mdTable := clr.MetadataTables[tt.out.tableKind]
-			if !reflect.DeepEqual(mdTable, tt.out.table) {
+			if !reflect.DeepEqual(*mdTable, tt.out.table) {
 				t.Errorf("CLR metadata tables assertion failed, got %v, want %v",
 					clr.MetadataTables, tt.out.table)
+			}
+		})
+	}
+}
+
+func TestClrDirectorCOMImageFlagsType(t *testing.T) {
+
+	tests := []struct {
+		in  int
+		out []string
+	}{
+		{
+			0x9,
+			[]string{"IL Only", "Strong Name Signed"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run("Case: "+strconv.Itoa(tt.in), func(t *testing.T) {
+			got := COMImageFlagsType(tt.in).String()
+			if !reflect.DeepEqual(got, tt.out) {
+				t.Errorf("CLR header flags assertion failed, got %v, want %v",
+					got, tt.out)
 			}
 		})
 	}
