@@ -7,6 +7,7 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -766,24 +767,40 @@ func parsePE(filename string, cfg config) {
 		}
 
 		fmt.Print("\n\t------[ MetaData Tables Stream Header ]------\n\n")
-		mdTableStreamHdr := clr.MetadataTablesStreamHeader
-		fmt.Fprintf(w, "Reserved:\t 0x%x\n", mdTableStreamHdr.Reserved)
-		fmt.Fprintf(w, "Major Version:\t 0x%x\n", mdTableStreamHdr.MajorVersion)
-		fmt.Fprintf(w, "Minor Version:\t 0x%x\n", mdTableStreamHdr.MinorVersion)
-		fmt.Fprintf(w, "Heaps:\t 0x%x\n", mdTableStreamHdr.Heaps)
-		fmt.Fprintf(w, "RID:\t 0x%x\n", mdTableStreamHdr.RID)
-		fmt.Fprintf(w, "MaskValid:\t 0x%x\n", mdTableStreamHdr.MaskValid)
-		fmt.Fprintf(w, "Sorted:\t 0x%x\n", mdTableStreamHdr.Sorted)
+		mdTablesStreamHdr := clr.MetadataTablesStreamHeader
+		fmt.Fprintf(w, "Reserved:\t 0x%x\n", mdTablesStreamHdr.Reserved)
+		fmt.Fprintf(w, "Major Version:\t 0x%x\n", mdTablesStreamHdr.MajorVersion)
+		fmt.Fprintf(w, "Minor Version:\t 0x%x\n", mdTablesStreamHdr.MinorVersion)
+		fmt.Fprintf(w, "Heaps:\t 0x%x\n", mdTablesStreamHdr.Heaps)
+		fmt.Fprintf(w, "RID:\t 0x%x\n", mdTablesStreamHdr.RID)
+		fmt.Fprintf(w, "MaskValid:\t 0x%x\n", mdTablesStreamHdr.MaskValid)
+		fmt.Fprintf(w, "Sorted:\t 0x%x\n", mdTablesStreamHdr.Sorted)
 		w.Flush()
 
-		// if modTable, ok := pe.CLR.MetadataTables[peparser.Module]; ok {
-		// 	if modTable.Content != nil {
-		// 		modTableRow := modTable.Content.(peparser.ModuleTableRow)
-		// 		modName := pe.GetStringFromData(modTableRow.Name, pe.CLR.MetadataStreams["#Strings"])
-		// 		moduleName := string(modName)
-		// 		log.Info(moduleName)
-		// 	}
-		// }
+		fmt.Print("\n\t------[ MetaData Tables ]------\n\n")
+		mdTables := clr.MetadataTables
+		for _, mdTable := range mdTables {
+			fmt.Fprintf(w, "Name:\t %s | Items Count:\t 0x%x\n", mdTable.Name, mdTable.CountCols)
+		}
+		w.Flush()
+
+		for table, modTable := range pe.CLR.MetadataTables {
+			switch table {
+			case peparser.Module:
+				fmt.Print("\n\t[Modules]\n\t---------\n")
+				modTableRow := modTable.Content.(peparser.ModuleTableRow)
+				modName := pe.GetStringFromData(modTableRow.Name, pe.CLR.MetadataStreams["#Strings"])
+				Mvid := pe.GetStringFromData(modTableRow.Mvid, pe.CLR.MetadataStreams["#GUID"])
+				MvidStr := hex.EncodeToString(Mvid)
+				fmt.Fprintf(w, "Generation:\t 0x%x\n", modTableRow.Generation)
+				fmt.Fprintf(w, "Name:\t 0x%x (%s)\n", modTableRow.Name, string(modName))
+				fmt.Fprintf(w, "Mvid:\t 0x%x (%s)\n", modTableRow.Mvid, MvidStr)
+				fmt.Fprintf(w, "EncID:\t 0x%x\n", modTableRow.EncID)
+				fmt.Fprintf(w, "EncBaseID:\t 0x%x\n", modTableRow.EncBaseID)
+				w.Flush()
+
+			}
+		}
 	}
 
 	fmt.Print("\n")

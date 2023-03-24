@@ -459,11 +459,8 @@ type MetadataTable struct {
 	// The name of the table.
 	Name string `json:"name"`
 
-	// Number of columns in the table
-	CountCols uint8 `json:"count_cols"`
-
-	// Size of a record in the table/
-	SizeRecord uint16 `json:"size_record"`
+	// Number of columns in the table.
+	CountCols uint32 `json:"count_cols"`
 
 	// Every table has a different layout, defined in the ECMA-335 spec.
 	// Content abstract the type each table is pointing to.
@@ -724,18 +721,16 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	// This header is followed by a sequence of 4-byte unsigned integers
 	// indicating the number of records in each table marked 1 in the MaskValid
 	// bit vector.
-	tablesCount := 0
 	offset += uint32(binary.Size(mdTableStreamHdr))
 	pe.CLR.MetadataTables = make(map[int]*MetadataTable)
 	for i := 0; i < GenericParamConstraint; i++ {
 		if IsBitSet(mdTableStreamHdr.MaskValid, i) {
 			mdTable := MetadataTable{}
 			mdTable.Name = MetadataTableIndexToString(i)
-			mdTable.CountCols, err = pe.ReadUint8(offset)
+			mdTable.CountCols, err = pe.ReadUint32(offset)
 			if err != nil {
 				break
 			}
-			tablesCount++
 			offset += 4
 			pe.CLR.MetadataTables[i] = &mdTable
 		}
