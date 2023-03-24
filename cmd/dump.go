@@ -374,6 +374,19 @@ func parsePE(filename string, cfg config) {
 		w.Flush()
 	}
 
+	if cfg.wantCOFF && pe.FileInfo.HasCOFF {
+		fmt.Printf("\nCOFF\n****\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		fmt.Fprintln(w, "Name\tValue\tSectionNumber\tType\tStorageClass\tNumberOfAuxSymbols\t")
+		for _, sym := range pe.COFF.SymbolTable {
+			symName, _ := sym.String(pe)
+			fmt.Fprintf(w, "%s\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t\n",
+				symName, sym.Value, sym.SectionNumber,
+				sym.Type, sym.StorageClass, sym.NumberOfAuxSymbols)
+		}
+		w.Flush()
+	}
+
 	if cfg.wantSections && pe.FileInfo.HasSections {
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
 		for i, sec := range pe.Sections {
