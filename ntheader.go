@@ -31,6 +31,9 @@ type ImageFileHeaderMachineType uint16
 // `Characteristics` field.
 type ImageFileHeaderCharacteristicsType uint16
 
+// ImageOptionalHeaderSubsystemType represents the type of the optional header `Subsystem field.
+type ImageOptionalHeaderSubsystemType uint16
+
 // ImageFileHeader contains infos about the physical layout and properties of the
 // file.
 type ImageFileHeader struct {
@@ -168,7 +171,7 @@ type ImageOptionalHeader32 struct {
 	CheckSum uint32 `json:"checksum"`
 
 	// The subsystem that is required to run this image.
-	Subsystem uint16 `json:"subsystem"`
+	Subsystem ImageOptionalHeaderSubsystemType `json:"subsystem"`
 
 	// For more information, see DLL Characteristics later in this specification.
 	DllCharacteristics uint16 `json:"dll_characteristics"`
@@ -300,7 +303,7 @@ type ImageOptionalHeader64 struct {
 	CheckSum uint32 `json:"checksum"`
 
 	// The subsystem that is required to run this image.
-	Subsystem uint16 `json:"subsystem"`
+	Subsystem ImageOptionalHeaderSubsystemType `json:"subsystem"`
 
 	// For more information, see DLL Characteristics later in this specification.
 	DllCharacteristics uint16 `json:"dll_characteristics"`
@@ -511,6 +514,7 @@ func (t ImageFileHeaderCharacteristicsType) String() []string {
 			values = append(values, s)
 		}
 	}
+
 	return values
 }
 
@@ -551,21 +555,10 @@ func (pe *File) PrettyDllCharacteristics() []string {
 	return values
 }
 
-// PrettySubsystem returns the string representations of the `Subsystem` field
+// String returns the string representations of the `Subsystem` field
 // of ImageOptionalHeader.
-func (pe *File) PrettySubsystem() string {
-
-	var subsystem uint16
-
-	if pe.Is64 {
-		subsystem =
-			pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).Subsystem
-	} else {
-		subsystem =
-			pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).Subsystem
-	}
-
-	subsystemMap := map[uint16]string{
+func (subsystem ImageOptionalHeaderSubsystemType) String() string {
+	subsystemMap := map[ImageOptionalHeaderSubsystemType]string{
 		ImageSubsystemUnknown:                "Unknown",
 		ImageSubsystemNative:                 "Native",
 		ImageSubsystemWindowsGUI:             "Windows GUI",
@@ -611,6 +604,6 @@ func (pe *File) PrettyOptionalHeaderMagic() string {
 	case ImageROMOptionalHeaderMagic:
 		return "ROM"
 	default:
-		return "??"
+		return "?"
 	}
 }

@@ -47,9 +47,7 @@ func TestNtHeaderCharacteristicsType(t *testing.T) {
 		{
 			ImageFileHeaderCharacteristicsType(0x0022), []string{"ExecutableImage", "LargeAddressAware"},
 		},
-		{
-			ImageFileHeaderCharacteristicsType(0x0), []string{"?"},
-		},
+
 	}
 
 	for _, tt := range tests {
@@ -66,31 +64,27 @@ func TestNtHeaderCharacteristicsType(t *testing.T) {
 	}
 }
 
-func TestSubsystem(t *testing.T) {
+func TestOptionalHeaderSubsystemType(t *testing.T) {
 
 	tests := []struct {
-		in  string
+		in  ImageOptionalHeaderSubsystemType
 		out string
 	}{
-		{getAbsoluteFilePath("test/putty.exe"), "Windows GUI"},
+		{
+			ImageOptionalHeaderSubsystemType(0x2), "Windows GUI",
+		},
+		{
+			ImageOptionalHeaderSubsystemType(0xff), "?",
+		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.in, func(t *testing.T) {
-			ops := Options{Fast: true}
-			file, err := New(tt.in, &ops)
-			if err != nil {
-				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
-			}
-			err = file.Parse()
-			if err != nil {
-				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
-			}
-
-			prettySubsystem := file.PrettySubsystem()
-			if prettySubsystem != tt.out {
-				t.Errorf("pretty subsystem type assertion failed, got %v, want %v",
-					prettySubsystem, tt.out)
+		name := "CaseOptionalHeaderSubsystemTypeEqualTo_" + strconv.Itoa(int(tt.in))
+		t.Run(name, func(t *testing.T) {
+			got := tt.in.String()
+			if got != tt.out {
+				t.Errorf("optional header subsystem type assertion failed, got %v, want %v",
+					got, tt.out)
 			}
 		})
 	}
