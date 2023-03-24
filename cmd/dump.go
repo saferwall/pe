@@ -512,7 +512,7 @@ func parsePE(filename string, cfg config) {
 			fmt.Print("|- Unwind codes:\n")
 			for _, uc := range ui.UnwindCodes {
 				fmt.Printf("|-  * %.2x: %s, %s\n", uc.CodeOffset,
-					peparser.PrettyUnwindOpcode(uc.UnwindOp), uc.Operand)
+					uc.UnwindOp.String(), uc.Operand)
 			}
 		}
 	}
