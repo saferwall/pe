@@ -20,7 +20,7 @@ type TestClrEntry struct {
 	mdTables             map[int]*MetadataTable
 }
 
-func TestDotNet(t *testing.T) {
+func TestClrDirectory(t *testing.T) {
 
 	tests := []struct {
 		in  string
@@ -97,30 +97,25 @@ func TestDotNet(t *testing.T) {
 					Sorted:       0x16003301fa00,
 				},
 				mdTables: map[int]*MetadataTable{
-					12: {
+					CustomAttribute: {
 						Name:       "CustomAttribute",
 						CountCols:  0x13,
-						SizeRecord: 0x0,
 					},
-					32: {
+					Assembly: {
 						Name:       "Assembly",
 						CountCols:  0x1,
-						SizeRecord: 0x0,
 					},
-					35: {
+					AssemblyRef: {
 						Name:       "AssemblyRef",
 						CountCols:  0x1e,
-						SizeRecord: 0x0,
 					},
-					39: {
+					ExportedType: {
 						Name:       "ExportedType",
-						CountCols:  0x27,
-						SizeRecord: 0x0,
+						CountCols:  0x527,
 					},
-					0: {
+					Module: {
 						Name:       "Module",
 						CountCols:  0x1,
-						SizeRecord: 0x0,
 						Content: ModuleTableRow{
 							Generation: 0x0,
 							Name:       0x2cd7,
@@ -129,25 +124,21 @@ func TestDotNet(t *testing.T) {
 							EncBaseID:  0x0,
 						},
 					},
-					1: {
+					TypeRef: {
 						Name:       "TypeRef",
 						CountCols:  0x13,
-						SizeRecord: 0x0,
 					},
-					2: {
+					TypeDef: {
 						Name:       "TypeDef",
 						CountCols:  0x1,
-						SizeRecord: 0x0,
 					},
-					10: {
+					MemberRef: {
 						Name:       "MemberRef",
 						CountCols:  0x11,
-						SizeRecord: 0x0,
 					},
-					14: {
+					DeclSecurity: {
 						Name:       "DeclSecurity",
 						CountCols:  0x1,
-						SizeRecord: 0x0,
 					},
 				},
 			},
