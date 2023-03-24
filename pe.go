@@ -47,31 +47,31 @@ const (
 
 // Image file machine types
 const (
-	ImageFileMachineUnknown   = uint16(0x0)    // The contents of this field are assumed to be applicable to any machine type
-	ImageFileMachineAM33      = uint16(0x1d3)  // Matsushita AM33
-	ImageFileMachineAMD64     = uint16(0x8664) // x64
-	ImageFileMachineARM       = uint16(0x1c0)  // ARM little endian
-	ImageFileMachineARM64     = uint16(0xaa64) // ARM64 little endian
-	ImageFileMachineARMNT     = uint16(0x1c4)  // ARM Thumb-2 little endian
-	ImageFileMachineEBC       = uint16(0xebc)  // EFI byte code
-	ImageFileMachineI386      = uint16(0x14c)  // Intel 386 or later processors and compatible processors
-	ImageFileMachineIA64      = uint16(0x200)  // Intel Itanium processor family
-	ImageFileMachineM32R      = uint16(0x9041) // Mitsubishi M32R little endian
-	ImageFileMachineMIPS16    = uint16(0x266)  // MIPS16
-	ImageFileMachineMIPSFPU   = uint16(0x366)  // MIPS with FPU
-	ImageFileMachineMIPSFPU16 = uint16(0x466)  // MIPS16 with FPU
-	ImageFileMachinePowerPC   = uint16(0x1f0)  // Power PC little endian
-	ImageFileMachinePowerPCFP = uint16(0x1f1)  // Power PC with floating point support
-	ImageFileMachineR4000     = uint16(0x166)  // MIPS little endian
-	ImageFileMachineRISCV32   = uint16(0x5032) // RISC-V 32-bit address space
-	ImageFileMachineRISCV64   = uint16(0x5064) // RISC-V 64-bit address space
-	ImageFileMachineRISCV128  = uint16(0x5128) // RISC-V 128-bit address space
-	ImageFileMachineSH3       = uint16(0x1a2)  // Hitachi SH3
-	ImageFileMachineSH3DSP    = uint16(0x1a3)  // Hitachi SH3 DSP
-	ImageFileMachineSH4       = uint16(0x1a6)  // Hitachi SH4
-	ImageFileMachineSH5       = uint16(0x1a8)  // Hitachi SH5
-	ImageFileMachineTHUMB     = uint16(0x1c2)  // Thumb
-	ImageFileMachineWCEMIPSv2 = uint16(0x169)  // MIPS little-endian WCE v2
+	ImageFileMachineUnknown   = ImageFileHeaderMachineType(0x0)    // The contents of this field are assumed to be applicable to any machine type
+	ImageFileMachineAM33      = ImageFileHeaderMachineType(0x1d3)  // Matsushita AM33
+	ImageFileMachineAMD64     = ImageFileHeaderMachineType(0x8664) // x64
+	ImageFileMachineARM       = ImageFileHeaderMachineType(0x1c0)  // ARM little endian
+	ImageFileMachineARM64     = ImageFileHeaderMachineType(0xaa64) // ARM64 little endian
+	ImageFileMachineARMNT     = ImageFileHeaderMachineType(0x1c4)  // ARM Thumb-2 little endian
+	ImageFileMachineEBC       = ImageFileHeaderMachineType(0xebc)  // EFI byte code
+	ImageFileMachineI386      = ImageFileHeaderMachineType(0x14c)  // Intel 386 or later processors and compatible processors
+	ImageFileMachineIA64      = ImageFileHeaderMachineType(0x200)  // Intel Itanium processor family
+	ImageFileMachineM32R      = ImageFileHeaderMachineType(0x9041) // Mitsubishi M32R little endian
+	ImageFileMachineMIPS16    = ImageFileHeaderMachineType(0x266)  // MIPS16
+	ImageFileMachineMIPSFPU   = ImageFileHeaderMachineType(0x366)  // MIPS with FPU
+	ImageFileMachineMIPSFPU16 = ImageFileHeaderMachineType(0x466)  // MIPS16 with FPU
+	ImageFileMachinePowerPC   = ImageFileHeaderMachineType(0x1f0)  // Power PC little endian
+	ImageFileMachinePowerPCFP = ImageFileHeaderMachineType(0x1f1)  // Power PC with floating point support
+	ImageFileMachineR4000     = ImageFileHeaderMachineType(0x166)  // MIPS little endian
+	ImageFileMachineRISCV32   = ImageFileHeaderMachineType(0x5032) // RISC-V 32-bit address space
+	ImageFileMachineRISCV64   = ImageFileHeaderMachineType(0x5064) // RISC-V 64-bit address space
+	ImageFileMachineRISCV128  = ImageFileHeaderMachineType(0x5128) // RISC-V 128-bit address space
+	ImageFileMachineSH3       = ImageFileHeaderMachineType(0x1a2)  // Hitachi SH3
+	ImageFileMachineSH3DSP    = ImageFileHeaderMachineType(0x1a3)  // Hitachi SH3 DSP
+	ImageFileMachineSH4       = ImageFileHeaderMachineType(0x1a6)  // Hitachi SH4
+	ImageFileMachineSH5       = ImageFileHeaderMachineType(0x1a8)  // Hitachi SH5
+	ImageFileMachineTHUMB     = ImageFileHeaderMachineType(0x1c2)  // Thumb
+	ImageFileMachineWCEMIPSv2 = ImageFileHeaderMachineType(0x169)  // MIPS little-endian WCE v2
 )
 
 // The Characteristics field contains flags that indicate attributes of the object or image file.

@@ -272,16 +272,17 @@ func parsePE(filename string, cfg config) {
 	if cfg.wantNTHeader {
 		ntHeader := pe.NtHeader.FileHeader
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		characteristics := strings.Join(ntHeader.Characteristics.String(), " | ")
 
 		fmt.Print("\n\t------[ File Header ]------\n\n")
-		fmt.Fprintf(w, "Machine:\t 0x%x (%s)\n", ntHeader.Machine, pe.PrettyMachineType())
+		fmt.Fprintf(w, "Machine:\t 0x%x (%s)\n", int(ntHeader.Machine), ntHeader.Machine.String())
 		fmt.Fprintf(w, "Number Of Sections:\t 0x%x\n", ntHeader.NumberOfSections)
 		fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", ntHeader.TimeDateStamp, humanizeTimestamp(ntHeader.TimeDateStamp))
 		fmt.Fprintf(w, "Pointer To Symbol Table:\t 0x%x\n", ntHeader.PointerToSymbolTable)
 		fmt.Fprintf(w, "Number Of Symbols:\t 0x%x\n", ntHeader.NumberOfSymbols)
 		fmt.Fprintf(w, "Number Of Symbols:\t 0x%x\n", ntHeader.NumberOfSymbols)
 		fmt.Fprintf(w, "Size Of Optional Header:\t 0x%x\n", ntHeader.SizeOfOptionalHeader)
-		fmt.Fprintf(w, "Characteristics:\t 0x%x\n", ntHeader.Characteristics)
+		fmt.Fprintf(w, "Characteristics:\t 0x%x (%s)\n", ntHeader.Characteristics, characteristics)
 		w.Flush()
 
 		fmt.Print("\n\t------[ Optional Header ]------\n\n")

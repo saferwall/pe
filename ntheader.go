@@ -24,11 +24,18 @@ type ImageNtHeader struct {
 	OptionalHeader interface{} `json:"optional_header"`
 }
 
+// ImageFileHeaderMachineType represents the type of the image file header `Machine“ field.
+type ImageFileHeaderMachineType uint16
+
+// ImageFileHeaderCharacteristicsType represents the type of the image file header
+// `Characteristics` field.
+type ImageFileHeaderCharacteristicsType uint16
+
 // ImageFileHeader contains infos about the physical layout and properties of the
 // file.
 type ImageFileHeader struct {
 	// The number that identifies the type of target machine.
-	Machine uint16 `json:"machine"`
+	Machine ImageFileHeaderMachineType `json:"machine"`
 
 	// The number of sections. This indicates the size of the section table,
 	// which immediately follows the headers.
@@ -54,7 +61,7 @@ type ImageFileHeader struct {
 	SizeOfOptionalHeader uint16 `json:"size_of_optional_header"`
 
 	// The flags that indicate the attributes of the file.
-	Characteristics uint16 `json:"characteristics"`
+	Characteristics ImageFileHeaderCharacteristicsType `json:"characteristics"`
 }
 
 // ImageOptionalHeader32 represents the PE32 format structure of the optional header.
@@ -443,10 +450,9 @@ func (pe *File) ParseNTHeader() (err error) {
 	return nil
 }
 
-// PrettyMachineType returns the string representations of the `Machine` field
-// of  the IMAGE_FILE_HEADER.
-func (pe *File) PrettyMachineType() string {
-	machineType := map[uint16]string{
+// String returns the string representations of the `Machine` field of the IMAGE_FILE_HEADER.
+func (t ImageFileHeaderMachineType) String() string {
+	machineType := map[ImageFileHeaderMachineType]string{
 		ImageFileMachineUnknown:   "Unknown",
 		ImageFileMachineAM33:      "Matsushita AM33",
 		ImageFileMachineAMD64:     "x64",
@@ -474,17 +480,16 @@ func (pe *File) PrettyMachineType() string {
 		ImageFileMachineWCEMIPSv2: "MIPS little-endian WCE v2",
 	}
 
-	if val, ok := machineType[pe.NtHeader.FileHeader.Machine]; ok {
+	if val, ok := machineType[t]; ok {
 		return val
 	}
 	return "?"
 }
 
-// PrettyImageFileCharacteristics returns the string representations
-// of the `Characteristics` field of  the IMAGE_FILE_HEADER.
-func (pe *File) PrettyImageFileCharacteristics() []string {
+// String returns the string representations of the `Characteristics` field of the IMAGE_FILE_HEADER.
+func (t ImageFileHeaderCharacteristicsType) String() []string {
 	var values []string
-	fileHeaderCharacteristics := map[uint16]string{
+	fileHeaderCharacteristics := map[ImageFileHeaderCharacteristicsType]string{
 		ImageFileRelocsStripped:       "RelocsStripped",
 		ImageFileExecutableImage:      "ExecutableImage",
 		ImageFileLineNumsStripped:     "LineNumsStripped",
@@ -502,7 +507,7 @@ func (pe *File) PrettyImageFileCharacteristics() []string {
 	}
 
 	for k, s := range fileHeaderCharacteristics {
-		if k&pe.NtHeader.FileHeader.Characteristics != 0 {
+		if k&t != 0 {
 			values = append(values, s)
 		}
 	}
