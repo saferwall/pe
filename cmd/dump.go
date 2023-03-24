@@ -288,7 +288,7 @@ func parsePE(filename string, cfg config) {
 		fmt.Print("\n\t------[ Optional Header ]------\n\n")
 		if pe.Is64 {
 			oh := pe.NtHeader.OptionalHeader.(peparser.ImageOptionalHeader64)
-			dllCharacteristics := strings.Join(pe.PrettyDllCharacteristics(), " | ")
+			dllCharacteristics := strings.Join(oh.DllCharacteristics.String(), " | ")
 			fmt.Fprintf(w, "Magic:\t 0x%x (%s)\n", oh.Magic, pe.PrettyOptionalHeaderMagic())
 			fmt.Fprintf(w, "Major Linker Version:\t 0x%x\n", oh.MajorLinkerVersion)
 			fmt.Fprintf(w, "Minor Linker Version:\t 0x%x\n", oh.MinorLinkerVersion)
@@ -315,7 +315,7 @@ func parsePE(filename string, cfg config) {
 			fmt.Fprintf(w, "Size Of Headers:\t 0x%x (%s)\n", oh.SizeOfHeaders, BytesSize(float64(oh.SizeOfHeaders)))
 			fmt.Fprintf(w, "Checksum:\t 0x%x\n", oh.CheckSum)
 			fmt.Fprintf(w, "Subsystem:\t 0x%x (%s)\n", uint16(oh.Subsystem), oh.Subsystem.String())
-			fmt.Fprintf(w, "Dll Characteristics:\t 0x%x (%s)\n", oh.DllCharacteristics, dllCharacteristics)
+			fmt.Fprintf(w, "Dll Characteristics:\t 0x%x (%s)\n", uint16(oh.DllCharacteristics), dllCharacteristics)
 			fmt.Fprintf(w, "Size Of Stack Reserve:\t 0x%x (%s)\n", oh.SizeOfStackReserve, BytesSize(float64(oh.SizeOfStackReserve)))
 			fmt.Fprintf(w, "Size Of Stack Commit:\t 0x%x (%s)\n", oh.SizeOfStackCommit, BytesSize(float64(oh.SizeOfStackCommit)))
 			fmt.Fprintf(w, "Size Of Heap Reserve:\t 0x%x (%s)\n", oh.SizeOfHeapReserve, BytesSize(float64(oh.SizeOfHeapReserve)))
@@ -330,7 +330,7 @@ func parsePE(filename string, cfg config) {
 			}
 		} else {
 			oh := pe.NtHeader.OptionalHeader.(peparser.ImageOptionalHeader32)
-			dllCharacteristics := strings.Join(pe.PrettyDllCharacteristics(), " | ")
+			dllCharacteristics := strings.Join(oh.DllCharacteristics.String(), " | ")
 			fmt.Fprintf(w, "Magic:\t 0x%x (%s)\n", oh.Magic, pe.PrettyOptionalHeaderMagic())
 			fmt.Fprintf(w, "Major Linker Version:\t 0x%x\n", oh.MajorLinkerVersion)
 			fmt.Fprintf(w, "Minor Linker Version:\t 0x%x\n", oh.MinorLinkerVersion)
@@ -357,7 +357,7 @@ func parsePE(filename string, cfg config) {
 			fmt.Fprintf(w, "Size Of Headers:\t 0x%x (%s)\n", oh.SizeOfHeaders, BytesSize(float64(oh.SizeOfHeaders)))
 			fmt.Fprintf(w, "Checksum:\t 0x%x\n", oh.CheckSum)
 			fmt.Fprintf(w, "Subsystem:\t 0x%x (%s)\n", uint16(oh.Subsystem), oh.Subsystem.String())
-			fmt.Fprintf(w, "Dll Characteristics:\t 0x%x (%s)\n", oh.DllCharacteristics, dllCharacteristics)
+			fmt.Fprintf(w, "Dll Characteristics:\t 0x%x (%s)\n", uint16(oh.DllCharacteristics), dllCharacteristics)
 			fmt.Fprintf(w, "Size Of Stack Reserve:\t 0x%x (%s)\n", oh.SizeOfStackReserve, BytesSize(float64(oh.SizeOfStackReserve)))
 			fmt.Fprintf(w, "Size Of Stack Commit:\t 0x%x (%s)\n", oh.SizeOfStackCommit, BytesSize(float64(oh.SizeOfStackCommit)))
 			fmt.Fprintf(w, "Size Of Heap Reserve:\t 0x%x (%s)\n", oh.SizeOfHeapReserve, BytesSize(float64(oh.SizeOfHeapReserve)))

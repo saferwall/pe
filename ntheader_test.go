@@ -47,7 +47,6 @@ func TestNtHeaderCharacteristicsType(t *testing.T) {
 		{
 			ImageFileHeaderCharacteristicsType(0x0022), []string{"ExecutableImage", "LargeAddressAware"},
 		},
-
 	}
 
 	for _, tt := range tests {
@@ -90,35 +89,28 @@ func TestOptionalHeaderSubsystemType(t *testing.T) {
 	}
 }
 
-func TestPrettyDllCharacteristics(t *testing.T) {
+func TestOptionalHeaderDllCharacteristics(t *testing.T) {
 
 	tests := []struct {
-		in  string
+		in  ImageOptionalHeaderDllCharacteristicsType
 		out []string
 	}{
-		{getAbsoluteFilePath("test/putty.exe"), []string{
-			"DynamicBase", "HighEntropyVA", "NXCompact", "TerminalServiceAware"}},
+		{
+			ImageOptionalHeaderDllCharacteristicsType(0x8160),
+			[]string{"DynamicBase", "HighEntropyVA", "NXCompact", "TerminalServiceAware"},
+		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.in, func(t *testing.T) {
-			ops := Options{Fast: true}
-			file, err := New(tt.in, &ops)
-			if err != nil {
-				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+		name := "CaseOptionalHeaderDllCharacteristicsTypeEqualTo_" + strconv.Itoa(int(tt.in))
+		t.Run(name, func(t *testing.T) {
+			got := tt.in.String()
+			sort.Strings(got)
+			sort.Strings(tt.out)
+			if !reflect.DeepEqual(got, tt.out) {
+				t.Errorf("optional header dll characteristics type assertion failed, got %v, want %v",
+					got, tt.out)
 			}
-			err = file.Parse()
-			if err != nil {
-				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
-			}
-
-			dllCharacteristics := file.PrettyDllCharacteristics()
-			sort.Strings(dllCharacteristics)
-			if !reflect.DeepEqual(dllCharacteristics, tt.out) {
-				t.Errorf("pretty dll characteristics type assertion failed, got %v, want %v",
-					dllCharacteristics, tt.out)
-			}
-
 		})
 	}
 }

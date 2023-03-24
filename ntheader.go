@@ -34,6 +34,9 @@ type ImageFileHeaderCharacteristicsType uint16
 // ImageOptionalHeaderSubsystemType represents the type of the optional header `Subsystem field.
 type ImageOptionalHeaderSubsystemType uint16
 
+// ImageOptionalHeaderDllCharacteristicsType represents the type of the optional header `DllCharacteristics field.
+type ImageOptionalHeaderDllCharacteristicsType uint16
+
 // ImageFileHeader contains infos about the physical layout and properties of the
 // file.
 type ImageFileHeader struct {
@@ -174,7 +177,7 @@ type ImageOptionalHeader32 struct {
 	Subsystem ImageOptionalHeaderSubsystemType `json:"subsystem"`
 
 	// For more information, see DLL Characteristics later in this specification.
-	DllCharacteristics uint16 `json:"dll_characteristics"`
+	DllCharacteristics ImageOptionalHeaderDllCharacteristicsType `json:"dll_characteristics"`
 
 	// Size of virtual memory to reserve for the initial thread’s stack. Only
 	// the SizeOfStackCommit field is committed; the rest is available in
@@ -306,7 +309,7 @@ type ImageOptionalHeader64 struct {
 	Subsystem ImageOptionalHeaderSubsystemType `json:"subsystem"`
 
 	// For more information, see DLL Characteristics later in this specification.
-	DllCharacteristics uint16 `json:"dll_characteristics"`
+	DllCharacteristics ImageOptionalHeaderDllCharacteristicsType `json:"dll_characteristics"`
 
 	// Size of virtual memory to reserve for the initial thread’s stack. Only
 	// the SizeOfStackCommit field is committed; the rest is available in
@@ -518,21 +521,11 @@ func (t ImageFileHeaderCharacteristicsType) String() []string {
 	return values
 }
 
-// PrettyDllCharacteristics returns the string representations
-// of the `DllCharacteristics` field of ImageOptionalHeader.
-func (pe *File) PrettyDllCharacteristics() []string {
+// String returns the string representations of the `DllCharacteristics` field of ImageOptionalHeader.
+func (t ImageOptionalHeaderDllCharacteristicsType) String() []string {
 	var values []string
-	var characteristics uint16
 
-	if pe.Is64 {
-		characteristics =
-			pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).DllCharacteristics
-	} else {
-		characteristics =
-			pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).DllCharacteristics
-	}
-
-	imgDllCharacteristics := map[uint16]string{
+	imgDllCharacteristics := map[ImageOptionalHeaderDllCharacteristicsType]string{
 		ImageDllCharacteristicsHighEntropyVA:        "HighEntropyVA",
 		ImageDllCharacteristicsDynamicBase:          "DynamicBase",
 		ImageDllCharacteristicsForceIntegrity:       "ForceIntegrity",
@@ -547,7 +540,7 @@ func (pe *File) PrettyDllCharacteristics() []string {
 	}
 
 	for k, s := range imgDllCharacteristics {
-		if k&characteristics != 0 {
+		if k&t != 0 {
 			values = append(values, s)
 		}
 	}
