@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -18,6 +18,9 @@ var (
 	ErrInvalidBasicRelocSizeOfBloc = errors.New("invalid relocation " +
 		"information. Base Relocation SizeOfBlock too large")
 )
+
+// ImageBaseRelocationEntryType represents the type of an in image base relocation entry.
+type ImageBaseRelocationEntryType uint8
 
 // The Type field of the relocation record indicates what kind of relocation
 // should be performed. Different relocation types are defined for each type
@@ -87,7 +90,7 @@ const (
 
 const (
 	// MaxDefaultRelocEntriesCount represents the default maximum number of
-	// relocations entries to parse. Some malwares uses a fake huge reloc entries that
+	// relocations entries to parse. Some malware uses a fake huge reloc entries that
 	// can slow significantly the parser.
 	// Example:  01008963d32f5cc17b64c31446386ee5b36a7eab6761df87a2989ba9394d8f3d
 	MaxDefaultRelocEntriesCount = 0x1000
@@ -117,7 +120,7 @@ type ImageBaseRelocationEntry struct {
 
 	// A value that indicates the kind of relocation that should be performed.
 	// Valid relocation types depend on machine type.
-	Type uint8
+	Type ImageBaseRelocationEntryType
 }
 
 // Relocation represents the relocation table which holds the data that needs to
@@ -146,7 +149,7 @@ func (pe *File) parseRelocations(dataRVA, rva, size uint32) ([]ImageBaseRelocati
 		if err != nil {
 			break
 		}
-		entry.Type = uint8(entry.Data >> 12)
+		entry.Type = ImageBaseRelocationEntryType(entry.Data >> 12)
 		entry.Offset = entry.Data & 0x0fff
 		relocEntries = append(relocEntries, entry)
 	}
@@ -208,10 +211,9 @@ func (pe *File) parseRelocDirectory(rva, size uint32) error {
 	return nil
 }
 
-// PrettyRelocTypeEntry returns the string representation
-// of the `Type` field of a base reloc entry.
-func (pe *File) PrettyRelocTypeEntry(k uint8) string {
-	relocTypesMap := map[uint8]string{
+// String returns the string representation of the `Type` field of a base reloc entry.
+func (t ImageBaseRelocationEntryType) String(pe *File) string {
+	relocTypesMap := map[ImageBaseRelocationEntryType]string{
 		ImageRelBasedAbsolute:      "Absolute",
 		ImageRelBasedHigh:          "High",
 		ImageRelBasedLow:           "Low",
@@ -223,30 +225,30 @@ func (pe *File) PrettyRelocTypeEntry(k uint8) string {
 		ImageRelBasedDir64:         "DIR64",
 	}
 
-	if value, ok := relocTypesMap[k]; ok {
+	if value, ok := relocTypesMap[t]; ok {
 		return value
 	}
 
 	switch pe.NtHeader.FileHeader.Machine {
 	case ImageFileMachineMIPS16, ImageFileMachineMIPSFPU, ImageFileMachineMIPSFPU16, ImageFileMachineWCEMIPSv2:
-		if k == ImageRelBasedMIPSJmpAddr {
+		if t == ImageRelBasedMIPSJmpAddr {
 			return "MIPS JMP Addr"
 		}
 
 	case ImageFileMachineARM, ImageFileMachineARM64, ImageFileMachineARMNT:
-		if k == ImageRelBasedARMMov32 {
+		if t == ImageRelBasedARMMov32 {
 			return "ARM MOV 32"
 		}
 
-		if k == ImageRelBasedThumbMov32 {
+		if t == ImageRelBasedThumbMov32 {
 			return "Thumb MOV 32"
 		}
 	case ImageFileMachineRISCV32, ImageFileMachineRISCV64, ImageFileMachineRISCV128:
-		if k == ImageRelBasedRISCVHigh20 {
+		if t == ImageRelBasedRISCVHigh20 {
 			return "RISC-V High 20"
 		}
 
-		if k == ImageRelBasedRISCVLow12i {
+		if t == ImageRelBasedRISCVLow12i {
 			return "RISC-V Low 12"
 		}
 	}

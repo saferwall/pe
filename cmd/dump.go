@@ -552,6 +552,19 @@ func parsePE(filename string, cfg config) {
 		w.Flush()
 	}
 
+	if cfg.wantReloc && pe.FileInfo.HasReloc {
+		fmt.Printf("\nRELOCATIONS\n***********\n")
+		for _, reloc := range pe.Relocations {
+			fmt.Printf("\n\u27A1 Virtual Address: 0x%x | Size Of Block:0x%x | Entries Count:0x%x\t\n",
+				reloc.Data.VirtualAddress, reloc.Data.SizeOfBlock, len(reloc.Entries))
+			fmt.Print("|- Entries:\n")
+			for _, relocEntry := range reloc.Entries {
+				fmt.Printf("|-  Data: 0x%x |  Offset: 0x%x | Type:0x%x (%s)\n", relocEntry.Data,
+					relocEntry.Offset, relocEntry.Type, relocEntry.Type.String(pe))
+			}
+		}
+	}
+
 	if cfg.wantDebug && pe.FileInfo.HasDebug {
 		fmt.Printf("\nDEBUGS\n*******\n")
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)

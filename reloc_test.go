@@ -99,7 +99,7 @@ func TestParseRelocDirectory(t *testing.T) {
 				t.Errorf("reloc assertion failed, got %v, want %v", reloc, tt.out.reloc)
 			}
 
-			prettyType := file.PrettyRelocTypeEntry(reloc.Entries[0].Type)
+			prettyType := reloc.Entries[0].Type.String(file)
 			if prettyType != tt.out.relocTypeMeaning {
 				t.Errorf("pretty reloc type assertion failed, got %v, want %v", prettyType,
 					tt.out.relocTypeMeaning)
