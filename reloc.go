@@ -228,17 +228,12 @@ func (pe *File) PrettyRelocTypeEntry(k uint8) string {
 	}
 
 	switch pe.NtHeader.FileHeader.Machine {
-	case ImageFileMachineMIPS16:
-	case ImageFileMachineMIPSFPU:
-	case ImageFileMachineMIPSFPU16:
-	case ImageFileMachineWCEMIPSv2:
+	case ImageFileMachineMIPS16, ImageFileMachineMIPSFPU, ImageFileMachineMIPSFPU16, ImageFileMachineWCEMIPSv2:
 		if k == ImageRelBasedMIPSJmpAddr {
 			return "MIPS JMP Addr"
 		}
 
-	case ImageFileMachineARM:
-	case ImageFileMachineARM64:
-	case ImageFileMachineARMNT:
+	case ImageFileMachineARM, ImageFileMachineARM64, ImageFileMachineARMNT:
 		if k == ImageRelBasedARMMov32 {
 			return "ARM MOV 32"
 		}
@@ -246,9 +241,7 @@ func (pe *File) PrettyRelocTypeEntry(k uint8) string {
 		if k == ImageRelBasedThumbMov32 {
 			return "Thumb MOV 32"
 		}
-	case ImageFileMachineRISCV32:
-	case ImageFileMachineRISCV64:
-	case ImageFileMachineRISCV128:
+	case ImageFileMachineRISCV32, ImageFileMachineRISCV64, ImageFileMachineRISCV128:
 		if k == ImageRelBasedRISCVHigh20 {
 			return "RISC-V High 20"
 		}

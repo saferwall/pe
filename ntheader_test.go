@@ -11,6 +11,35 @@ import (
 	"testing"
 )
 
+func TestParseNtHeaderNE(t *testing.T) {
+
+	tests := []struct {
+		in  string
+		out error
+	}{
+		{
+			// This is an NE executable file. Extracted from Windows CE 2.0.
+			getAbsoluteFilePath("test/_setup.dll"),
+			ErrImageOS2SignatureFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			ops := Options{Fast: true}
+			file, err := New(tt.in, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			err = file.Parse()
+			if err != tt.out {
+				t.Fatalf("parsing nt header failed, got %v, want %v", err, tt.out)
+			}
+		})
+	}
+}
+
 func TestNtHeaderMachineType(t *testing.T) {
 
 	tests := []struct {
@@ -89,7 +118,7 @@ func TestOptionalHeaderSubsystemType(t *testing.T) {
 	}
 }
 
-func TestOptionalHeaderDllCharacteristics(t *testing.T) {
+func TestOptionalHeaderDllCharacteristicsType(t *testing.T) {
 
 	tests := []struct {
 		in  ImageOptionalHeaderDllCharacteristicsType

@@ -8,6 +8,19 @@ import (
 	"encoding/binary"
 )
 
+// ImageFileHeaderMachineType represents the type of the image file header `Machine“ field.
+type ImageFileHeaderMachineType uint16
+
+// ImageFileHeaderCharacteristicsType represents the type of the image file header
+// `Characteristics` field.
+type ImageFileHeaderCharacteristicsType uint16
+
+// ImageOptionalHeaderSubsystemType represents the type of the optional header `Subsystem field.
+type ImageOptionalHeaderSubsystemType uint16
+
+// ImageOptionalHeaderDllCharacteristicsType represents the type of the optional header `DllCharacteristics field.
+type ImageOptionalHeaderDllCharacteristicsType uint16
+
 // ImageNtHeader represents the PE header and is the general term for a structure
 // named IMAGE_NT_HEADERS.
 type ImageNtHeader struct {
@@ -23,19 +36,6 @@ type ImageNtHeader struct {
 	// OptionalHeader is of type *OptionalHeader32 or *OptionalHeader64.
 	OptionalHeader interface{} `json:"optional_header"`
 }
-
-// ImageFileHeaderMachineType represents the type of the image file header `Machine“ field.
-type ImageFileHeaderMachineType uint16
-
-// ImageFileHeaderCharacteristicsType represents the type of the image file header
-// `Characteristics` field.
-type ImageFileHeaderCharacteristicsType uint16
-
-// ImageOptionalHeaderSubsystemType represents the type of the optional header `Subsystem field.
-type ImageOptionalHeaderSubsystemType uint16
-
-// ImageOptionalHeaderDllCharacteristicsType represents the type of the optional header `DllCharacteristics field.
-type ImageOptionalHeaderDllCharacteristicsType uint16
 
 // ImageFileHeader contains infos about the physical layout and properties of the
 // file.
