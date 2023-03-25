@@ -1,58 +1,32 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
 package pe
 
 import (
-	"reflect"
 	"testing"
 )
 
-type TestReloc struct {
-	reloc            Relocation
-	relocCount       int
-	relocIndex       int
-	relocTypeMeaning string
-}
+func TestParseRelocDirectoryData(t *testing.T) {
 
-func TestParseRelocDirectory(t *testing.T) {
+	type TestRelocData struct {
+		imgBaseRelocation ImageBaseRelocation
+		relocEntriesCount int
+		relocDataIndex    int
+	}
 
 	tests := []struct {
 		in  string
-		out TestReloc
+		out TestRelocData
 	}{
 		{
 			getAbsoluteFilePath("test/putty.exe"),
-			TestReloc{
-				reloc: Relocation{
-					Data: ImageBaseRelocation{VirtualAddress: 0xd8000, SizeOfBlock: 0xc},
-					Entries: []ImageBaseRelocationEntry{
-						{Data: 0xa000, Offset: 0x0, Type: 0xa},
-						{Data: 0xa008, Offset: 0x8, Type: 0xa},
-					},
-				},
-				relocCount:       18,
-				relocIndex:       17,
-				relocTypeMeaning: "DIR64",
-			},
-		},
-		{
-			// fake exception directory
-			getAbsoluteFilePath("test/01008963d32f5cc17b64c31446386ee5b36a7eab6761df87a2989ba9394d8f3d"),
-			TestReloc{
-				reloc: Relocation{
-					Data: ImageBaseRelocation{VirtualAddress: 0x11000, SizeOfBlock: 0x10},
-					Entries: []ImageBaseRelocationEntry{
-						{Data: 0x3310, Offset: 0x310, Type: 0x3},
-						{Data: 0x3320, Offset: 0x320, Type: 0x3},
-						{Data: 0x3324, Offset: 0x324, Type: 0x3},
-						{Data: 0x0, Offset: 0x0, Type: 0x0},
-					},
-				},
-				relocCount:       9,
-				relocIndex:       7,
-				relocTypeMeaning: "HighLow",
+			TestRelocData{
+				imgBaseRelocation: ImageBaseRelocation{
+					VirtualAddress: 0xd8000, SizeOfBlock: 0xc},
+				relocEntriesCount: 18,
+				relocDataIndex:    17,
 			},
 		},
 	}
@@ -89,19 +63,111 @@ func TestParseRelocDirectory(t *testing.T) {
 				t.Fatalf("parseRelocDirectory(%s) failed, reason: %v", tt.in, err)
 			}
 			relocs := file.Relocations
-			if len(relocs) != tt.out.relocCount {
-				t.Errorf("Relocations count assertion failed, got %v, want %v",
-					len(relocs), tt.out.relocCount)
+			if len(relocs) != tt.out.relocEntriesCount {
+				t.Errorf("relocations entries count assertion failed, got %v, want %v",
+					len(relocs), tt.out.relocEntriesCount)
 			}
 
-			reloc := relocs[tt.out.relocIndex]
-			if !reflect.DeepEqual(reloc, tt.out.reloc) {
-				t.Errorf("reloc assertion failed, got %v, want %v", reloc, tt.out.reloc)
+			imgBaseRelocation := relocs[tt.out.relocDataIndex].Data
+			if imgBaseRelocation != tt.out.imgBaseRelocation {
+				t.Errorf("reloc data assertion failed, got %v, want %v",
+					imgBaseRelocation, tt.out.imgBaseRelocation)
+			}
+		})
+	}
+}
+
+func TestParseRelocDirectoryEntry(t *testing.T) {
+
+	type TestRelocEntry struct {
+		imgBaseRelocationEntry ImageBaseRelocationEntry
+		relocEntriesCount      int
+		relocDataIndex         int
+		relocEntryIndex        int
+		relocTypeMeaning       string
+	}
+
+	tests := []struct {
+		in  string
+		out TestRelocEntry
+	}{
+		{
+			getAbsoluteFilePath("test/putty.exe"),
+			TestRelocEntry{
+				imgBaseRelocationEntry: ImageBaseRelocationEntry{
+					Data:   0xab00,
+					Offset: 0xb00,
+					Type:   0xa,
+				},
+				relocDataIndex:    0x1,
+				relocEntriesCount: 154,
+				relocEntryIndex:   17,
+				relocTypeMeaning:  "DIR64",
+			},
+		},
+		{
+			getAbsoluteFilePath("test/arp.dll"),
+			TestRelocEntry{
+				imgBaseRelocationEntry: ImageBaseRelocationEntry{
+					Data:   0x8004,
+					Offset: 0x4,
+					Type:   0x8,
+				},
+				relocDataIndex:    3,
+				relocEntriesCount: 204,
+				relocEntryIndex:   1,
+				relocTypeMeaning:  "RISC-V Low12s",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			ops := Options{Fast: true}
+			file, err := New(tt.in, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
 			}
 
-			prettyType := reloc.Entries[0].Type.String(file)
-			if prettyType != tt.out.relocTypeMeaning {
-				t.Errorf("pretty reloc type assertion failed, got %v, want %v", prettyType,
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
+			}
+
+			var va, size uint32
+			switch file.Is64 {
+			case true:
+				oh64 := file.NtHeader.OptionalHeader.(ImageOptionalHeader64)
+				dirEntry := oh64.DataDirectory[ImageDirectoryEntryBaseReloc]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			case false:
+				oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+				dirEntry := oh32.DataDirectory[ImageDirectoryEntryBaseReloc]
+				va = dirEntry.VirtualAddress
+				size = dirEntry.Size
+			}
+
+			err = file.parseRelocDirectory(va, size)
+			if err != nil {
+				t.Fatalf("parseRelocDirectory(%s) failed, reason: %v", tt.in, err)
+			}
+
+			reloc := file.Relocations[tt.out.relocDataIndex]
+			if len(reloc.Entries) != tt.out.relocEntriesCount {
+				t.Errorf("relocations entries count assertion failed, got %v, want %v",
+					len(reloc.Entries), tt.out.relocEntriesCount)
+			}
+
+			relocEntry := reloc.Entries[tt.out.relocEntryIndex]
+			if relocEntry != tt.out.imgBaseRelocationEntry {
+				t.Errorf("reloc image base relocation entry assertion failed, got %v, want %v",
+					relocEntry, tt.out.imgBaseRelocationEntry)
+			}
+
+			relocType := relocEntry.Type.String(file)
+			if relocType != tt.out.relocTypeMeaning {
+				t.Errorf("pretty reloc type assertion failed, got %v, want %v", relocType,
 					tt.out.relocTypeMeaning)
 			}
 
