@@ -495,15 +495,15 @@ type ModuleTableRow struct {
 // CLRData embeds the Common Language Runtime Header structure as well as the
 // Metadata header structure.
 type CLRData struct {
-	CLRHeader                  *ImageCOR20Header          `json:"clr_header,omitempty"`
-	MetadataHeader             *MetadataHeader            `json:"metadata_header,omitempty"`
-	MetadataStreamHeaders      []*MetadataStreamHeader    `json:"metadata_stream_headers,omitempty"`
-	MetadataStreams            map[string][]byte          `json:"-"`
-	MetadataTablesStreamHeader *MetadataTableStreamHeader `json:"metadata_tables_stream_header,omitempty"`
-	MetadataTables             map[int]*MetadataTable     `json:"metadata_tables,omitempty"`
-	StringStreamIndexSize      int                        `json:"-"`
-	GUIDStreamIndexSize        int                        `json:"-"`
-	BlobStreamIndexSize        int                        `json:"-"`
+	CLRHeader                  ImageCOR20Header          `json:"clr_header"`
+	MetadataHeader             MetadataHeader            `json:"metadata_header"`
+	MetadataStreamHeaders      []MetadataStreamHeader    `json:"metadata_stream_headers"`
+	MetadataStreams            map[string][]byte         `json:"-"`
+	MetadataTablesStreamHeader MetadataTableStreamHeader `json:"metadata_tables_stream_header"`
+	MetadataTables             map[int]*MetadataTable    `json:"metadata_tables"`
+	StringStreamIndexSize      int                       `json:"-"`
+	GUIDStreamIndexSize        int                       `json:"-"`
+	BlobStreamIndexSize        int                       `json:"-"`
 }
 
 func (pe *File) readFromMetadataSteam(Stream int, off uint32, out *uint32) (uint32, error) {
@@ -589,35 +589,35 @@ func (pe *File) parseMetadataHeader(offset, size uint32) (MetadataHeader, error)
 	return mh, err
 }
 
-func (pe *File) parseMetadataModuleTable(moduleTable *MetadataTable, off uint32) error {
+func (pe *File) parseMetadataModuleTable(off uint32) (ModuleTableRow, error) {
 	var err error
 	var indexSize uint32
 	modTableRow := ModuleTableRow{}
+
 	if modTableRow.Generation, err = pe.ReadUint16(off); err != nil {
-		return err
+		return ModuleTableRow{}, err
 	}
 	off += 2
 
 	if indexSize, err = pe.readFromMetadataSteam(StringStream, off, &modTableRow.Name); err != nil {
-		return err
+		return ModuleTableRow{}, err
 	}
 	off += indexSize
 
 	if indexSize, err = pe.readFromMetadataSteam(GUIDStream, off, &modTableRow.Mvid); err != nil {
-		return err
+		return ModuleTableRow{}, err
 	}
 	off += indexSize
 	if indexSize, err = pe.readFromMetadataSteam(GUIDStream, off, &modTableRow.EncID); err != nil {
-		return err
+		return ModuleTableRow{}, err
 	}
 	off += indexSize
 
 	if _, err = pe.readFromMetadataSteam(GUIDStream, off, &modTableRow.EncBaseID); err != nil {
-		return err
+		return ModuleTableRow{}, err
 	}
 
-	moduleTable.Content = modTableRow
-	return nil
+	return modTableRow, nil
 }
 
 // The 15th directory entry of the PE header contains the RVA and size of the
@@ -634,7 +634,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 		return err
 	}
 
-	pe.CLR.CLRHeader = &clrHeader
+	pe.CLR.CLRHeader = clrHeader
 	if clrHeader.MetaData.VirtualAddress == 0 || clrHeader.MetaData.Size == 0 {
 		return nil
 	}
@@ -649,7 +649,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	if err != nil {
 		return err
 	}
-	pe.CLR.MetadataHeader = &mh
+	pe.CLR.MetadataHeader = mh
 	pe.CLR.MetadataStreams = make(map[string][]byte)
 	offset += 16 + mh.VersionString + 4
 
@@ -696,7 +696,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 		rva = clrHeader.MetaData.VirtualAddress + sh.Offset
 		start := pe.GetOffsetFromRva(rva)
 		pe.CLR.MetadataStreams[sh.Name] = pe.data[start : start+sh.Size]
-		pe.CLR.MetadataStreamHeaders = append(pe.CLR.MetadataStreamHeaders, &sh)
+		pe.CLR.MetadataStreamHeaders = append(pe.CLR.MetadataStreamHeaders, sh)
 	}
 
 	// Get the Metadata Table Stream.
@@ -711,7 +711,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	if err != nil {
 		return nil
 	}
-	pe.CLR.MetadataTablesStreamHeader = &mdTableStreamHdr
+	pe.CLR.MetadataTablesStreamHeader = mdTableStreamHdr
 
 	// Get the size of indexes of #String", "#GUID" and "#Blob" streams.
 	pe.CLR.StringStreamIndexSize = pe.GetMetadataStreamIndexSize(StringStream)
@@ -740,7 +740,8 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	for tableIdx, table := range pe.CLR.MetadataTables {
 		switch tableIdx {
 		case Module:
-			if err = pe.parseMetadataModuleTable(table, offset); err != nil {
+			table.Content, err = pe.parseMetadataModuleTable(offset)
+			if err != nil {
 				return err
 			}
 		}

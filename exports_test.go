@@ -1,11 +1,10 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
 package pe
 
 import (
-	"reflect"
 	"testing"
 )
 
@@ -30,10 +29,7 @@ func TestExportDirectory(t *testing.T) {
 				entryIndex: 0,
 				name:       "KERNEL32.dll",
 				imgExpDir: ImageExportDirectory{
-					Characteristics:       0x0,
 					TimeDateStamp:         0x38B369C4,
-					MajorVersion:          0x0,
-					MinorVersion:          0x0,
 					Name:                  0x0009E1D2,
 					Base:                  0x1,
 					NumberOfFunctions:     0x661,
@@ -45,7 +41,6 @@ func TestExportDirectory(t *testing.T) {
 				expFunc: ExportFunction{
 					Ordinal:      0x1,
 					FunctionRVA:  0x0009E1F7,
-					NameOrdinal:  0x0,
 					NameRVA:      0x0009E1DF,
 					Name:         "AcquireSRWLockExclusive",
 					Forwarder:    "NTDLL.RtlAcquireSRWLockExclusive",
@@ -53,6 +48,51 @@ func TestExportDirectory(t *testing.T) {
 				},
 			},
 		},
+		{
+			getAbsoluteFilePath("test/mfc140u.dll"),
+			TestExport{
+				entryCount: 14103,
+				entryIndex: 0,
+				name:       "KERNEL32.dll",
+				imgExpDir: ImageExportDirectory{
+					TimeDateStamp:      0x5b8f7bca,
+					Name:               0x3e2e0c,
+					Base:               0x100,
+					NumberOfFunctions:  0x371d,
+					AddressOfFunctions: 0x3d5198,
+				},
+				expFunc: ExportFunction{
+					Ordinal:     0x100,
+					FunctionRVA: 0x275fa0,
+				},
+			},
+		},
+		// {
+		// 	// TODO: ThreadSanitizer failed to allocate 0x000048000000 (1207959552) in Github CI
+		// 	getAbsoluteFilePath("test/0b1d3d3664915577ab9a32188d29bbf3542b86c7b9ce333e245496c3018819f1"),
+		// 	TestExport{
+		// 		entryCount: 7728638,
+		// 		entryIndex: 0,
+		// 		name:       "",
+		// 		imgExpDir: ImageExportDirectory{
+		// 			Characteristics:       0xac0000,
+		// 			TimeDateStamp:         0xac0000,
+		// 			MinorVersion:          0xac,
+		// 			Name:                  0xac0000,
+		// 			Base:                  0xac0000,
+		// 			NumberOfFunctions:     0xac0000,
+		// 			NumberOfNames:         0xac0000,
+		// 			AddressOfFunctions:    0xac0000,
+		// 			AddressOfNames:        0xac0000,
+		// 			AddressOfNameOrdinals: 0xac0000,
+		// 		},
+		// 		expFunc: ExportFunction{
+		// 			Ordinal:     0xac0000,
+		// 			FunctionRVA: 0xac0000,
+		// 			NameRVA:     0xac0000,
+		// 		},
+		// 	},
+		// },
 	}
 
 	for _, tt := range tests {
@@ -86,22 +126,23 @@ func TestExportDirectory(t *testing.T) {
 			if err != nil {
 				t.Fatalf("parseExportDirectory(%s) failed, reason: %v", tt.in, err)
 			}
-			got := file.Export
-			if len(got.Functions) != tt.out.entryCount {
-				t.Errorf("export functions count assertion failed, got %v, want %v",
-					len(got.Functions), tt.out.entryCount)
+
+			export := file.Export
+			if len(export.Functions) != tt.out.entryCount {
+				t.Fatalf("export functions count assertion failed, got %v, want %v",
+					len(export.Functions), tt.out.entryCount)
 			}
 
-			imgExpDir := file.Export.Struct
-			if !reflect.DeepEqual(imgExpDir, tt.out.imgExpDir) {
-				t.Errorf("image export directory assertion failed, got %v, want %v",
+			imgExpDir := export.Struct
+			if imgExpDir != tt.out.imgExpDir {
+				t.Fatalf("image export directory assertion failed, got %v, want %v",
 					imgExpDir, tt.out.imgExpDir)
 			}
 
-			if len(file.Export.Functions) > 0 {
-				expFunc := file.Export.Functions[tt.out.entryIndex]
-				if !reflect.DeepEqual(expFunc, tt.out.expFunc) {
-					t.Errorf("export entry assertion failed, got %v, want %v", expFunc, tt.out.expFunc)
+			if len(export.Functions) > 0 {
+				expFunc := export.Functions[tt.out.entryIndex]
+				if expFunc != tt.out.expFunc {
+					t.Fatalf("export entry assertion failed, got %v, want %v", expFunc, tt.out.expFunc)
 				}
 			}
 		})

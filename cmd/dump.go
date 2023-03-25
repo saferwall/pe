@@ -272,22 +272,23 @@ func parsePE(filename string, cfg config) {
 	if cfg.wantNTHeader {
 		ntHeader := pe.NtHeader.FileHeader
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		characteristics := strings.Join(ntHeader.Characteristics.String(), " | ")
 
 		fmt.Print("\n\t------[ File Header ]------\n\n")
-		fmt.Fprintf(w, "Machine:\t 0x%x (%s)\n", ntHeader.Machine, pe.PrettyMachineType())
+		fmt.Fprintf(w, "Machine:\t 0x%x (%s)\n", int(ntHeader.Machine), ntHeader.Machine.String())
 		fmt.Fprintf(w, "Number Of Sections:\t 0x%x\n", ntHeader.NumberOfSections)
 		fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", ntHeader.TimeDateStamp, humanizeTimestamp(ntHeader.TimeDateStamp))
 		fmt.Fprintf(w, "Pointer To Symbol Table:\t 0x%x\n", ntHeader.PointerToSymbolTable)
 		fmt.Fprintf(w, "Number Of Symbols:\t 0x%x\n", ntHeader.NumberOfSymbols)
 		fmt.Fprintf(w, "Number Of Symbols:\t 0x%x\n", ntHeader.NumberOfSymbols)
 		fmt.Fprintf(w, "Size Of Optional Header:\t 0x%x\n", ntHeader.SizeOfOptionalHeader)
-		fmt.Fprintf(w, "Characteristics:\t 0x%x\n", ntHeader.Characteristics)
+		fmt.Fprintf(w, "Characteristics:\t 0x%x (%s)\n", ntHeader.Characteristics, characteristics)
 		w.Flush()
 
 		fmt.Print("\n\t------[ Optional Header ]------\n\n")
 		if pe.Is64 {
 			oh := pe.NtHeader.OptionalHeader.(peparser.ImageOptionalHeader64)
-			dllCharacteristics := strings.Join(pe.PrettyDllCharacteristics(), " | ")
+			dllCharacteristics := strings.Join(oh.DllCharacteristics.String(), " | ")
 			fmt.Fprintf(w, "Magic:\t 0x%x (%s)\n", oh.Magic, pe.PrettyOptionalHeaderMagic())
 			fmt.Fprintf(w, "Major Linker Version:\t 0x%x\n", oh.MajorLinkerVersion)
 			fmt.Fprintf(w, "Minor Linker Version:\t 0x%x\n", oh.MinorLinkerVersion)
@@ -313,8 +314,8 @@ func parsePE(filename string, cfg config) {
 			fmt.Fprintf(w, "Size Of Image:\t 0x%x (%s)\n", oh.SizeOfImage, BytesSize(float64(oh.SizeOfImage)))
 			fmt.Fprintf(w, "Size Of Headers:\t 0x%x (%s)\n", oh.SizeOfHeaders, BytesSize(float64(oh.SizeOfHeaders)))
 			fmt.Fprintf(w, "Checksum:\t 0x%x\n", oh.CheckSum)
-			fmt.Fprintf(w, "Subsystem:\t 0x%x (%s)\n", oh.Subsystem, pe.PrettySubsystem())
-			fmt.Fprintf(w, "Dll Characteristics:\t 0x%x (%s)\n", oh.DllCharacteristics, dllCharacteristics)
+			fmt.Fprintf(w, "Subsystem:\t 0x%x (%s)\n", uint16(oh.Subsystem), oh.Subsystem.String())
+			fmt.Fprintf(w, "Dll Characteristics:\t 0x%x (%s)\n", uint16(oh.DllCharacteristics), dllCharacteristics)
 			fmt.Fprintf(w, "Size Of Stack Reserve:\t 0x%x (%s)\n", oh.SizeOfStackReserve, BytesSize(float64(oh.SizeOfStackReserve)))
 			fmt.Fprintf(w, "Size Of Stack Commit:\t 0x%x (%s)\n", oh.SizeOfStackCommit, BytesSize(float64(oh.SizeOfStackCommit)))
 			fmt.Fprintf(w, "Size Of Heap Reserve:\t 0x%x (%s)\n", oh.SizeOfHeapReserve, BytesSize(float64(oh.SizeOfHeapReserve)))
@@ -329,7 +330,7 @@ func parsePE(filename string, cfg config) {
 			}
 		} else {
 			oh := pe.NtHeader.OptionalHeader.(peparser.ImageOptionalHeader32)
-			dllCharacteristics := strings.Join(pe.PrettyDllCharacteristics(), " | ")
+			dllCharacteristics := strings.Join(oh.DllCharacteristics.String(), " | ")
 			fmt.Fprintf(w, "Magic:\t 0x%x (%s)\n", oh.Magic, pe.PrettyOptionalHeaderMagic())
 			fmt.Fprintf(w, "Major Linker Version:\t 0x%x\n", oh.MajorLinkerVersion)
 			fmt.Fprintf(w, "Minor Linker Version:\t 0x%x\n", oh.MinorLinkerVersion)
@@ -355,8 +356,8 @@ func parsePE(filename string, cfg config) {
 			fmt.Fprintf(w, "Size Of Image:\t 0x%x (%s)\n", oh.SizeOfImage, BytesSize(float64(oh.SizeOfImage)))
 			fmt.Fprintf(w, "Size Of Headers:\t 0x%x (%s)\n", oh.SizeOfHeaders, BytesSize(float64(oh.SizeOfHeaders)))
 			fmt.Fprintf(w, "Checksum:\t 0x%x\n", oh.CheckSum)
-			fmt.Fprintf(w, "Subsystem:\t 0x%x (%s)\n", oh.Subsystem, pe.PrettySubsystem())
-			fmt.Fprintf(w, "Dll Characteristics:\t 0x%x (%s)\n", oh.DllCharacteristics, dllCharacteristics)
+			fmt.Fprintf(w, "Subsystem:\t 0x%x (%s)\n", uint16(oh.Subsystem), oh.Subsystem.String())
+			fmt.Fprintf(w, "Dll Characteristics:\t 0x%x (%s)\n", uint16(oh.DllCharacteristics), dllCharacteristics)
 			fmt.Fprintf(w, "Size Of Stack Reserve:\t 0x%x (%s)\n", oh.SizeOfStackReserve, BytesSize(float64(oh.SizeOfStackReserve)))
 			fmt.Fprintf(w, "Size Of Stack Commit:\t 0x%x (%s)\n", oh.SizeOfStackCommit, BytesSize(float64(oh.SizeOfStackCommit)))
 			fmt.Fprintf(w, "Size Of Heap Reserve:\t 0x%x (%s)\n", oh.SizeOfHeapReserve, BytesSize(float64(oh.SizeOfHeapReserve)))
@@ -369,6 +370,19 @@ func parsePE(filename string, cfg config) {
 				size := oh.DataDirectory[entry].Size
 				fmt.Fprintf(w, "%s Table:\t RVA: 0x%0.8x\t Size:0x%0.8x\t\n", entry.String(), rva, size)
 			}
+		}
+		w.Flush()
+	}
+
+	if cfg.wantCOFF && pe.FileInfo.HasCOFF {
+		fmt.Printf("\nCOFF\n****\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		fmt.Fprintln(w, "Name\tValue\tSectionNumber\tType\tStorageClass\tNumberOfAuxSymbols\t")
+		for _, sym := range pe.COFF.SymbolTable {
+			symName, _ := sym.String(pe)
+			fmt.Fprintf(w, "%s\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t\n",
+				symName, sym.Value, sym.SectionNumber,
+				sym.Type, sym.StorageClass, sym.NumberOfAuxSymbols)
 		}
 		w.Flush()
 	}
@@ -512,7 +526,7 @@ func parsePE(filename string, cfg config) {
 			fmt.Print("|- Unwind codes:\n")
 			for _, uc := range ui.UnwindCodes {
 				fmt.Printf("|-  * %.2x: %s, %s\n", uc.CodeOffset,
-					peparser.PrettyUnwindOpcode(uc.UnwindOp), uc.Operand)
+					uc.UnwindOp.String(), uc.Operand)
 			}
 		}
 	}
@@ -536,6 +550,19 @@ func parsePE(filename string, cfg config) {
 		fmt.Fprintf(w, "Signature Algorithm:\t %s\n", cert.Info.SignatureAlgorithm.String())
 		fmt.Fprintf(w, "PublicKey Algorithm:\t %s\n", cert.Info.PublicKeyAlgorithm.String())
 		w.Flush()
+	}
+
+	if cfg.wantReloc && pe.FileInfo.HasReloc {
+		fmt.Printf("\nRELOCATIONS\n***********\n")
+		for _, reloc := range pe.Relocations {
+			fmt.Printf("\n\u27A1 Virtual Address: 0x%x | Size Of Block:0x%x | Entries Count:0x%x\t\n",
+				reloc.Data.VirtualAddress, reloc.Data.SizeOfBlock, len(reloc.Entries))
+			fmt.Print("|- Entries:\n")
+			for _, relocEntry := range reloc.Entries {
+				fmt.Printf("|-  Data: 0x%x |  Offset: 0x%x | Type:0x%x (%s)\n", relocEntry.Data,
+					relocEntry.Offset, relocEntry.Type, relocEntry.Type.String(pe))
+			}
+		}
 	}
 
 	if cfg.wantDebug && pe.FileInfo.HasDebug {

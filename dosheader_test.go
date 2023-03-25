@@ -68,3 +68,32 @@ func TestParseDOSHeader(t *testing.T) {
 		})
 	}
 }
+
+func TestParseDOSHeaderNonMZ(t *testing.T) {
+
+	tests := []struct {
+		in  string
+		out error
+	}{
+		{
+			// This is an ELF file.
+			getAbsoluteFilePath("test/look"),
+			ErrDOSMagicNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			ops := Options{Fast: true}
+			file, err := New(tt.in, &ops)
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			err = file.ParseDOSHeader()
+			if err != tt.out {
+				t.Fatalf("parsing DOS header failed, got %v, want %v", err, tt.out)
+			}
+		})
+	}
+}

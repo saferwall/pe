@@ -7,16 +7,21 @@ package pe
 import (
 	"reflect"
 	"sort"
+	"strconv"
 	"testing"
 )
 
-func TestPrettyMachineType(t *testing.T) {
+func TestParseNtHeaderNE(t *testing.T) {
 
 	tests := []struct {
 		in  string
-		out string
+		out error
 	}{
-		{getAbsoluteFilePath("test/putty.exe"), "x64"},
+		{
+			// This is an NE executable file. Extracted from Windows CE 2.0.
+			getAbsoluteFilePath("test/_setup.dll"),
+			ErrImageOS2SignatureFound,
+		},
 	}
 
 	for _, tt := range tests {
@@ -26,79 +31,115 @@ func TestPrettyMachineType(t *testing.T) {
 			if err != nil {
 				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
 			}
-			err = file.Parse()
-			if err != nil {
-				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
-			}
 
-			prettyMachineType := file.PrettyMachineType()
-			if prettyMachineType != tt.out {
-				t.Errorf("pretty machine type assertion failed, got %v, want %v",
-					prettyMachineType, tt.out)
+			err = file.Parse()
+			if err != tt.out {
+				t.Fatalf("parsing nt header failed, got %v, want %v", err, tt.out)
 			}
 		})
 	}
 }
 
-func TestSubsystem(t *testing.T) {
+func TestNtHeaderMachineType(t *testing.T) {
 
 	tests := []struct {
-		in  string
+		in  ImageFileHeaderMachineType
 		out string
 	}{
-		{getAbsoluteFilePath("test/putty.exe"), "Windows GUI"},
+		{
+			ImageFileHeaderMachineType(0x8664), "x64",
+		},
+		{
+			ImageFileHeaderMachineType(0xffff), "?",
+		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.in, func(t *testing.T) {
-			ops := Options{Fast: true}
-			file, err := New(tt.in, &ops)
-			if err != nil {
-				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
-			}
-			err = file.Parse()
-			if err != nil {
-				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
-			}
+		name := "CaseNtHeaderMachineTypeEqualTo_" + strconv.Itoa(int(tt.in))
+		t.Run(name, func(t *testing.T) {
 
-			prettySubsystem := file.PrettySubsystem()
-			if prettySubsystem != tt.out {
-				t.Errorf("pretty subsystem type assertion failed, got %v, want %v",
-				prettySubsystem, tt.out)
+			got := tt.in.String()
+			if got != tt.out {
+				t.Errorf("nt header machine type assertion failed, got %v, want %v",
+					got, tt.out)
 			}
 		})
 	}
 }
 
-func TestPrettyDllCharacteristics(t *testing.T) {
+func TestNtHeaderCharacteristicsType(t *testing.T) {
 
 	tests := []struct {
-		in  string
+		in  ImageFileHeaderCharacteristicsType
 		out []string
 	}{
-		{getAbsoluteFilePath("test/putty.exe"), []string{
-			"DynamicBase", "HighEntropyVA", "NXCompact", "TerminalServiceAware"}},
+		{
+			ImageFileHeaderCharacteristicsType(0x0022), []string{"ExecutableImage", "LargeAddressAware"},
+		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.in, func(t *testing.T) {
-			ops := Options{Fast: true}
-			file, err := New(tt.in, &ops)
-			if err != nil {
-				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+		name := "CaseNtHeaderCharacteristicsTypeEqualTo_" + strconv.Itoa(int(tt.in))
+		t.Run(name, func(t *testing.T) {
+			got := tt.in.String()
+			sort.Strings(got)
+			sort.Strings(tt.out)
+			if !reflect.DeepEqual(got, tt.out) {
+				t.Errorf("nt header Characteristics type assertion failed, got %v, want %v",
+					got, tt.out)
 			}
-			err = file.Parse()
-			if err != nil {
-				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
-			}
+		})
+	}
+}
 
-			dllCharacteristics := file.PrettyDllCharacteristics()
-			sort.Strings(dllCharacteristics)
-			if !reflect.DeepEqual(dllCharacteristics, tt.out) {
-				t.Errorf("pretty dll characteristics type assertion failed, got %v, want %v",
-					dllCharacteristics, tt.out)
-			}
+func TestOptionalHeaderSubsystemType(t *testing.T) {
 
+	tests := []struct {
+		in  ImageOptionalHeaderSubsystemType
+		out string
+	}{
+		{
+			ImageOptionalHeaderSubsystemType(0x2), "Windows GUI",
+		},
+		{
+			ImageOptionalHeaderSubsystemType(0xff), "?",
+		},
+	}
+
+	for _, tt := range tests {
+		name := "CaseOptionalHeaderSubsystemTypeEqualTo_" + strconv.Itoa(int(tt.in))
+		t.Run(name, func(t *testing.T) {
+			got := tt.in.String()
+			if got != tt.out {
+				t.Errorf("optional header subsystem type assertion failed, got %v, want %v",
+					got, tt.out)
+			}
+		})
+	}
+}
+
+func TestOptionalHeaderDllCharacteristicsType(t *testing.T) {
+
+	tests := []struct {
+		in  ImageOptionalHeaderDllCharacteristicsType
+		out []string
+	}{
+		{
+			ImageOptionalHeaderDllCharacteristicsType(0x8160),
+			[]string{"DynamicBase", "HighEntropyVA", "NXCompact", "TerminalServiceAware"},
+		},
+	}
+
+	for _, tt := range tests {
+		name := "CaseOptionalHeaderDllCharacteristicsTypeEqualTo_" + strconv.Itoa(int(tt.in))
+		t.Run(name, func(t *testing.T) {
+			got := tt.in.String()
+			sort.Strings(got)
+			sort.Strings(tt.out)
+			if !reflect.DeepEqual(got, tt.out) {
+				t.Errorf("optional header dll characteristics type assertion failed, got %v, want %v",
+					got, tt.out)
+			}
 		})
 	}
 }
