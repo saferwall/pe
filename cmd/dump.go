@@ -437,6 +437,34 @@ func parsePE(filename string, cfg config) {
 		}
 	}
 
+	if cfg.wantExport && pe.FileInfo.HasExport {
+		fmt.Printf("\nEXPORTS\n********\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+
+		fmt.Printf("\n\t------[ %s ]------\n\n", pe.Export.Name)
+		imgExpDir := pe.Export.Struct
+		fmt.Fprintf(w, "Characteristics:\t 0x%x\n", imgExpDir.Characteristics)
+		fmt.Fprintf(w, "Time Date Stamp:\t 0x%x (%s\n", imgExpDir.TimeDateStamp,
+			humanizeTimestamp(imgExpDir.TimeDateStamp))
+		fmt.Fprintf(w, "Major Version:\t 0x%x\n", imgExpDir.MajorVersion)
+		fmt.Fprintf(w, "Minor Version:\t 0x%x\n", imgExpDir.MinorVersion)
+		fmt.Fprintf(w, "Name:\t 0x%x\n", imgExpDir.Name)
+		fmt.Fprintf(w, "Base:\t 0x%x\n", imgExpDir.Base)
+		fmt.Fprintf(w, "Number Of Functions:\t 0x%x\n", imgExpDir.NumberOfFunctions)
+		fmt.Fprintf(w, "Number Of Names:\t 0x%x\n", imgExpDir.NumberOfNames)
+		fmt.Fprintf(w, "Address Of Functions:\t 0x%x\n", imgExpDir.AddressOfFunctions)
+		fmt.Fprintf(w, "Address Of Names:\t 0x%x\n", imgExpDir.AddressOfNames)
+		fmt.Fprintf(w, "Address Of Name Ordinals:\t 0x%x\n", imgExpDir.AddressOfNameOrdinals)
+		fmt.Fprintf(w, "\n")
+
+		fmt.Fprintln(w, "Name\tOrdinal\tNameRVA\tFunctionRVA\tForwardedTo\t")
+		for _, exp := range pe.Export.Functions {
+			fmt.Fprintf(w, "%s\t0x%x\t0x%x\t0x%x\t0x%x\t%s\t\n",
+				exp.Name, exp.Ordinal, exp.NameRVA, exp.FunctionRVA, exp.ForwarderRVA, exp.Forwarder)
+		}
+		w.Flush()
+	}
+
 	if cfg.wantResource && pe.FileInfo.HasResource {
 		var printRsrcDir func(rsrcDir peparser.ResourceDirectory)
 		padding := 0
