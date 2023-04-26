@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"golang.org/x/text/encoding/unicode"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -444,6 +445,11 @@ func (pe *File) adjustSectionAlignment(va uint32) uint32 {
 	return va
 }
 
+// alignDword aligns the offset on a 32-bit boundary.
+func alignDword(offset, base uint32) uint32 {
+	return ((offset + base + 3) & 0xfffffffc) - (base & 0xfffffffc)
+}
+
 // stringInSlice checks weather a string exists in a slice of strings.
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
@@ -663,6 +669,20 @@ func (pe *File) ReadBytesAtOffset(offset, size uint32) ([]byte, error) {
 	}
 
 	return pe.data[offset : offset+size], nil
+}
+
+// DecodeUTF16String decodes the UTF16 string from the byte slice.
+func DecodeUTF16String(b []byte) (string, error) {
+	n := bytes.Index(b, []byte{0, 0})
+	if n == 0 {
+		return "", nil
+	}
+	decoder := unicode.UTF16(unicode.LittleEndian, unicode.UseBOM).NewDecoder()
+	s, err := decoder.Bytes(b[0 : n+1])
+	if err != nil {
+		return "", err
+	}
+	return string(s), nil
 }
 
 // IsBitSet returns true when a bit on a particular position is set.
