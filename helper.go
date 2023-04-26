@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -74,12 +74,12 @@ var (
 
 	// AnoImageBaseOverflow is reported when the image base + SizeOfImage is
 	// larger than 80000000h/FFFF080000000000h in PE32/P32+.
-	AnoImageBaseOverflow = "Image base beyong allowed address"
+	AnoImageBaseOverflow = "Image base beyond allowed address"
 
 	// ErrInvalidSectionFileAlignment is reported when section alignment is less than a
-	// PAGE_SIZE and section alignement != file alignment.
+	// PAGE_SIZE and section alignment != file alignment.
 	ErrInvalidSectionFileAlignment = errors.New("corrupt PE file. Section " +
-		"alignment is less than a PAGE_SIZE and section alignement != file alignment")
+		"alignment is less than a PAGE_SIZE and section alignment != file alignment")
 
 	// AnoInvalidSizeOfImage is reported when SizeOfImage is not multiple of
 	// SectionAlignment.
@@ -219,7 +219,7 @@ func (pe *File) GetOffsetFromRva(rva uint32) uint32 {
 	return rva - sectionAlignment + fileAlignment
 }
 
-// GetRVAFromOffset retuns an RVA given an offset.
+// GetRVAFromOffset returns an RVA given an offset.
 func (pe *File) GetRVAFromOffset(offset uint32) uint32 {
 	section := pe.getSectionByOffset(offset)
 	minAddr := ^uint32(0)
@@ -406,7 +406,7 @@ func (pe *File) adjustFileAlignment(va uint32) uint32 {
 	// round it to 0x200 if not power of 2.
 	// According to https://github.com/corkami/docs/blob/master/PE/PE.md
 	// if PointerToRawData is less that 0x200 it's rounded to zero. Loading the
-	// test filein a debugger it's easy to verify that the PointerToRawData
+	// test file in a debugger it's easy to verify that the PointerToRawData
 	// value of 1 is rounded to zero. Hence we reproduce the behavior
 	return (va / 0x200) * 0x200
 
@@ -494,9 +494,9 @@ func (pe *File) IsDriver() bool {
 		}
 	}
 
-	// If still we couldn't tell, check common driver section with combinaison
+	// If still we couldn't tell, check common driver section with combination
 	// of IMAGE_SUBSYSTEM_NATIVE or IMAGE_SUBSYSTEM_NATIVE_WINDOWS.
-	subsystem := uint16(0)
+	subsystem := ImageOptionalHeaderSubsystemType(0)
 	oh32 := ImageOptionalHeader32{}
 	oh64 := ImageOptionalHeader64{}
 	switch pe.Is64 {

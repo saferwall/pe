@@ -74,6 +74,9 @@ var OpInfoRegisters = map[uint8]string{
 	r15: "R15",
 }
 
+// UnwindOpType represents the type of an unwind opcode.
+type UnwindOpType uint8
+
 // _UNWIND_OP_CODES
 const (
 	// Push a nonvolatile integer register, decrementing RSP by 8. The
@@ -81,7 +84,7 @@ const (
 	// on epilogs, UWOP_PUSH_NONVOL unwind codes must appear first in the
 	// prolog and correspondingly, last in the unwind code array. This relative
 	// ordering applies to all other unwind codes except UWOP_PUSH_MACHFRAME.
-	UwOpPushNonVol = uint8(0)
+	UwOpPushNonVol = UnwindOpType(0)
 
 	// Allocate a large-sized area on the stack. There are two forms. If the
 	// operation info equals 0, then the size of the allocation divided by 8 is
@@ -89,12 +92,12 @@ const (
 	// operation info equals 1, then the unscaled size of the allocation is
 	// recorded in the next two slots in little-endian format, allowing
 	// allocations up to 4GB - 8.
-	UwOpAllocLarge = uint8(1)
+	UwOpAllocLarge = UnwindOpType(1)
 
 	// Allocate a small-sized area on the stack. The size of the allocation is
 	// the operation info field * 8 + 8, allowing allocations from 8 to 128
 	// bytes.
-	UwOpAllocSmall = uint8(2)
+	UwOpAllocSmall = UnwindOpType(2)
 
 	// Establish the frame pointer register by setting the register to some
 	// offset of the current RSP. The offset is equal to the Frame Register
@@ -103,7 +106,7 @@ const (
 	// points to the middle of the fixed stack allocation, helping code density
 	// by allowing more accesses to use short instruction forms. The operation
 	// info field is reserved and shouldn't be used.
-	UwOpSetFpReg = uint8(3)
+	UwOpSetFpReg = UnwindOpType(3)
 
 	// Save a nonvolatile integer register on the stack using a MOV instead of
 	// a PUSH. This code is primarily used for shrink-wrapping, where a
@@ -111,7 +114,7 @@ const (
 	// previously allocated. The operation info is the number of the register.
 	// The scaled-by-8 stack offset is recorded in the next unwind operation
 	// code slot, as described in the note above.
-	UwOpSaveNonVol = uint8(4)
+	UwOpSaveNonVol = UnwindOpType(4)
 
 	// Save a nonvolatile integer register on the stack with a long offset,
 	// using a MOV instead of a PUSH. This code is primarily used for
@@ -119,7 +122,7 @@ const (
 	// position that was previously allocated. The operation info is the number
 	// of the register. The unscaled stack offset is recorded in the next two
 	// unwind operation code slots, as described in the note above.
-	UwOpSaveNonVolFar = uint8(5)
+	UwOpSaveNonVolFar = UnwindOpType(5)
 
 	// For version 1 of the UNWIND_INFO structure, this code was called
 	// UWOP_SAVE_XMM and occupied 2 records, it retained the lower 64 bits of
@@ -127,7 +130,7 @@ const (
 	// this code has never been used.
 	// For version 2 of the UNWIND_INFO structure, this code is called
 	// UWOP_EPILOG, takes 2 entries, and describes the function epilogue.
-	UwOpEpilog = uint8(6)
+	UwOpEpilog = UnwindOpType(6)
 
 	// For version 1 of the UNWIND_INFO structure, this code was called
 	// UWOP_SAVE_XMM_FAR and occupied 3 records, it saved the lower 64 bits of
@@ -135,21 +138,21 @@ const (
 	// this code has never been used.
 	// For version 2 of the UNWIND_INFO structure, this code is called
 	// UWOP_SPARE_CODE, takes 3 entries, and makes no sense.
-	UwOpSpareCode = uint8(7)
+	UwOpSpareCode = UnwindOpType(7)
 
 	// Save all 128 bits of a nonvolatile XMM register on the stack. The
 	// operation info is the number of the register. The scaled-by-16 stack
 	// offset is recorded in the next slot.
-	UwOpSaveXmm128 = uint8(8)
+	UwOpSaveXmm128 = UnwindOpType(8)
 
 	// Save all 128 bits of a nonvolatile XMM register on the stack with a long
 	// offset. The operation info is the number of the register. The unscaled
 	// stack offset is recorded in the next two slots.
-	UwOpSaveXmm128Far = uint8(9)
+	UwOpSaveXmm128Far = UnwindOpType(9)
 
 	// Push a machine frame. This unwind code is used to record the effect of a
 	// hardware interrupt or exception.
-	UwOpPushMachFrame = uint8(10)
+	UwOpPushMachFrame = UnwindOpType(10)
 
 	// UWOP_SET_FPREG_LARGE is a CLR Unix-only extension to the Windows AMD64
 	// unwind codes. It is not part of the standard Windows AMD64 unwind codes
@@ -165,7 +168,7 @@ const (
 	// must be zero). This result is used as the frame pointer register offset
 	// from RSP at the time the frame pointer is established. Either
 	// UWOP_SET_FPREG or UWOP_SET_FPREG_LARGE can be used, but not both.
-	UwOpSetFpRegLarge = uint8(11)
+	UwOpSetFpRegLarge = UnwindOpType(11)
 )
 
 // ImageRuntimeFunctionEntry represents an entry in the function table on 64-bit
@@ -239,7 +242,7 @@ type UnwindCode struct {
 	CodeOffset uint8 `json:"code_offset"`
 
 	// The unwind operation code.
-	UnwindOp uint8 `json:"unwind_op"`
+	UnwindOp UnwindOpType `json:"unwind_op"`
 
 	// Operation info.
 	OpInfo uint8 `json:"op_info"`
@@ -356,7 +359,7 @@ type ScopeTable struct {
 // Exception represent an entry in the function table.
 type Exception struct {
 	RuntimeFunction ImageRuntimeFunctionEntry `json:"runtime_function"`
-	UnwinInfo       UnwindInfo                `json:"unwind_info"`
+	UnwindInfo      UnwindInfo                `json:"unwind_info"`
 }
 
 func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) {
@@ -364,14 +367,14 @@ func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) 
 	unwindCode := UnwindCode{}
 	advanceBy := 0
 
-	// Read the unwince code at offset (2 bytes)
+	// Read the unwind code at offset (2 bytes)
 	uc, err := pe.ReadUint16(offset)
 	if err != nil {
 		return unwindCode, advanceBy
 	}
 
 	unwindCode.CodeOffset = uint8(uc & 0xff)
-	unwindCode.UnwindOp = uint8(uc & 0xf00 >> 8)
+	unwindCode.UnwindOp = UnwindOpType(uc & 0xf00 >> 8)
 	unwindCode.OpInfo = uint8(uc & 0xf000 >> 12)
 
 	switch unwindCode.UnwindOp {
@@ -410,7 +413,7 @@ func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) 
 	case UwOpSaveXmm128:
 		fo := binary.LittleEndian.Uint16(pe.data[offset+2:])
 		unwindCode.FrameOffset = fo * 16
-		unwindCode.Operand = "Rgister=XMM" + strconv.Itoa(int(unwindCode.OpInfo)) +
+		unwindCode.Operand = "Register=XMM" + strconv.Itoa(int(unwindCode.OpInfo)) +
 			", Offset=" + strconv.Itoa(int(unwindCode.FrameOffset))
 		advanceBy += 2
 	case UwOpSaveXmm128Far:
@@ -439,7 +442,7 @@ func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) 
 	return unwindCode, advanceBy
 }
 
-func (pe *File) parseUnwinInfo(unwindInfo uint32) UnwindInfo {
+func (pe *File) parseUnwindInfo(unwindInfo uint32) UnwindInfo {
 
 	ui := UnwindInfo{}
 
@@ -536,7 +539,7 @@ func (pe *File) parseExceptionDirectory(rva, size uint32) error {
 		exception := Exception{RuntimeFunction: functionEntry}
 
 		if pe.Is64 {
-			exception.UnwinInfo = pe.parseUnwinInfo(functionEntry.UnwindInfoAddress)
+			exception.UnwindInfo = pe.parseUnwindInfo(functionEntry.UnwindInfoAddress)
 		}
 
 		exceptions = append(exceptions, exception)
@@ -569,10 +572,10 @@ func PrettyUnwindInfoHandlerFlags(flags uint8) []string {
 	return values
 }
 
-// PrettyUnwindOpcode returns the string representation of the an unwind opcode.
-func PrettyUnwindOpcode(unwindOpcode uint8) string {
+// String returns the string representation of the an unwind opcode.
+func (uo UnwindOpType) String() string {
 
-	unOpToString := map[uint8]string{
+	unOpToString := map[UnwindOpType]string{
 		UwOpPushNonVol:    "UWOP_PUSH_NONVOL",
 		UwOpAllocLarge:    "UWOP_ALLOC_LARE",
 		UwOpAllocSmall:    "UWOP_ALLOC_SMALL",
@@ -587,7 +590,7 @@ func PrettyUnwindOpcode(unwindOpcode uint8) string {
 		UwOpSetFpRegLarge: "UWOP_SET_FPREG_LARGE",
 	}
 
-	if val, ok := unOpToString[unwindOpcode]; ok {
+	if val, ok := unOpToString[uo]; ok {
 		return val
 	}
 

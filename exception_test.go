@@ -6,6 +6,7 @@ package pe
 
 import (
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -108,11 +109,39 @@ func TestParseExceptionDirectory(t *testing.T) {
 				t.Errorf("RuntimeFunction assertion failed, got %v, want %v", len(got), tt.out.entryCount)
 			}
 
-			unwinInfo := file.Exceptions[tt.out.entryIndex].UnwinInfo
-			if !reflect.DeepEqual(unwinInfo, tt.out.unwindInfo) {
-				t.Errorf("UnwinInfo assertion failed, got %v, want %v", unwinInfo, tt.out.unwindInfo)
+			unwindInfo := file.Exceptions[tt.out.entryIndex].UnwindInfo
+			if !reflect.DeepEqual(unwindInfo, tt.out.unwindInfo) {
+				t.Errorf("UnwindInfo assertion failed, got %v, want %v", unwindInfo, tt.out.unwindInfo)
 			}
 
+		})
+	}
+}
+
+func TestExceptionDirectoryUnwindOpcode(t *testing.T) {
+
+	tests := []struct {
+		in  UnwindOpType
+		out string
+	}{
+		{
+			UwOpPushNonVol,
+			"UWOP_PUSH_NONVOL",
+		},
+		{
+			UnwindOpType(0xff),
+			"?",
+		},
+	}
+
+	for _, tt := range tests {
+		name := "CaseUnwindOpcodeEqualTo_" + strconv.Itoa(int(tt.in))
+		t.Run(name, func(t *testing.T) {
+			got := tt.in.String()
+			if got != tt.out {
+				t.Errorf("unwind opcode string interpretation, got %v, want %v",
+					got, tt.out)
+			}
 		})
 	}
 }

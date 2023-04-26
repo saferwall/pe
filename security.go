@@ -6,12 +6,13 @@ package pe
 
 import (
 	"bytes"
-	"crypto/sha256"
+	"crypto"
 	"crypto/x509"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash"
 	"io"
 	"io/ioutil"
 	"os"
@@ -234,12 +235,21 @@ func (pe *File) parseLocations() (map[string]*RelRange, error) {
 	return location, nil
 }
 
-// Authentihash generates the pe image file hash.
+// Authentihash generates the SHA256 pe image file hash.
 // The relevant sections to exclude during hashing are:
 //   - The location of the checksum
 //   - The location of the entry of the Certificate Table in the Data Directory
 //   - The location of the Certificate Table.
 func (pe *File) Authentihash() []byte {
+	return pe.AuthentihashExt(crypto.SHA256.New())[0]
+}
+
+// AuthentihashExt generates pe image file hashes using the given hashers.
+// The relevant sections to exclude during hashing are:
+//   - The location of the checksum
+//   - The location of the entry of the Certificate Table in the Data Directory
+//   - The location of the Certificate Table.
+func (pe *File) AuthentihashExt(hashers ...hash.Hash) [][]byte {
 
 	locationMap, err := pe.parseLocations()
 	if err != nil {
@@ -268,12 +278,21 @@ func (pe *File) Authentihash() []byte {
 	} else {
 		rd = bytes.NewReader(pe.data)
 	}
-	hasher := sha256.New()
+
 	for _, v := range ranges {
-		sr := io.NewSectionReader(rd, int64(v.Start), int64(v.End)-int64(v.Start))
-		io.Copy(hasher, sr)
+		for _, hasher := range hashers {
+			sr := io.NewSectionReader(rd, int64(v.Start), int64(v.End)-int64(v.Start))
+			io.Copy(hasher, sr)
+			sr.Seek(0, io.SeekStart)
+		}
 	}
-	return hasher.Sum(nil)
+
+	var ret [][]byte
+	for _, hasher := range hashers {
+		ret = append(ret, hasher.Sum(nil))
+	}
+
+	return ret
 }
 
 // The security directory contains the authenticode signature, which is a digital

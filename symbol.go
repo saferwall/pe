@@ -427,7 +427,7 @@ func (symbol *COFFSymbol) SectionNumberName(pe *File) string {
 		return "Debug"
 	}
 
-	return "Unknown"
+	return "?"
 }
 
 // PrettyCOFFTypeRepresentation returns the string representation of the `Type`

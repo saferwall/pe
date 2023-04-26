@@ -246,6 +246,14 @@ Section Flags : 40600040, Meaning: [Align2Bytes Align8Bytes Readable Initialized
 
 To validate the parser we use the [go-fuzz](https://github.com/dvyukov/go-fuzz) and a corpus of known malformed and tricky PE files from [corkami](https://github.com/corkami/pocs/tree/master/PE).
 
+## Projects Using This Library
+
+  <a href="https://www.fibratus.io" >
+    <img src="https://github.com/rabbitstack/fibratus/raw/master/logo.png" alt="Fibratus" width="50px">
+  </a>
+
+[Fibratus](https://github.com/rabbitstack/fibratus) A modern tool for Windows kernel exploration and tracing with a focus on security.
+
 ## References
 
 - [Peering Inside the PE: A Tour of the Win32 Portable Executable File Format by Matt Pietrek](http://bytepointer.com/resources/pietrek_peering_inside_pe.htm)
@@ -254,3 +262,4 @@ To validate the parser we use the [go-fuzz](https://github.com/dvyukov/go-fuzz) 
 - [Portable Executable File Format](https://blog.kowalczyk.info/articles/pefileformat.html)
 - [PE Format MSDN spec](https://docs.microsoft.com/en-us/windows/win32/debug/pe-format)
 - [DotNET format](https://www.ntcore.com/files/dotnetformat.htm)
+- [BlackHat 2011 - CONSTANT INSECURITY: (PECOFF) Portable Executable FIle Format](https://www.youtube.com/watch?v=uoQL3CE24ls)
