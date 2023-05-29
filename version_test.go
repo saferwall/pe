@@ -38,6 +38,14 @@ var peVersionResourceTests = []struct {
 		nil,
 		map[string]string{"CompanyName": "Microsoft Corporation", "FileDescription": "Shim Engine DLL", "FileVersion": "10.0.17763.1 (WinBuild.160101.0800)", "OriginalFilename": "Shim Engine DLL (IAT)", "LegalCopyright": "© Microsoft Corporation. All rights reserved.", "InternalName": "Shim Engine DLL (IAT)", "ProductName": "Microsoft® Windows® Operating System", "ProductVersion": "10.0.17763.1"},
 	},
+	// unclear if I should check in the pwsh.exe file needed for this test
+	/*
+		{
+			getAbsoluteFilePath("test/pwsh.exe"),
+			nil,
+			map[string]string{"Assembly Version": "7.3.4.500", "Comments": "PowerShell on Windows top-level project", "CompanyName": "Microsoft Corporation", "FileDescription": "pwsh", "FileVersion": "7.3.4.500", "InternalName": "pwsh.dll", "LegalCopyright": "(c) Microsoft Corporation.", "OriginalFilename": "pwsh.dll", "ProductName": "PowerShell", "ProductVersion": "7.3.4 SHA: b59f05d5a1b2fceca231f75c53c203a02edf6203"},
+		},
+	*/
 }
 
 func TestParseVersionResources(t *testing.T) {
