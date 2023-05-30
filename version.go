@@ -251,9 +251,18 @@ func (s *String) GetOffset(rva uint32, e ResourceDirectoryEntry, pe *File) uint3
 	return alignDword(offset, e.Data.Struct.OffsetToData)
 }
 
+// variant of GetOffset which also returns the number of bytes which were added
+// to achieve 32-bit alignment. The padding value needs to be added to the
+// string length to figure out the offset of the next string
+func (s *String) getOffsetAndPadding(rva uint32, e ResourceDirectoryEntry, pe *File) (uint32, uint16) {
+	unalignedOffset := pe.GetOffsetFromRva(e.Data.Struct.OffsetToData) + rva
+	alignedOffset := alignDword(unalignedOffset, e.Data.Struct.OffsetToData)
+	return alignedOffset, uint16(alignedOffset - unalignedOffset)
+}
+
 func (pe *File) parseString(rva uint32, e ResourceDirectoryEntry) (string, string, uint16, error) {
 	var s String
-	offset := s.GetOffset(rva, e, pe)
+	offset, padding := s.getOffsetAndPadding(rva, e, pe)
 	b, err := pe.ReadBytesAtOffset(offset, StringLength)
 	if err != nil {
 		return "", "", 0, err
@@ -279,7 +288,13 @@ func (pe *File) parseString(rva uint32, e ResourceDirectoryEntry) (string, strin
 	if err != nil {
 		return "", "", 0, err
 	}
-	return key, value, s.Length, nil
+	// The caller of this function uses the string length as an offset to find
+	// the next string in the file. We need add the alignment padding here
+	// since the caller is unaware of the byte alignment, and will add the
+	// string length to the unaligned offset to get the address of the next
+	// string.
+	totalLength := s.Length + padding
+	return key, value, totalLength, nil
 }
 
 // ParseVersionResources parses file version strings from the version resource
