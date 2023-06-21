@@ -7,7 +7,6 @@ package pe
 import (
 	"encoding/binary"
 	"math"
-	"reflect"
 	"sort"
 	"strings"
 )
@@ -386,7 +385,7 @@ func (section *Section) NextHeaderAddr(pe *File) uint32 {
 			return 0
 		}
 
-		if reflect.DeepEqual(section.Header, &currentSection.Header) {
+		if section.Header == currentSection.Header {
 			return pe.Sections[i+1].Header.VirtualAddress
 		}
 	}
