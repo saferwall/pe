@@ -426,6 +426,7 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 		signatureContent, err = parseAuthenticodeContent(pkcs.Content)
 		if err != nil {
 			pe.logger.Errorf("could not parse authenticode content: %v", err)
+			signatureValid = false
 		} else if !pe.opts.DisableSignatureValidation {
 			authentihash := pe.AuthentihashExt(signatureContent.HashFunction.New())[0]
 			signatureValid = bytes.Equal(authentihash, signatureContent.HashResult)
