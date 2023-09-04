@@ -13,10 +13,11 @@ import (
 )
 
 type TestSecurityEntry struct {
-	Header   WinCertificate
-	Info     CertInfo
-	Verified bool
-	err      error
+	Header         WinCertificate
+	Info           CertInfo
+	Verified       bool
+	SignatureValid bool
+	err            error
 }
 
 func TestParseSecurityDirectory(t *testing.T) {
@@ -42,8 +43,31 @@ func TestParseSecurityDirectory(t *testing.T) {
 					PublicKeyAlgorithm: x509.RSA,
 					SignatureAlgorithm: x509.SHA256WithRSA,
 				},
-				Verified: true,
-				err:      nil,
+				Verified:       true,
+				SignatureValid: true,
+				err:            nil,
+			},
+		},
+		{
+			getAbsoluteFilePath("test/putty_modified.exe"),
+			TestSecurityEntry{
+				Header: WinCertificate{
+					Length:          0x3D90,
+					Revision:        0x200,
+					CertificateType: 0x2,
+				},
+				Info: CertInfo{
+					Issuer:             "GB, Greater Manchester, Salford, COMODO RSA Code Signing CA",
+					Subject:            "GB, Cambridgeshire, Cambridge, Simon Tatham, Simon Tatham",
+					NotBefore:          time.Date(2018, time.November, 13, 00, 00, 0, 0, time.UTC),
+					NotAfter:           time.Date(2021, time.November, 8, 23, 59, 59, 0, time.UTC),
+					SerialNumber:       "7c1118cbbadc95da3752c46e47a27438",
+					PublicKeyAlgorithm: x509.RSA,
+					SignatureAlgorithm: x509.SHA256WithRSA,
+				},
+				Verified:       true,
+				SignatureValid: false,
+				err:            nil,
 			},
 		},
 		{
@@ -63,8 +87,9 @@ func TestParseSecurityDirectory(t *testing.T) {
 					PublicKeyAlgorithm: x509.RSA,
 					SignatureAlgorithm: x509.SHA1WithRSA,
 				},
-				Verified: false,
-				err:      nil,
+				Verified:       false,
+				SignatureValid: false,
+				err:            nil,
 			},
 		},
 
@@ -116,7 +141,12 @@ func TestParseSecurityDirectory(t *testing.T) {
 					t.Fatalf("certificate info assertion failed, got %v, want %v", got.Info, tt.out.Info)
 				}
 			}
-
+			if tt.out.SignatureValid != got.SignatureValid {
+				t.Fatalf("signature verification failed, got %v, want %v", got.SignatureValid, tt.out.SignatureValid)
+			}
+			if tt.out.Verified != got.Verified {
+				t.Fatalf("certificate verification failed, got %v, want %v", got.SignatureValid, tt.out.SignatureValid)
+			}
 		})
 	}
 }
@@ -155,7 +185,6 @@ func TestAuthentihash(t *testing.T) {
 			if string(got) != tt.out {
 				t.Errorf("Authentihash(%s) got %v, want %v", tt.in, got, tt.out)
 			}
-
 		})
 	}
 }
