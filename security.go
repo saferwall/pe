@@ -8,6 +8,8 @@ import (
 	"bytes"
 	"crypto"
 	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/asn1"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
@@ -67,11 +69,13 @@ var (
 
 // Certificate directory.
 type Certificate struct {
-	Header   WinCertificate `json:"header"`
-	Content  pkcs7.PKCS7    `json:"-"`
-	Raw      []byte         `json:"-"`
-	Info     CertInfo       `json:"info"`
-	Verified bool           `json:"verified"`
+	Header           WinCertificate      `json:"header"`
+	Content          pkcs7.PKCS7         `json:"-"`
+	SignatureContent AuthenticodeContent `json:"-"`
+	SignatureValid   bool                `json:"-"`
+	Raw              []byte              `json:"-"`
+	Info             CertInfo            `json:"info"`
+	Verified         bool                `json:"verified"`
 }
 
 // WinCertificate encapsulates a signature used in verifying executable files.
@@ -304,10 +308,12 @@ func (pe *File) AuthentihashExt(hashers ...hash.Hash) [][]byte {
 func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 
 	var pkcs *pkcs7.PKCS7
-	var isValid bool
+	var certValid bool
 	certInfo := CertInfo{}
 	certHeader := WinCertificate{}
 	certSize := uint32(binary.Size(certHeader))
+	signatureContent := AuthenticodeContent{}
+	var signatureValid bool
 	var certContent []byte
 
 	// The virtual address value from the Certificate Table entry in the
@@ -410,11 +416,20 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 			if err == nil {
 				err = pkcs.VerifyWithChain(certPool)
 				if err == nil {
-					isValid = true
+					certValid = true
 				} else {
-					isValid = false
+					certValid = false
 				}
 			}
+		}
+
+		signatureContent, err = parseAuthenticodeContent(pkcs.Content)
+		if err != nil {
+			pe.logger.Errorf("could not parse authenticode content: %v", err)
+			signatureValid = false
+		} else if !pe.opts.DisableSignatureValidation {
+			authentihash := pe.AuthentihashExt(signatureContent.HashFunction.New())[0]
+			signatureValid = bytes.Equal(authentihash, signatureContent.HashResult)
 		}
 
 		// Subsequent entries are accessed by advancing that entry's dwLength
@@ -432,7 +447,8 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 	}
 
 	pe.Certificates = Certificate{Header: certHeader, Content: *pkcs,
-		Raw: certContent, Info: certInfo, Verified: isValid}
+		Raw: certContent, Info: certInfo, Verified: certValid,
+		SignatureContent: signatureContent, SignatureValid: signatureValid}
 	pe.HasCertificate = true
 	return nil
 }
@@ -500,4 +516,69 @@ func loadSystemRoots() (*x509.CertPool, error) {
 	}
 
 	return roots, nil
+}
+
+type SpcIndirectDataContent struct {
+	Data          SpcAttributeTypeAndOptionalValue
+	MessageDigest DigestInfo
+}
+
+type SpcAttributeTypeAndOptionalValue struct {
+	Type  asn1.ObjectIdentifier
+	Value SpcPeImageData `asn1:"optional"`
+}
+
+type SpcPeImageData struct {
+	Flags asn1.BitString
+	File  asn1.RawValue
+}
+
+type DigestInfo struct {
+	DigestAlgorithm pkix.AlgorithmIdentifier
+	Digest          []byte
+}
+
+// Translation of algorithm identifier to hash algorithm, copied from pkcs7.getHashForOID
+func parseHashAlgorithm(identifier pkix.AlgorithmIdentifier) (crypto.Hash, error) {
+	oid := identifier.Algorithm
+	switch {
+	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA1), oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA1),
+		oid.Equal(pkcs7.OIDDigestAlgorithmDSA), oid.Equal(pkcs7.OIDDigestAlgorithmDSASHA1),
+		oid.Equal(pkcs7.OIDEncryptionAlgorithmRSA):
+		return crypto.SHA1, nil
+	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA256), oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA256):
+		return crypto.SHA256, nil
+	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA384), oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA384):
+		return crypto.SHA384, nil
+	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA512), oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA512):
+		return crypto.SHA512, nil
+	}
+	return crypto.Hash(0), pkcs7.ErrUnsupportedAlgorithm
+}
+
+// AuthenticodeContent provides a simplified view on SpcIndirectDataContent, which specifies the ASN.1 encoded values of
+// the authenticode signature content.
+type AuthenticodeContent struct {
+	HashFunction crypto.Hash
+	HashResult   []byte
+}
+
+func parseAuthenticodeContent(content []byte) (AuthenticodeContent, error) {
+	var authenticodeContent SpcIndirectDataContent
+	content, err := asn1.Unmarshal(content, &authenticodeContent.Data)
+	if err != nil {
+		return AuthenticodeContent{}, err
+	}
+	_, err = asn1.Unmarshal(content, &authenticodeContent.MessageDigest)
+	if err != nil {
+		return AuthenticodeContent{}, err
+	}
+	hashFunction, err := parseHashAlgorithm(authenticodeContent.MessageDigest.DigestAlgorithm)
+	if err != nil {
+		return AuthenticodeContent{}, err
+	}
+	return AuthenticodeContent{
+		HashFunction: hashFunction,
+		HashResult:   authenticodeContent.MessageDigest.Digest,
+	}, nil
 }

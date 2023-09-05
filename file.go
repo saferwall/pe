@@ -8,7 +8,7 @@ import (
 	"errors"
 	"os"
 
-	mmap "github.com/edsrzf/mmap-go"
+	"github.com/edsrzf/mmap-go"
 	"github.com/saferwall/pe/log"
 )
 
@@ -61,6 +61,9 @@ type Options struct {
 
 	// Disable certificate validation, by default (false).
 	DisableCertValidation bool
+
+	// Disable signature validation, by default (false).
+	DisableSignatureValidation bool
 
 	// A custom logger.
 	Logger log.Logger
