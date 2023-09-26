@@ -723,7 +723,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	// bit vector.
 	offset += uint32(binary.Size(mdTableStreamHdr))
 	pe.CLR.MetadataTables = make(map[int]*MetadataTable)
-	for i := 0; i < GenericParamConstraint; i++ {
+	for i := 0; i <= GenericParamConstraint; i++ {
 		if IsBitSet(mdTableStreamHdr.MaskValid, i) {
 			mdTable := MetadataTable{}
 			mdTable.Name = MetadataTableIndexToString(i)
