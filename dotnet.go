@@ -6,6 +6,7 @@ package pe
 
 import (
 	"encoding/binary"
+	"fmt"
 )
 
 // References
@@ -87,7 +88,7 @@ const (
 	// optimized metadata (#~ stream).
 	MethodPtr = 5
 	// Method definition descriptors.
-	Method = 6
+	MethodDef = 6
 	// A method-to-parameters lookup table, which does not exist in optimized
 	// metadata (#~ stream).
 	ParamPtr = 7
@@ -207,7 +208,7 @@ func MetadataTableIndexToString(k int) string {
 		FieldPtr:               "FieldPtr",
 		Field:                  "Field",
 		MethodPtr:              "MethodPtr",
-		Method:                 "Method",
+		MethodDef:              "MethodDef",
 		ParamPtr:               "ParamPtr",
 		Param:                  "Param",
 		InterfaceImpl:          "InterfaceImpl",
@@ -467,31 +468,6 @@ type MetadataTable struct {
 	Content interface{} `json:"content"`
 }
 
-// ModuleTableRow represents the `Module` metadata table contains a single
-// record that provides the identification of the current module. The column
-// structure of the table is as follows:
-type ModuleTableRow struct {
-	// Used only at run time, in edit-and-continue mode.
-	Generation uint16 `json:"generation"`
-
-	// (offset in the #Strings stream) The module name, which is the same as
-	// the name of the executable file with its extension but without a path.
-	// The length should not exceed 512 bytes in UTF-8 encoding, counting the
-	// zero terminator.
-	Name uint32 `json:"name"`
-
-	// (offset in the #GUID stream) A globally unique identifier, assigned
-	// to the module as it is generated.
-	Mvid uint32 `json:"mvid"`
-
-	// (offset in the #GUID stream): Used only at run time, in
-	// edit-and-continue mode.
-	EncID uint32 `json:"enc_id"`
-
-	// (offset in the #GUID stream): Used only at run time, in edit-and-continue mode.
-	EncBaseID uint32 `json:"enc_base_id"`
-}
-
 // CLRData embeds the Common Language Runtime Header structure as well as the
 // Metadata header structure.
 type CLRData struct {
@@ -504,37 +480,6 @@ type CLRData struct {
 	StringStreamIndexSize      int                       `json:"-"`
 	GUIDStreamIndexSize        int                       `json:"-"`
 	BlobStreamIndexSize        int                       `json:"-"`
-}
-
-func (pe *File) readFromMetadataSteam(Stream int, off uint32, out *uint32) (uint32, error) {
-	var indexSize int
-	switch Stream {
-	case StringStream:
-		indexSize = pe.CLR.StringStreamIndexSize
-	case GUIDStream:
-		indexSize = pe.CLR.GUIDStreamIndexSize
-	case BlobStream:
-		indexSize = pe.CLR.BlobStreamIndexSize
-	}
-
-	var data uint32
-	var err error
-	switch indexSize {
-	case 2:
-		d, err := pe.ReadUint16(off)
-		if err != nil {
-			return 0, err
-		}
-		data = uint32(d)
-	case 4:
-		data, err = pe.ReadUint32(off)
-		if err != nil {
-			return 0, err
-		}
-	}
-
-	*out = data
-	return uint32(indexSize), nil
 }
 
 func (pe *File) parseMetadataStream(off, size uint32) (MetadataTableStreamHeader, error) {
@@ -587,37 +532,6 @@ func (pe *File) parseMetadataHeader(offset, size uint32) (MetadataHeader, error)
 	}
 
 	return mh, err
-}
-
-func (pe *File) parseMetadataModuleTable(off uint32) (ModuleTableRow, error) {
-	var err error
-	var indexSize uint32
-	modTableRow := ModuleTableRow{}
-
-	if modTableRow.Generation, err = pe.ReadUint16(off); err != nil {
-		return ModuleTableRow{}, err
-	}
-	off += 2
-
-	if indexSize, err = pe.readFromMetadataSteam(StringStream, off, &modTableRow.Name); err != nil {
-		return ModuleTableRow{}, err
-	}
-	off += indexSize
-
-	if indexSize, err = pe.readFromMetadataSteam(GUIDStream, off, &modTableRow.Mvid); err != nil {
-		return ModuleTableRow{}, err
-	}
-	off += indexSize
-	if indexSize, err = pe.readFromMetadataSteam(GUIDStream, off, &modTableRow.EncID); err != nil {
-		return ModuleTableRow{}, err
-	}
-	off += indexSize
-
-	if _, err = pe.readFromMetadataSteam(GUIDStream, off, &modTableRow.EncBaseID); err != nil {
-		return ModuleTableRow{}, err
-	}
-
-	return modTableRow, nil
 }
 
 // The 15th directory entry of the PE header contains the RVA and size of the
@@ -737,14 +651,86 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 	}
 
 	// Parse the metadata tables.
-	for tableIdx, table := range pe.CLR.MetadataTables {
-		switch tableIdx {
-		case Module:
-			table.Content, err = pe.parseMetadataModuleTable(offset)
-			if err != nil {
-				return err
-			}
+	for tableIndex := 0; tableIndex <= GenericParamConstraint; tableIndex++ {
+		table, ok := pe.CLR.MetadataTables[tableIndex]
+		if !ok {
+			continue
 		}
+
+		n := uint32(0)
+		switch tableIndex {
+		case Module: // 0x00
+			table.Content, n, err = pe.parseMetadataModuleTable(offset)
+		case TypeRef: // 0x01
+			table.Content, n, err = pe.parseMetadataTypeRefTable(offset)
+		case TypeDef: // 0x02
+			table.Content, n, err = pe.parseMetadataTypeDefTable(offset)
+		case Field: // 0x04
+			table.Content, n, err = pe.parseMetadataFieldTable(offset)
+		case MethodDef: // 0x06
+			table.Content, n, err = pe.parseMetadataMethodDefTable(offset)
+		case Param: // 0x08
+			table.Content, n, err = pe.parseMetadataParamTable(offset)
+		case InterfaceImpl: // 0x09
+			table.Content, n, err = pe.parseMetadataInterfaceImplTable(offset)
+		case MemberRef: // 0x0a
+			table.Content, n, err = pe.parseMetadataMemberRefTable(offset)
+		case Constant: // 0x0b
+			table.Content, n, err = pe.parseMetadataConstantTable(offset)
+		case CustomAttribute: // 0x0c
+			table.Content, n, err = pe.parseMetadataCustomAttributeTable(offset)
+		case FieldMarshal: // 0x0d
+			table.Content, n, err = pe.parseMetadataFieldMarshalTable(offset)
+		case DeclSecurity: // 0x0e
+			table.Content, n, err = pe.parseMetadataDeclSecurityTable(offset)
+		case ClassLayout: // 0x0f
+			table.Content, n, err = pe.parseMetadataClassLayoutTable(offset)
+		case FieldLayout: // 0x10
+			table.Content, n, err = pe.parseMetadataFieldLayoutTable(offset)
+		case StandAloneSig: // 0x11
+			table.Content, n, err = pe.parseMetadataStandAloneSignTable(offset)
+		case EventMap: // 0x12
+			table.Content, n, err = pe.parseMetadataEventMapTable(offset)
+		case Event: // 0x14
+			table.Content, n, err = pe.parseMetadataEventTable(offset)
+		case PropertyMap: // 0x15
+			table.Content, n, err = pe.parseMetadataPropertyMapTable(offset)
+		case Property: // 0x17
+			table.Content, n, err = pe.parseMetadataPropertyTable(offset)
+		case MethodSemantics: // 0x18
+			table.Content, n, err = pe.parseMetadataMethodSemanticsTable(offset)
+		case MethodImpl: // 0x19
+			table.Content, n, err = pe.parseMetadataMethodImplTable(offset)
+		case ModuleRef: // 0x1a
+			table.Content, n, err = pe.parseMetadataModuleRefTable(offset)
+		case TypeSpec: // 0x1b
+			table.Content, n, err = pe.parseMetadataTypeSpecTable(offset)
+		case ImplMap: // 0x1c
+			table.Content, n, err = pe.parseMetadataImplMapTable(offset)
+		case FieldRVA: // 0x1d
+			table.Content, n, err = pe.parseMetadataFieldRVATable(offset)
+		case Assembly: // 0x20
+			table.Content, n, err = pe.parseMetadataAssemblyTable(offset)
+		case AssemblyRef: // 0x23
+			table.Content, n, err = pe.parseMetadataAssemblyRefTable(offset)
+		case ExportedType: // 0x27
+			table.Content, n, err = pe.parseMetadataExportedTypeTable(offset)
+		case ManifestResource: // 0x28
+			table.Content, n, err = pe.parseMetadataManifestResourceTable(offset)
+		case NestedClass: // 0x29
+			table.Content, n, err = pe.parseMetadataNestedClassTable(offset)
+		case GenericParam: // 0x2a
+			table.Content, n, err = pe.parseMetadataGenericParamTable(offset)
+		case MethodSpec: // 0x2b
+			table.Content, n, err = pe.parseMetadataMethodSpecTable(offset)
+		case GenericParamConstraint: // 0x2c
+			table.Content, n, err = pe.parseMetadataGenericParamConstraintTable(offset)
+
+		default:
+			fmt.Printf("unhandled metadata table %d %s offset 0x%x cols %d\n", tableIndex, MetadataTableIndexToString(tableIndex), offset, table.CountCols)
+		}
+		offset += n
+
 	}
 
 	return nil
