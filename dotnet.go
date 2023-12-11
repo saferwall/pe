@@ -6,7 +6,6 @@ package pe
 
 import (
 	"encoding/binary"
-	"fmt"
 )
 
 // References
@@ -727,7 +726,8 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 			table.Content, n, err = pe.parseMetadataGenericParamConstraintTable(offset)
 
 		default:
-			fmt.Printf("unhandled metadata table %d %s offset 0x%x cols %d\n", tableIndex, MetadataTableIndexToString(tableIndex), offset, table.CountCols)
+			pe.logger.Warnf("unhandled metadata table %d %s offset 0x%x cols %d",
+				tableIndex, MetadataTableIndexToString(tableIndex), offset, table.CountCols)
 		}
 		offset += n
 
