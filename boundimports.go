@@ -109,7 +109,7 @@ func (pe *File) parseBoundImportDirectory(rva, size uint32) (err error) {
 		bndFrwdRefSize := uint32(binary.Size(bndFrwdRef))
 		count := min(uint32(bndDesc.NumberOfModuleForwarderRefs), safetyBoundary/bndFrwdRefSize)
 
-		var forwarderRefs []BoundForwardedRefData
+		forwarderRefs := make([]BoundForwardedRefData, 0)
 		for i := uint32(0); i < count; i++ {
 			err = pe.structUnpack(&bndFrwdRef, rva, bndFrwdRefSize)
 			if err != nil {
