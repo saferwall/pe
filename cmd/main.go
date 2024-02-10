@@ -89,7 +89,7 @@ func main() {
 			wantCLR:         *dumpCLR,
 		}
 
-		// Start as many workers you want, now 10 workers
+		// Start as many workers you want, default to cpu count -1.
 		numWorkers := runtime.GOMAXPROCS(runtime.NumCPU() - 1)
 		for w := 1; w <= numWorkers; w++ {
 			go loopFilesWorker(cfg)
