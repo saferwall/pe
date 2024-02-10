@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"sync"
 	"text/tabwriter"
 	"time"
 	"unicode"
@@ -22,6 +23,50 @@ import (
 	peparser "github.com/saferwall/pe"
 	"github.com/saferwall/pe/log"
 )
+
+var (
+	wg   sync.WaitGroup
+	jobs chan string = make(chan string)
+)
+
+func loopFilesWorker(cfg config) error {
+	for path := range jobs {
+		files, err := os.ReadDir(path)
+		if err != nil {
+			wg.Done()
+			return err
+		}
+
+		for _, file := range files {
+			if !file.IsDir() {
+				fullpath := filepath.Join(path, file.Name())
+				parse(fullpath, cfg)
+			}
+		}
+		wg.Done()
+	}
+	return nil
+}
+
+func LoopDirsFiles(path string) error {
+	files, err := os.ReadDir(path)
+	if err != nil {
+		return err
+	}
+	//Add this path as a job to the workers
+	//You must call it in a go routine, since if every worker is busy, then you have to wait for the channel to be free.
+	go func() {
+		wg.Add(1)
+		jobs <- path
+	}()
+	for _, file := range files {
+		if file.IsDir() {
+			//Recursively go further in the tree
+			LoopDirsFiles(filepath.Join(path, file.Name()))
+		}
+	}
+	return nil
+}
 
 func prettyPrint(buff []byte) string {
 	var prettyJSON bytes.Buffer
@@ -500,6 +545,12 @@ func parsePE(filename string, cfg config) {
 
 		fmt.Printf("\nRESOURCES\n**********\n")
 		printRsrcDir(pe.Resources)
+
+		r, err := pe.ParseVersionResources()
+		if err == nil {
+			fmt.Print(r)
+		}
+		fmt.Print()
 	}
 
 	if cfg.wantException && pe.FileInfo.HasException {

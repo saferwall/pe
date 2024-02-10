@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 )
 
 type config struct {
@@ -88,7 +89,14 @@ func main() {
 			wantCLR:         *dumpCLR,
 		}
 
-		parse(os.Args[2], cfg)
+		//Start as many workers you want, now 10 workers
+		numWorkers := runtime.GOMAXPROCS(runtime.NumCPU() - 1)
+		for w := 1; w <= numWorkers; w++ {
+			go loopFilesWorker(cfg)
+		}
+		//Start the recursion
+		LoopDirsFiles(os.Args[2])
+		wg.Wait()
 
 	case "version":
 		verCmd.Parse(os.Args[2:])
@@ -109,5 +117,6 @@ func showHelp() {
 	Brought to you by Saferwall (c) 2018 MIT
 `)
 	fmt.Println("\nAvailable sub-commands 'dump' or 'version' subcommands")
+
 	os.Exit(1)
 }
