@@ -384,15 +384,15 @@ type ImageCHPEMetadataX86 struct {
 	Version                                  uint32 `json:"version"`
 	CHPECodeAddressRangeOffset               uint32 `json:"chpe_code_address_range_offset"`
 	CHPECodeAddressRangeCount                uint32 `json:"chpe_code_address_range_count"`
-	WoWA64ExceptionHandlerFunctionPtr        uint32 `json:"WoW_a64_exception_handler_function_ptr"`
-	WoWA64DispatchCallFunctionPtr            uint32 `json:"WoW_a64_dispatch_call_function_ptr"`
-	WoWA64DispatchIndirectCallFunctionPtr    uint32 `json:"WoW_a64_dispatch_indirect_call_function_ptr"`
-	WoWA64DispatchIndirectCallCfgFunctionPtr uint32 `json:"WoW_a64_dispatch_indirect_call_cfg_function_ptr"`
-	WoWA64DispatchRetFunctionPtr             uint32 `json:"WoW_a64_dispatch_ret_function_ptr"`
-	WoWA64DispatchRetLeafFunctionPtr         uint32 `json:"WoW_a64_dispatch_ret_leaf_function_ptr"`
-	WoWA64DispatchJumpFunctionPtr            uint32 `json:"WoW_a64_dispatch_jump_function_ptr"`
+	WoWA64ExceptionHandlerFunctionPtr        uint32 `json:"wow_a64_exception_handler_function_ptr"`
+	WoWA64DispatchCallFunctionPtr            uint32 `json:"wow_a64_dispatch_call_function_ptr"`
+	WoWA64DispatchIndirectCallFunctionPtr    uint32 `json:"wow_a64_dispatch_indirect_call_function_ptr"`
+	WoWA64DispatchIndirectCallCfgFunctionPtr uint32 `json:"wow_a64_dispatch_indirect_call_cfg_function_ptr"`
+	WoWA64DispatchRetFunctionPtr             uint32 `json:"wow_a64_dispatch_ret_function_ptr"`
+	WoWA64DispatchRetLeafFunctionPtr         uint32 `json:"wow_a64_dispatch_ret_leaf_function_ptr"`
+	WoWA64DispatchJumpFunctionPtr            uint32 `json:"wow_a64_dispatch_jump_function_ptr"`
 	CompilerIATPointer                       uint32 `json:"compiler_iat_pointer"`       // Present if Version >= 2
-	WoWA64RDTSCFunctionPtr                   uint32 `json:"WoW_a64_rdtsc_function_ptr"` // Present if Version >= 3
+	WoWA64RDTSCFunctionPtr                   uint32 `json:"wow_a64_rdtsc_function_ptr"` // Present if Version >= 3
 }
 
 type CodeRange struct {
