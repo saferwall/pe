@@ -14,32 +14,32 @@ type ImageDelayImportDescriptor struct {
 	// in the image. This field can be used to extend the record by indicating
 	// the presence of new fields, or it can be used to indicate behaviors to
 	// the delay or unload helper functions.
-	Attributes uint32
+	Attributes uint32 `json:"attributes"`
 
 	// The name of the DLL to be delay-loaded resides in the read-only data
 	// section of the image. It is referenced through the szName field.
-	Name uint32
+	Name uint32 `json:"name"`
 
 	// The handle of the DLL to be delay-loaded is in the data section of the
 	// image. The phmod field points to the handle. The supplied delay-load
 	// helper uses this location to store the handle to the loaded DLL.
-	ModuleHandleRVA uint32
+	ModuleHandleRVA uint32 `json:"module_handle_rva"`
 
 	// The delay import address table (IAT) is referenced by the delay import
 	// descriptor through the pIAT field. The delay-load helper updates these
 	// pointers with the real entry points so that the thunks are no longer in
 	// the calling loop
-	ImportAddressTableRVA uint32
+	ImportAddressTableRVA uint32 `json:"import_address_table_rva"`
 
 	// The delay import name table (INT) contains the names of the imports that
 	// might require loading. They are ordered in the same fashion as the
 	// function pointers in the IAT.
-	ImportNameTableRVA uint32
+	ImportNameTableRVA uint32 `json:"import_name_table_rva"`
 
 	// The delay bound import address table (BIAT) is an optional table of
 	// IMAGE_THUNK_DATA items that is used along with the timestamp field
 	// of the delay-load directory table by a post-process binding phase.
-	BoundImportAddressTableRVA uint32
+	BoundImportAddressTableRVA uint32 `json:"bound_import_address_table_rva"`
 
 	// The delay unload import address table (UIAT) is an optional table of
 	// IMAGE_THUNK_DATA items that the unload code uses to handle an explicit
@@ -48,18 +48,18 @@ type ImageDelayImportDescriptor struct {
 	// delay-load thunks. On the unload request, the library can be freed,
 	// the *phmod cleared, and the UIAT written over the IAT to restore
 	// everything to its preload state.
-	UnloadInformationTableRVA uint32
+	UnloadInformationTableRVA uint32 `json:"unload_information_table_rva"`
 
 	// 0 if not bound, otherwise, date/time of the target DLL.
-	TimeDateStamp uint32
+	TimeDateStamp uint32 `json:"time_date_stamp"`
 }
 
 // DelayImport represents an entry in the delay import table.
 type DelayImport struct {
-	Offset     uint32
-	Name       string
-	Functions  []ImportFunction
-	Descriptor ImageDelayImportDescriptor
+	Offset     uint32                     `json:"offset"`
+	Name       string                     `json:"name"`
+	Functions  []ImportFunction           `json:"functions"`
+	Descriptor ImageDelayImportDescriptor `json:"descriptor"`
 }
 
 // Delay-Load Import Tables tables were added to the image to support a uniform
