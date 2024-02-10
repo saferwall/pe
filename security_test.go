@@ -170,6 +170,8 @@ func TestAuthentihash(t *testing.T) {
 			"595e4eb556587a1363ff297df9f354a377963ecac0bed19230992b9601426aae"},
 		{getAbsoluteFilePath("test/mfc40u.dll"),
 			"5c8acdf9b2c7854c6b8e22e973d2fbae9c68fc22513d24c68c8e8010b1663e67"},
+		{getAbsoluteFilePath("test/000057fd78f66e64e15f5070364c824a8923b6216bd8bcf6368857fb9674c483"),
+			""},
 	}
 
 	for _, tt := range tests {

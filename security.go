@@ -16,7 +16,6 @@ import (
 	"fmt"
 	"hash"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -72,7 +71,7 @@ type Certificate struct {
 	Header           WinCertificate      `json:"header"`
 	Content          pkcs7.PKCS7         `json:"-"`
 	SignatureContent AuthenticodeContent `json:"-"`
-	SignatureValid   bool                `json:"-"`
+	SignatureValid   bool                `json:"signature_valid"`
 	Raw              []byte              `json:"-"`
 	Info             CertInfo            `json:"info"`
 	Verified         bool                `json:"verified"`
@@ -245,7 +244,11 @@ func (pe *File) parseLocations() (map[string]*RelRange, error) {
 //   - The location of the entry of the Certificate Table in the Data Directory
 //   - The location of the Certificate Table.
 func (pe *File) Authentihash() []byte {
-	return pe.AuthentihashExt(crypto.SHA256.New())[0]
+	results := pe.AuthentihashExt(crypto.SHA256.New())
+	if len(results) > 0 {
+		return results[0]
+	}
+	return nil
 }
 
 // AuthentihashExt generates pe image file hashes using the given hashers.
@@ -494,7 +497,7 @@ func loadSystemRoots() (*x509.CertPool, error) {
 		}
 	}
 
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return roots, err
 	}
@@ -504,7 +507,7 @@ func loadSystemRoots() (*x509.CertPool, error) {
 			continue
 		}
 		certPath := filepath.Join(dir, f.Name())
-		certData, err := ioutil.ReadFile(certPath)
+		certData, err := os.ReadFile(certPath)
 		if err != nil {
 			return roots, err
 		}
