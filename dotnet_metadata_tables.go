@@ -1,3 +1,7 @@
+// Copyright 2018 Saferwall. All rights reserved.
+// Use of this source code is governed by Apache v2 license
+// license that can be found in the LICENSE file.
+
 package pe
 
 // the struct definition and comments are from the ECMA-335 spec 6th edition
@@ -5,11 +9,17 @@ package pe
 
 // Module 0x00
 type ModuleTableRow struct {
-	Generation uint16 `json:"generation"`  // a 2-byte value, reserved, shall be zero
-	Name       uint32 `json:"name"`        // an index into the String heap
-	Mvid       uint32 `json:"mvid"`        // an index into the Guid heap; simply a Guid used to distinguish between two versions of the same module
-	EncID      uint32 `json:"enc_id"`      // an index into the Guid heap; reserved, shall be zero
-	EncBaseID  uint32 `json:"enc_base_id"` // an index into the Guid heap; reserved, shall be zero
+	// a 2-byte value, reserved, shall be zero
+	Generation uint16 `json:"generation"`
+	// an index into the String heap
+	Name uint32 `json:"name"`
+	// an index into the Guid heap; simply a Guid used to distinguish between
+	// two versions of the same module
+	Mvid uint32 `json:"mvid"`
+	// an index into the Guid heap; reserved, shall be zero
+	EncID uint32 `json:"enc_id"`
+	// an index into the Guid heap; reserved, shall be zero
+	EncBaseID uint32 `json:"enc_base_id"`
 }
 
 // Module 0x00
@@ -56,9 +66,13 @@ func (pe *File) parseMetadataModuleTable(off uint32) ([]ModuleTableRow, uint32, 
 
 // TypeRef 0x01
 type TypeRefTableRow struct {
-	ResolutionScope uint32 // an index into a Module, ModuleRef, AssemblyRef or TypeRef table, or null; more precisely, a ResolutionScope (§II.24.2.6) coded index
-	TypeName        uint32 // an index into the String heap
-	TypeNamespace   uint32 // an index into the String heap
+	// an index into a Module, ModuleRef, AssemblyRef or TypeRef table, or null;
+	// more precisely, a ResolutionScope (§II.24.2.6) coded index.
+	ResolutionScope uint32 `json:"resolution_scope"`
+	// an index into the String heap
+	TypeName uint32 `json:"type_name"`
+	// an index into the String heap
+	TypeNamespace uint32 `json:"type_namespace"`
 }
 
 // TypeRef 0x01
@@ -93,12 +107,21 @@ func (pe *File) parseMetadataTypeRefTable(off uint32) ([]TypeRefTableRow, uint32
 
 // TypeDef 0x02
 type TypeDefTableRow struct {
-	Flags         uint32 // a 4-byte bitmask of type TypeAttributes, §II.23.1.15
-	TypeName      uint32 // an index into the String heap
-	TypeNamespace uint32 // an index into the String heap
-	Extends       uint32 // an index into the TypeDef, TypeRef, or TypeSpec table; more precisely, a TypeDefOrRef (§II.24.2.6) coded index
-	FieldList     uint32 // an index into the Field table; it marks the first of a contiguous run of Fields owned by this Type
-	MethodList    uint32 // an index into the MethodDef table; it marks the first of a continguous run of Methods owned by this Type
+	// a 4-byte bitmask of type TypeAttributes, §II.23.1.15
+	Flags uint32 `json:"flags"`
+	// an index into the String heap
+	TypeName uint32 `json:"type_name"`
+	// an index into the String heap
+	TypeNamespace uint32 `json:"type_namespace"`
+	// an index into the TypeDef, TypeRef, or TypeSpec table; more precisely,
+	// a TypeDefOrRef (§II.24.2.6) coded index
+	Extends uint32 `json:"extends"`
+	// an index into the Field table; it marks the first of a contiguous run
+	// of Fields owned by this Type
+	FieldList uint32 `json:"field_list"`
+	// an index into the MethodDef table; it marks the first of a contiguous
+	// run of Methods owned by this Type
+	MethodList uint32 `json:"method_list"`
 }
 
 // TypeDef 0x02
@@ -151,9 +174,12 @@ func (pe *File) parseMetadataTypeDefTable(off uint32) ([]TypeDefTableRow, uint32
 
 // Field 0x04
 type FieldTableRow struct {
-	Flags     uint16 // a 2-byte bitmask of type FieldAttributes, §II.23.1.5
-	Name      uint32 // an index into the String heap
-	Signature uint32 // an index into the Blob heap
+	// a 2-byte bitmask of type FieldAttributes, §II.23.1.5
+	Flags uint16 `json:"flags"`
+	// an index into the String heap
+	Name uint32 `json:"name"`
+	// an index into the Blob heap
+	Signature uint32 `json:"signature"`
 }
 
 // Field 0x04
@@ -188,12 +214,18 @@ func (pe *File) parseMetadataFieldTable(off uint32) ([]FieldTableRow, uint32, er
 
 // MethodDef 0x06
 type MethodDefTableRow struct {
-	RVA       uint32 // a 4-byte constant
-	ImplFlags uint16 // a 2-byte bitmask of type MethodImplAttributes, §II.23.1.10
-	Flags     uint16 // a 2-byte bitmask of type MethodAttributes, §II.23.1.10
-	Name      uint32 // an index into the String heap
-	Signature uint32 // an index into the Blob heap
-	ParamList uint32 // an index into the Param table
+	// a 4-byte constant
+	RVA uint32 `json:"rva"`
+	// a 2-byte bitmask of type MethodImplAttributes, §II.23.1.10
+	ImplFlags uint16 `json:"impl_flags"`
+	// a 2-byte bitmask of type MethodAttributes, §II.23.1.10
+	Flags uint16 `json:"flags"`
+	// an index into the String heap
+	Name uint32 `json:"name"`
+	// an index into the Blob heap
+	Signature uint32 `json:"signature"`
+	// an index into the Param table
+	ParamList uint32 `json:"param_list"`
 }
 
 // MethodDef 0x06
@@ -246,9 +278,12 @@ func (pe *File) parseMetadataMethodDefTable(off uint32) ([]MethodDefTableRow, ui
 
 // Param 0x08
 type ParamTableRow struct {
-	Flags    uint16 // a 2-byte bitmask of type ParamAttributes, §II.23.1.13
-	Sequence uint16 // a 2-byte constant
-	Name     uint32 // an index into the String heap
+	// a 2-byte bitmask of type ParamAttributes, §II.23.1.13
+	Flags uint16 `json:"flags"`
+	// a 2-byte constant
+	Sequence uint16 `json:"sequence"`
+	// an index into the String heap
+	Name uint32 `json:"name"`
 }
 
 // Param 0x08
@@ -283,8 +318,11 @@ func (pe *File) parseMetadataParamTable(off uint32) ([]ParamTableRow, uint32, er
 
 // InterfaceImpl 0x09
 type InterfaceImplTableRow struct {
-	Class     uint32 // an index into the TypeDef table
-	Interface uint32 // an index into the TypeDef, TypeRef, or TypeSpec table; more precisely, a TypeDefOrRef (§II.24.2.6) coded index
+	// an index into the TypeDef table
+	Class uint32 `json:"class"`
+	// an index into the TypeDef, TypeRef, or TypeSpec table; more precisely,
+	// a TypeDefOrRef (§II.24.2.6) coded index
+	Interface uint32 `json:"interface"`
 }
 
 // InterfaceImpl 0x09
@@ -313,9 +351,13 @@ func (pe *File) parseMetadataInterfaceImplTable(off uint32) ([]InterfaceImplTabl
 
 // MembersRef 0x0a
 type MemberRefTableRow struct {
-	Class     uint32 // an index into the MethodDef, ModuleRef,TypeDef, TypeRef, or TypeSpec tables; more precisely, a MemberRefParent (§II.24.2.6) coded index
-	Name      uint32 // an index into the String heap
-	Signature uint32 // an index into the Blob heap
+	// an index into the MethodDef, ModuleRef,TypeDef, TypeRef, or TypeSpec
+	// tables; more precisely, a MemberRefParent (§II.24.2.6) coded index
+	Class uint32 `json:"class"`
+	// // an index into the String heap
+	Name uint32 `json:"name"`
+	// an index into the Blob heap
+	Signature uint32 `json:"signature"`
 }
 
 // MembersRef 0x0a
@@ -351,10 +393,16 @@ func (pe *File) parseMetadataMemberRefTable(off uint32) ([]MemberRefTableRow, ui
 
 // Constant 0x0b
 type ConstantTableRow struct {
-	Type    uint8  // a 1-byte constant, followed by a 1-byte padding zero
-	Padding uint8  // padding zero
-	Parent  uint32 // an index into the Param, Field, or Property table; more precisely, a HasConstant (§II.24.2.6) coded index
-	Value   uint32 // an index into the Blob heap
+	// a 1-byte constant, followed by a 1-byte padding zero
+	Type uint8 `json:"type"`
+	// padding zero
+	Padding uint8 `json:"padding"`
+	// padding zero
+	// an index into the Param, Field, or Property table; more precisely,
+	// a HasConstant (§II.24.2.6) coded index
+	Parent uint32 `json:"parent"`
+	// an index into the Blob heap
+	Value uint32 `json:"value"`
 }
 
 // Constant 0x0b
@@ -395,9 +443,14 @@ func (pe *File) parseMetadataConstantTable(off uint32) ([]ConstantTableRow, uint
 
 // CustomAttribute 0x0c
 type CustomAttributeTableRow struct {
-	Parent uint32 // an index into a metadata table that has an associated HasCustomAttribute (§II.24.2.6) coded index
-	Type   uint32 // an index into the MethodDef or MemberRef table; more precisely, a CustomAttributeType (§II.24.2.6) coded index
-	Value  uint32 // an index into the Blob heap
+	// an index into a metadata table that has an associated HasCustomAttribute
+	// (§II.24.2.6) coded index
+	Parent uint32 `json:"parent"`
+	// an index into the MethodDef or MemberRef table; more precisely,
+	// a CustomAttributeType (§II.24.2.6) coded index
+	Type uint32 `json:"type"`
+	// an index into the Blob heap
+	Value uint32 `json:"value"`
 }
 
 // CustomAttribute 0x0c
@@ -432,8 +485,11 @@ func (pe *File) parseMetadataCustomAttributeTable(off uint32) ([]CustomAttribute
 
 // FieldMarshal 0x0d
 type FieldMarshalTableRow struct {
-	Parent     uint32 // an index into Field or Param table; more precisely, a HasFieldMarshal (§II.24.2.6) coded index
-	NativeType uint32 // an index into the Blob heap
+	// an index into Field or Param table; more precisely,
+	// a HasFieldMarshal (§II.24.2.6) coded index
+	Parent uint32 `json:"parent"`
+	// an index into the Blob heap
+	NativeType uint32 `json:"native_type"`
 }
 
 // FieldMarshal 0x0d
@@ -462,9 +518,13 @@ func (pe *File) parseMetadataFieldMarshalTable(off uint32) ([]FieldMarshalTableR
 
 // DeclSecurity 0x0e
 type DeclSecurityTableRow struct {
-	Action        uint16 // a 2-byte value
-	Parent        uint32 // an index into the TypeDef, MethodDef, or Assembly table; more precisely, a HasDeclSecurity (§II.24.2.6) coded index
-	PermissionSet uint32 // an index into the Blob heap
+	// a 2-byte value
+	Action uint16 `json:"action"`
+	// an index into the TypeDef, MethodDef, or Assembly table;
+	// more precisely, a HasDeclSecurity (§II.24.2.6) coded index
+	Parent uint32 `json:"parent"`
+	// // an index into the Blob heap
+	PermissionSet uint32 `json:"permission_set"`
 }
 
 // DeclSecurity 0x0e
@@ -499,9 +559,12 @@ func (pe *File) parseMetadataDeclSecurityTable(off uint32) ([]DeclSecurityTableR
 
 // ClassLayout 0x0f
 type ClassLayoutTableRow struct {
-	PackingSize uint16 // a 2-byte constant
-	ClassSize   uint32 // a 4-byte constant
-	Parent      uint32 // an index into the TypeDef table
+	// a 2-byte constant
+	PackingSize uint16 `json:"packing_size"`
+	// a 4-byte constant
+	ClassSize uint32 `json:"class_size"`
+	// an index into the TypeDef table
+	Parent uint32 `json:"parent"`
 }
 
 // ClassLayout 0x0f
@@ -536,8 +599,8 @@ func (pe *File) parseMetadataClassLayoutTable(off uint32) ([]ClassLayoutTableRow
 
 // FieldLayout 0x10
 type FieldLayoutTableRow struct {
-	Offset uint32 // a 4-byte constant
-	Field  uint32 // an index into the Field table
+	Offset uint32 `json:"offset"` // a 4-byte constant
+	Field  uint32 `json:"field"`  // an index into the Field table
 }
 
 // FieldLayout 0x10
@@ -566,7 +629,7 @@ func (pe *File) parseMetadataFieldLayoutTable(off uint32) ([]FieldLayoutTableRow
 
 // StandAloneSig 0x11
 type StandAloneSigTableRow struct {
-	Signature uint32 // an index into the Blob heap
+	Signature uint32 `json:"signature"` // an index into the Blob heap
 }
 
 // StandAloneSig 0x11
@@ -589,8 +652,10 @@ func (pe *File) parseMetadataStandAloneSignTable(off uint32) ([]StandAloneSigTab
 
 // EventMap 0x12
 type EventMapTableRow struct {
-	Parent    uint32 // an index into the TypeDef table
-	EventList uint32 // an index into the Event table
+	// an index into the TypeDef table
+	Parent uint32 `json:"parent"`
+	// an index into the Event table
+	EventList uint32 `json:"event_list"`
 }
 
 // EventMap 0x12
@@ -620,9 +685,13 @@ func (pe *File) parseMetadataEventMapTable(off uint32) ([]EventMapTableRow, uint
 
 // Event 0x14
 type EventTableRow struct {
-	EventFlags uint16 // a 2-byte bitmask of type EventAttributes, §II.23.1.4
-	Name       uint32 // an index into the String heap
-	EventType  uint32 // an index into a TypeDef, a TypeRef, or TypeSpec table; more precisely, a TypeDefOrRef (§II.24.2.6) coded index)
+	// a 2-byte bitmask of type EventAttributes, §II.23.1.4
+	EventFlags uint16 `json:"event_flags"`
+	// an index into the String heap
+	Name uint32 `json:"name"`
+	// an index into a TypeDef, a TypeRef, or TypeSpec table; more precisely,
+	// a TypeDefOrRef (§II.24.2.6) coded index)
+	EventType uint32 `json:"event_type"`
 }
 
 // Event 0x14
@@ -657,8 +726,10 @@ func (pe *File) parseMetadataEventTable(off uint32) ([]EventTableRow, uint32, er
 
 // PropertyMap 0x15
 type PropertyMapTableRow struct {
-	Parent       uint32 // an index	into the TypeDef table
-	PropertyList uint32 // an index into the Property table
+	// an index	into the TypeDef table
+	Parent uint32 `json:"parent"`
+	// an index into the Property table
+	PropertyList uint32 `json:"property_list"`
 }
 
 // PropertyMap 0x15
@@ -687,9 +758,12 @@ func (pe *File) parseMetadataPropertyMapTable(off uint32) ([]PropertyMapTableRow
 
 // Property 0x17
 type PropertyTableRow struct {
-	Flags uint16 // a 2-byte bitmask of type PropertyAttributes, §II.23.1.14
-	Name  uint32 // an index into the String heap
-	Type  uint32 // an index into the Blob heap
+	// a 2-byte bitmask of type PropertyAttributes, §II.23.1.14
+	Flags uint16 `json:"flags"`
+	// an index into the String heap
+	Name uint32 `json:"name"`
+	// an index into the Blob heap
+	Type uint32 `json:"type"`
 }
 
 // Property 0x17
@@ -724,9 +798,13 @@ func (pe *File) parseMetadataPropertyTable(off uint32) ([]PropertyTableRow, uint
 
 // MethodSemantics 0x18
 type MethodSemanticsTableRow struct {
-	Semantics   uint16 // a 2-byte bitmask of type MethodSemanticsAttributes, §II.23.1.12
-	Method      uint32 // an index into the MethodDef table
-	Association uint32 // an index into the Event or Property table; more precisely, a HasSemantics (§II.24.2.6) coded index
+	// a 2-byte bitmask of type MethodSemanticsAttributes, §II.23.1.12
+	Semantics uint16 `json:"semantics"`
+	// an index into the MethodDef table
+	Method uint32 `json:"method"`
+	// an index into the Event or Property table; more precisely,
+	// a HasSemantics (§II.24.2.6) coded index
+	Association uint32 `json:"association"`
 }
 
 // MethodSemantics 0x18
@@ -761,9 +839,14 @@ func (pe *File) parseMetadataMethodSemanticsTable(off uint32) ([]MethodSemantics
 
 // MethodImpl 0x19
 type MethodImplTableRow struct {
-	Class             uint32 // an index into the TypeDef table
-	MethodBody        uint32 // an index into the MethodDef or MemberRef table; more precisely, a MethodDefOrRef (§II.24.2.6) coded index
-	MethodDeclaration uint32 // an index into the MethodDef or MemberRef table; more precisely, a MethodDefOrRef (§II.24.2.6) coded index
+	// an index into the TypeDef table
+	Class uint32 `json:"class"`
+	// an index into the MethodDef or MemberRef table; more precisely, a
+	// MethodDefOrRef (§II.24.2.6) coded index
+	MethodBody uint32 `json:"method_body"`
+	// // an index into the MethodDef or MemberRef table; more precisely, a
+	// MethodDefOrRef (§II.24.2.6) coded index
+	MethodDeclaration uint32 `json:"method_declaration"`
 }
 
 // MethodImpl 0x19
@@ -798,7 +881,8 @@ func (pe *File) parseMetadataMethodImplTable(off uint32) ([]MethodImplTableRow, 
 
 // ModuleRef 0x1a
 type ModuleRefTableRow struct {
-	Name uint32 // an index into the String heap
+	// an index into the String heap
+	Name uint32 `json:"name"`
 }
 
 // ModuleRef 0x1a
@@ -821,7 +905,8 @@ func (pe *File) parseMetadataModuleRefTable(off uint32) ([]ModuleRefTableRow, ui
 
 // TypeSpec 0x1b
 type TypeSpecTableRow struct {
-	Signature uint32 // an index into the Blob heap
+	// an index into the Blob heap
+	Signature uint32 `json:"signature"`
 }
 
 // TypeSpec 0x1b
@@ -844,10 +929,15 @@ func (pe *File) parseMetadataTypeSpecTable(off uint32) ([]TypeSpecTableRow, uint
 
 // ImplMap 0x1c
 type ImplMapTableRow struct {
-	MappingFlags    uint16 // a 2-byte bitmask of type PInvokeAttributes, §23.1.8
-	MemberForwarded uint32 // an index into the Field or MethodDef table; more precisely, a MemberForwarded (§II.24.2.6) coded index)
-	ImportName      uint32 // an index into the String heap
-	ImportScope     uint32 // an index into the ModuleRef table
+	// a 2-byte bitmask of type PInvokeAttributes, §23.1.8
+	MappingFlags uint16 `json:"mapping_flags"`
+	// an index into the Field or MethodDef table; more precisely,
+	// a MemberForwarded (§II.24.2.6) coded index)
+	MemberForwarded uint32 `json:"member_forwarded"`
+	// an index into the String heap
+	ImportName uint32 `json:"import_name"`
+	// an index into the ModuleRef table
+	ImportScope uint32 `json:"import_scope"`
 }
 
 // ImplMap 0x1c
@@ -888,8 +978,10 @@ func (pe *File) parseMetadataImplMapTable(off uint32) ([]ImplMapTableRow, uint32
 
 // FieldRVA 0x1d
 type FieldRVATableRow struct {
-	RVA   uint32 // 4-byte constant
-	Field uint32 // an index into Field table
+	// 4-byte constant
+	RVA uint32 `json:"rva"`
+	// an index into Field table
+	Field uint32 `json:"field"`
 }
 
 // FieldRVA 0x1d
@@ -918,15 +1010,24 @@ func (pe *File) parseMetadataFieldRVATable(off uint32) ([]FieldRVATableRow, uint
 
 // Assembly 0x20
 type AssemblyTableRow struct {
-	HashAlgId      uint32 // a 4-byte constant of type AssemblyHashAlgorithm, §II.23.1.1
-	MajorVersion   uint16 // a 2-byte constant
-	MinorVersion   uint16 // a 2-byte constant
-	BuildNumber    uint16 // a 2-byte constant
-	RevisionNumber uint16 // a 2-byte constant
-	Flags          uint32 // a 4-byte bitmask of type AssemblyFlags, §II.23.1.2
-	PublicKey      uint32 // an index into the Blob heap
-	Name           uint32 // an index into the String heap
-	Culture        uint32 // an index into the String heap
+	// a 4-byte constant of type AssemblyHashAlgorithm, §II.23.1.1
+	HashAlgId uint32 `json:"hash_alg_id"`
+	// a 2-byte constant
+	MajorVersion uint16 `json:"major_version"`
+	// a 2-byte constant
+	MinorVersion uint16 `json:"minor_version"`
+	// a 2-byte constant
+	BuildNumber uint16 `json:"build_number"`
+	// a 2-byte constant
+	RevisionNumber uint16 `json:"revision_number"`
+	// a 4-byte bitmask of type AssemblyFlags, §II.23.1.2
+	Flags uint32 `json:"flags"`
+	// an index into the Blob heap
+	PublicKey uint32 `json:"public_key"`
+	// an index into the String heap
+	Name uint32 `json:"name"`
+	// an index into the String heap
+	Culture uint32 `json:"culture"`
 }
 
 // Assembly 0x20
@@ -997,27 +1098,27 @@ func (pe *File) parseMetadataAssemblyTable(off uint32) ([]AssemblyTableRow, uint
 
 // AssemblyProcessor 0x21
 type AssemblyProcessorTableRow struct {
-	Processor uint32 // a 4-byte constant
+	Processor uint32 `json:"processor"` // a 4-byte constant
 }
 
 // AssemblyOS 0x22
 type AssemblyOSTableRow struct {
-	OSPlatformID   uint32 // a 4-byte constant
-	OSMajorVersion uint32 // a 4-byte constant
-	OSMinorVersion uint32 // a 4-byte constant
+	OSPlatformID   uint32 `json:"os_platform_id"`   // a 4-byte constant
+	OSMajorVersion uint32 `json:"os_major_version"` // a 4-byte constant
+	OSMinorVersion uint32 `json:"os_minor_version"` // a 4-byte constant
 }
 
 // AssemblyRef 0x23
 type AssemblyRefTableRow struct {
-	MajorVersion     uint16 // a 2-byte constant
-	MinorVersion     uint16 // a 2-byte constant
-	BuildNumber      uint16 // a 2-byte constant
-	RevisionNumber   uint16 // a 2-byte constant
-	Flags            uint32 // a 4-byte bitmask of type AssemblyFlags, §II.23.1.2
-	PublicKeyOrToken uint32 // an index into the Blob heap, indicating the public key or token that identifies the author of this Assembly
-	Name             uint32 // an index into the String heap
-	Culture          uint32 // an index into the String heap
-	HashValue        uint32 // an index into the Blob heap
+	MajorVersion     uint16 `json:"major_version"`       // a 2-byte constant
+	MinorVersion     uint16 `json:"minor_version"`       // a 2-byte constant
+	BuildNumber      uint16 `json:"build_number"`        // a 2-byte constant
+	RevisionNumber   uint16 `json:"revision_number"`     // a 2-byte constant
+	Flags            uint32 `json:"flags"`               // a 4-byte bitmask of type AssemblyFlags, §II.23.1.2
+	PublicKeyOrToken uint32 `json:"public_key_or_token"` // an index into the Blob heap, indicating the public key or token that identifies the author of this Assembly
+	Name             uint32 `json:"name"`                // an index into the String heap
+	Culture          uint32 `json:"culture"`             // an index into the String heap
+	HashValue        uint32 `json:"hash_value"`          // an index into the Blob heap
 }
 
 // AssemblyRef 0x23
@@ -1088,32 +1189,32 @@ func (pe *File) parseMetadataAssemblyRefTable(off uint32) ([]AssemblyRefTableRow
 
 // AssemblyRefProcessor 0x24
 type AssemblyRefProcessorTableRow struct {
-	Processor   uint32 // a 4-byte constant
-	AssemblyRef uint32 // an index into the AssemblyRef table
+	Processor   uint32 `json:"processor"`    // a 4-byte constant
+	AssemblyRef uint32 `json:"assembly_ref"` // an index into the AssemblyRef table
 }
 
 // AssemblyRefOS 0x25
 type AssemblyRefOSTableRow struct {
-	OSPlatformId   uint32 // a 4-byte constant
-	OSMajorVersion uint32 // a 4-byte constant
-	OSMinorVersion uint32 // a 4-byte constan)
-	AssemblyRef    uint32 // an index into the AssemblyRef table
+	OSPlatformId   uint32 `json:"os_platform_id"`   // a 4-byte constant
+	OSMajorVersion uint32 `json:"os_major_version"` // a 4-byte constant
+	OSMinorVersion uint32 `json:"os_minor_version"` // a 4-byte constan)
+	AssemblyRef    uint32 `json:"assembly_ref"`     // an index into the AssemblyRef table
 }
 
 // File 0x26
 type FileTableRow struct {
-	Flags     uint32 // a 4-byte bitmask of type FileAttributes, §II.23.1.6
-	Name      uint32 // an index into the String heap
-	HashValue uint32 // an index into the Blob heap
+	Flags     uint32 `json:"flags"`      // a 4-byte bitmask of type FileAttributes, §II.23.1.6
+	Name      uint32 `json:"name"`       // an index into the String heap
+	HashValue uint32 `json:"hash_value"` // an index into the Blob heap
 }
 
 // ExportedType 0x27
 type ExportedTypeTableRow struct {
-	Flags          uint32 // a 4-byte bitmask of type TypeAttributes, §II.23.1.15
-	TypeDefId      uint32 // a 4-byte index into a TypeDef table of another module in this Assembly
-	TypeName       uint32 // an index into the String heap
-	TypeNamespace  uint32 // an index into the String heap
-	Implementation uint32 // an index (more precisely, an Implementation (§II.24.2.6) coded index
+	Flags          uint32 `json:"flags"`          // a 4-byte bitmask of type TypeAttributes, §II.23.1.15
+	TypeDefId      uint32 `json:"type_def_id"`    // a 4-byte index into a TypeDef table of another module in this Assembly
+	TypeName       uint32 `json:"type_name"`      // an index into the String heap
+	TypeNamespace  uint32 `json:"type_namespace"` // an index into the String heap
+	Implementation uint32 `json:"implementation"` // an index (more precisely, an Implementation (§II.24.2.6) coded index
 }
 
 // ExportedType 0x27
@@ -1160,10 +1261,10 @@ func (pe *File) parseMetadataExportedTypeTable(off uint32) ([]ExportedTypeTableR
 
 // ManifestResource 0x28
 type ManifestResourceTableRow struct {
-	Offset         uint32 // a 4-byte constant
-	Flags          uint32 // a 4-byte bitmask of type ManifestResourceAttributes, §II.23.1.9
-	Name           uint32 // an index into the String heap
-	Implementation uint32 // an index into a File table, a AssemblyRef table, or null; more precisely, an Implementation (§II.24.2.6) coded index
+	Offset         uint32 `json:"offset"`         // a 4-byte constant
+	Flags          uint32 `json:"flags"`          // a 4-byte bitmask of type ManifestResourceAttributes, §II.23.1.9
+	Name           uint32 `json:"name"`           // an index into the String heap
+	Implementation uint32 `json:"implementation"` // an index into a File table, a AssemblyRef table, or null; more precisely, an Implementation (§II.24.2.6) coded index
 }
 
 // ManifestResource 0x28
@@ -1204,8 +1305,8 @@ func (pe *File) parseMetadataManifestResourceTable(off uint32) ([]ManifestResour
 
 // NestedClass 0x29
 type NestedClassTableRow struct {
-	NestedClass    uint32 // an index into the TypeDef table
-	EnclosingClass uint32 // an index into the TypeDef table
+	NestedClass    uint32 `json:"nested_class"`    // an index into the TypeDef table
+	EnclosingClass uint32 `json:"enclosing_class"` // an index into the TypeDef table
 }
 
 // NestedClass 0x29
@@ -1234,10 +1335,10 @@ func (pe *File) parseMetadataNestedClassTable(off uint32) ([]NestedClassTableRow
 
 // GenericParam 0x2a
 type GenericParamTableRow struct {
-	Number uint16 // the 2-byte index of the generic parameter, numbered left-to-right, from zero
-	Flags  uint16 // a 2-byte bitmask of type GenericParamAttributes, §II.23.1.7
-	Owner  uint32 // an index into the TypeDef or MethodDef table, specifying the Type or Method to which this generic parameter applies; more precisely, a TypeOrMethodDef (§II.24.2.6) coded index
-	Name   uint32 // a non-null index into the String heap, giving the name for the generic parameter
+	Number uint16 `json:"number"` // the 2-byte index of the generic parameter, numbered left-to-right, from zero
+	Flags  uint16 `json:"flags"`  // a 2-byte bitmask of type GenericParamAttributes, §II.23.1.7
+	Owner  uint32 `json:"owner"`  // an index into the TypeDef or MethodDef table, specifying the Type or Method to which this generic parameter applies; more precisely, a TypeOrMethodDef (§II.24.2.6) coded index
+	Name   uint32 `json:"name"`   // a non-null index into the String heap, giving the name for the generic parameter
 }
 
 // GenericParam 0x2a
@@ -1277,8 +1378,8 @@ func (pe *File) parseMetadataGenericParamTable(off uint32) ([]GenericParamTableR
 
 // MethodSpec 0x2b
 type MethodSpecTableRow struct {
-	Method        uint32 // an index into the MethodDef or MemberRef table, specifying to which generic method this row refers; that is, which generic method this row is an instantiation of; more precisely, a MethodDefOrRef (§II.24.2.6) coded index
-	Instantiation uint32 // an index into the Blob heap
+	Method        uint32 `json:"method"`        // an index into the MethodDef or MemberRef table, specifying to which generic method this row refers; that is, which generic method this row is an instantiation of; more precisely, a MethodDefOrRef (§II.24.2.6) coded index
+	Instantiation uint32 `json:"instantiation"` // an index into the Blob heap
 }
 
 // MethodSpec 0x2b
@@ -1307,8 +1408,8 @@ func (pe *File) parseMetadataMethodSpecTable(off uint32) ([]MethodSpecTableRow, 
 
 // GenericParamConstraint 0x2c
 type GenericParamConstraintTableRow struct {
-	Owner      uint32 // an index into the GenericParam table, specifying to which generic parameter this row refers
-	Constraint uint32 // an index into the TypeDef, TypeRef, or TypeSpec tables, specifying from which class this generic parameter is constrained to derive; or which interface this generic parameter is constrained to implement; more precisely, a TypeDefOrRef (§II.24.2.6) coded index
+	Owner      uint32 `json:"owner"`      // an index into the GenericParam table, specifying to which generic parameter this row refers
+	Constraint uint32 `json:"constraint"` // an index into the TypeDef, TypeRef, or TypeSpec tables, specifying from which class this generic parameter is constrained to derive; or which interface this generic parameter is constrained to implement; more precisely, a TypeDefOrRef (§II.24.2.6) coded index
 }
 
 // GenericParamConstraint 0x2c

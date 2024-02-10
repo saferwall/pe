@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -26,72 +26,73 @@ var (
 // to resolve imports to the entry points within this image.
 type ImageExportDirectory struct {
 	// Reserved, must be 0.
-	Characteristics uint32
+	Characteristics uint32 `json:"characteristics"`
 
 	// The time and date that the export data was created.
-	TimeDateStamp uint32
+	TimeDateStamp uint32 `json:"time_date_stamp"`
 
 	// The major version number.
 	//The major and minor version numbers can be set by the user.
-	MajorVersion uint16
+	MajorVersion uint16 `json:"major_version"`
 
 	// The minor version number.
-	MinorVersion uint16
+	MinorVersion uint16 `json:"minor_version"`
 
 	// The address of the ASCII string that contains the name of the DLL.
 	// This address is relative to the image base.
-	Name uint32
+	Name uint32 `json:"name"`
 
 	// The starting ordinal number for exports in this image. This field
 	// specifies the starting ordinal number for the export address table.
 	// It is usually set to 1.
-	Base uint32
+	Base uint32 `json:"base"`
 
 	// The number of entries in the export address table.
-	NumberOfFunctions uint32
+	NumberOfFunctions uint32 `json:"number_of_functions"`
 
 	// The number of entries in the name pointer table. This is also the number
 	// of entries in the ordinal table.
-	NumberOfNames uint32
+	NumberOfNames uint32 `json:"number_of_names"`
 
 	// The address of the export address table, relative to the image base.
-	AddressOfFunctions uint32
+	AddressOfFunctions uint32 `json:"address_of_functions"`
 
 	// The address of the export name pointer table, relative to the image base.
 	// The table size is given by the Number of Name Pointers field.
-	AddressOfNames uint32
+	AddressOfNames uint32 `json:"address_of_names"`
 
 	// The address of the ordinal table, relative to the image base.
-	AddressOfNameOrdinals uint32
+	AddressOfNameOrdinals uint32 `json:"address_of_name_ordinals"`
 }
 
 // ExportFunction represents an imported function in the export table.
 type ExportFunction struct {
-	Ordinal      uint32
-	FunctionRVA  uint32
-	NameOrdinal  uint32
-	NameRVA      uint32
-	Name         string
-	Forwarder    string
-	ForwarderRVA uint32
+	Ordinal      uint32 `json:"ordinal"`
+	FunctionRVA  uint32 `json:"function_rva"`
+	NameOrdinal  uint32 `json:"name_ordinal"`
+	NameRVA      uint32 `json:"name_rva"`
+	Name         string `json:"name"`
+	Forwarder    string `json:"forwarder"`
+	ForwarderRVA uint32 `json:"forwarder_rva"`
 }
 
 // Export represent the export table.
 type Export struct {
-	Functions []ExportFunction
-	Struct    ImageExportDirectory
-	Name      string
+	Functions []ExportFunction     `json:"functions"`
+	Struct    ImageExportDirectory `json:"struct"`
+	Name      string               `json:"name"`
 }
 
 /*
 A few notes learned from `Corkami` about parsing export directory:
-- like many data directories, Exports' size are not necessary, except for forwarding.
-- Characteristics, TimeDateStamp, MajorVersion and MinorVersion are not necessary.
-- the export name is not necessary, and can be anything.
-- AddressOfNames is lexicographically-ordered.
-- export names can have any value (even null or more than 65536 characters long,
-  with unprintable characters), just null terminated.
-- an EXE can have exports (no need of relocation nor DLL flag), and can use
+  - like many data directories, Exports' size are not necessary, except for forwarding.
+  - Characteristics, TimeDateStamp, MajorVersion and MinorVersion are not necessary.
+  - the export name is not necessary, and can be anything.
+  - AddressOfNames is lexicographically-ordered.
+  - export names can have any value (even null or more than 65536 characters long,
+    with unprintable characters), just null terminated.
+  - an EXE can have exports (no need of relocation nor DLL flag), and can use
+
 them normally
 - exports can be not used for execution, but for documenting the internal code
 - numbers of functions will be different from number of names when the file

@@ -193,14 +193,14 @@ type ImageRuntimeFunctionEntry struct {
 type ImageARMRuntimeFunctionEntry struct {
 	// Function Start RVA is the 32-bit RVA of the start of the function. If
 	// the function contains thumb code, the low bit of this address must be set.
-	BeginAddress uint32 `bitfield:",functionstart"`
+	BeginAddress uint32 `bitfield:",functionstart" json:"begin_address"`
 
 	// Flag is a 2-bit field that indicates how to interpret the remaining
 	// 30 bits of the second .pdata word. If Flag is 0, then the remaining bits
 	// form an Exception Information RVA (with the low two bits implicitly 0).
 	// If Flag is non-zero, then the remaining bits form a Packed Unwind Data
 	// structure.
-	Flag uint8
+	Flag uint8 `json:"flag"`
 
 	/* Exception Information RVA or Packed Unwind Data.
 
@@ -211,7 +211,7 @@ type ImageARMRuntimeFunctionEntry struct {
 	Packed Unwind Data is a compressed description of the operations required
 	to unwind from a function, assuming a canonical form. In this case, no
 	.xdata record is required. */
-	ExceptionFlag uint32
+	ExceptionFlag uint32 `json:"exception_flag"`
 }
 
 // UnwindCode is used to record the sequence of operations in the prolog that

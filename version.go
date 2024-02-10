@@ -45,16 +45,16 @@ type VsVersionInfo struct {
 	// Length is the length, in bytes, of the VS_VERSIONINFO structure.
 	// This length does not include any padding that aligns any
 	// subsequent version resource data on a 32-bit boundary.
-	Length uint16
+	Length uint16 `json:"length"`
 	// ValueLength is the length, in bytes, of arbitrary data associated
 	// with the VS_VERSIONINFO structure.
 	// This value is zero if there is no any data associated with the
 	// current version structure.
-	ValueLength uint16
+	ValueLength uint16 `json:"value_length"`
 	// Type represents as many zero words as necessary to align the StringFileInfo
 	// and VarFileInfo structures on a 32-bit boundary. These bytes are not included
 	// in ValueLength.
-	Type uint16
+	Type uint16 `json:"type"`
 }
 
 func (pe *File) parseVersionInfo(e ResourceDirectoryEntry) (*VsVersionInfo, error) {
@@ -87,40 +87,40 @@ type VsFixedFileInfo struct {
 	// Signature contains the value 0xFEEF04BD. This is used
 	// with the `key` member of the VS_VERSIONINFO structure
 	// when searching a file for the VS_FIXEDFILEINFO structure.
-	Signature uint32
+	Signature uint32 `json:"signature"`
 	// StructVer is the binary version number of this structure.
 	// The high-order word of this member contains the major version
 	// number, and the low-order word contains the minor version number.
-	StructVer uint32
+	StructVer uint32 `json:"struct_ver"`
 	// FileVersionMS denotes the most significant 32 bits of the file's
 	// binary version number.
-	FileVersionMS uint32
+	FileVersionMS uint32 `json:"file_version_ms"`
 	// FileVersionLS denotes the least significant 32 bits of the file's
 	// binary version number.
-	FileVersionLS uint32
+	FileVersionLS uint32 `json:"file_version_ls"`
 	// ProductVersionMS represents the most significant 32 bits of the
 	// binary version number of the product with which this file was distributed.
-	ProductVersionMS uint32
+	ProductVersionMS uint32 `json:"product_version_ms"`
 	// ProductVersionLS represents the most significant 32 bits of the
 	// binary version number of the product with which this file was distributed.
-	ProductVersionLS uint32
+	ProductVersionLS uint32 `json:"product_version_ls"`
 	// FileFlagMask contains a bitmask that specifies the valid bits in FileFlags.
 	// A bit is valid only if it was defined when the file was created.
-	FileFlagMask uint32
+	FileFlagMask uint32 `json:"file_flag_mask"`
 	// FileFlags contains a bitmask that specifies the Boolean attributes of the file.
 	// For example, the file contains debugging information or is compiled with debugging
 	// features enabled if FileFlags is equal to 0x00000001L (VS_FF_DEBUG).
-	FileFlags uint32
+	FileFlags uint32 `json:"file_flags"`
 	// FileOS represents the operating system for which this file was designed.
-	FileOS uint32
+	FileOS uint32 `json:"file_os"`
 	// FileType describes the general type of file.
-	FileType uint32
+	FileType uint32 `json:"file_type"`
 	// FileSubtype specifies the function of the file. The possible values depend on the value of FileType.
-	FileSubtype uint32
+	FileSubtype uint32 `json:"file_subtype"`
 	// FileDateMS are the most significant 32 bits of the file's 64-bit binary creation date and time stamp.
-	FileDateMS uint32
+	FileDateMS uint32 `json:"file_date_ms"`
 	// FileDateLS are the least significant 32 bits of the file's 64-bit binary creation date and time stamp.
-	FileDateLS uint32
+	FileDateLS uint32 `json:"file_date_ls"`
 }
 
 // Size returns the size of this structure in bytes.

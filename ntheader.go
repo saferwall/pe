@@ -353,8 +353,10 @@ type ImageOptionalHeader64 struct {
 // contains the RVA and size of a table or a string that this particular
 // directory entry describes;this information is used by the operating system.
 type DataDirectory struct {
-	VirtualAddress uint32 // The RVA of the data structure.
-	Size           uint32 // The size in bytes of the data structure referred to.
+	// The RVA of the data structure.
+	VirtualAddress uint32 `json:"virtual_address"`
+	// The size in bytes of the data structure referred to.
+	Size uint32 `json:"size"`
 }
 
 // ParseNTHeader parse the PE NT header structure referred as IMAGE_NT_HEADERS.

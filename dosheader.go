@@ -65,7 +65,7 @@ type ImageDOSHeader struct {
 	ReservedWords2 [10]uint16 `json:"reserved_words_2"`
 
 	// File address of new exe header (Elfanew).
-	AddressOfNewEXEHeader uint32 `json:"address_of__new_exe_header"`
+	AddressOfNewEXEHeader uint32 `json:"address_of_new_exe_header"`
 }
 
 // ParseDOSHeader parses the DOS header stub. Every PE file begins with a small

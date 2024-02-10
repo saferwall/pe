@@ -111,7 +111,7 @@ func (pe *File) parseTLSDirectory(rva, size uint32) error {
 		tls.Struct = tlsDir
 
 		if tlsDir.AddressOfCallBacks != 0 {
-			var callbacks []uint64
+			callbacks := make([]uint64, 0)
 			rvaAddressOfCallBacks := uint32(tlsDir.AddressOfCallBacks -
 				pe.NtHeader.OptionalHeader.(ImageOptionalHeader64).ImageBase)
 			offset := pe.GetOffsetFromRva(rvaAddressOfCallBacks)
@@ -138,7 +138,7 @@ func (pe *File) parseTLSDirectory(rva, size uint32) error {
 		// 94a9dc17d47b03f6fb01cb639e25503b37761b452e7c07ec6b6c2280635f1df9
 		// Callbacks may be empty.
 		if tlsDir.AddressOfCallBacks != 0 {
-			var callbacks []uint32
+			callbacks := make([]uint32, 0)
 			rvaAddressOfCallBacks := tlsDir.AddressOfCallBacks -
 				pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
 			offset := pe.GetOffsetFromRva(rvaAddressOfCallBacks)

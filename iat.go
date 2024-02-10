@@ -6,10 +6,10 @@ package pe
 
 // IATEntry represents an entry inside the IAT.
 type IATEntry struct {
-	Index   uint32
-	Rva     uint32
-	Value   interface{}
-	Meaning string
+	Index   uint32      `json:"index"`
+	Rva     uint32      `json:"rva"`
+	Value   interface{} `json:"value,omitempty"`
+	Meaning string      `json:"meaning"`
 }
 
 // The structure and content of the import address table are identical to those

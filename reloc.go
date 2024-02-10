@@ -101,36 +101,36 @@ const (
 type ImageBaseRelocation struct {
 	// The image base plus the page RVA is added to each offset to create the
 	// VA where the base relocation must be applied.
-	VirtualAddress uint32
+	VirtualAddress uint32 `json:"virtual_address"`
 
 	// The total number of bytes in the base relocation block, including the
 	// Page RVA and Block Size fields and the Type/Offset fields that follow.
-	SizeOfBlock uint32
+	SizeOfBlock uint32 `json:"size_of_block"`
 }
 
 // ImageBaseRelocationEntry represents an image base relocation entry.
 type ImageBaseRelocationEntry struct {
 	// Locate data that must be reallocated in buffer (data being an address
 	// we use pointer of pointer).
-	Data uint16
+	Data uint16 `json:"data"`
 
 	// The offset of the relocation. This value plus the VirtualAddress
 	// in IMAGE_BASE_RELOCATION is the complete RVA.
-	Offset uint16
+	Offset uint16 `json:"offset"`
 
 	// A value that indicates the kind of relocation that should be performed.
 	// Valid relocation types depend on machine type.
-	Type ImageBaseRelocationEntryType
+	Type ImageBaseRelocationEntryType `json:"type"`
 }
 
 // Relocation represents the relocation table which holds the data that needs to
 // be relocated.
 type Relocation struct {
 	// Points to the ImageBaseRelocation structure.
-	Data ImageBaseRelocation
+	Data ImageBaseRelocation `json:"data"`
 
 	// holds the list of entries for each chunk.
-	Entries []ImageBaseRelocationEntry
+	Entries []ImageBaseRelocationEntry `json:"entries"`
 }
 
 func (pe *File) parseRelocations(dataRVA, rva, size uint32) ([]ImageBaseRelocationEntry, error) {
