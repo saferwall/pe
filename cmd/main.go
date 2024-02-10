@@ -89,14 +89,20 @@ func main() {
 			wantCLR:         *dumpCLR,
 		}
 
-		//Start as many workers you want, now 10 workers
+		// Start as many workers you want, now 10 workers
 		numWorkers := runtime.GOMAXPROCS(runtime.NumCPU() - 1)
 		for w := 1; w <= numWorkers; w++ {
 			go loopFilesWorker(cfg)
 		}
-		//Start the recursion
-		LoopDirsFiles(os.Args[2])
-		wg.Wait()
+
+		if !isDirectory(os.Args[2]) {
+			// Input path in a single file.
+			parsePE(os.Args[2], cfg)
+		} else {
+			// Input path in a directory.
+			LoopDirsFiles(os.Args[2])
+			wg.Wait()
+		}
 
 	case "version":
 		verCmd.Parse(os.Args[2:])

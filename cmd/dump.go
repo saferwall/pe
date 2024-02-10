@@ -40,7 +40,7 @@ func loopFilesWorker(cfg config) error {
 		for _, file := range files {
 			if !file.IsDir() {
 				fullpath := filepath.Join(path, file.Name())
-				parse(fullpath, cfg)
+				parsePE(fullpath, cfg)
 			}
 		}
 		wg.Done()
@@ -53,26 +53,25 @@ func LoopDirsFiles(path string) error {
 	if err != nil {
 		return err
 	}
-	//Add this path as a job to the workers
-	//You must call it in a go routine, since if every worker is busy, then you have to wait for the channel to be free.
+
 	go func() {
 		wg.Add(1)
 		jobs <- path
 	}()
 	for _, file := range files {
 		if file.IsDir() {
-			//Recursively go further in the tree
 			LoopDirsFiles(filepath.Join(path, file.Name()))
 		}
 	}
 	return nil
 }
 
-func prettyPrint(buff []byte) string {
+func prettyPrint(iface interface{}) string {
 	var prettyJSON bytes.Buffer
-	error := json.Indent(&prettyJSON, buff, "", "\t")
-	if error != nil {
-		log.Info("JSON parse error: ", error)
+	buff, _ := json.Marshal(iface)
+	err := json.Indent(&prettyJSON, buff, "", "\t")
+	if err != nil {
+		log.Errorf("JSON parse error: %v", err)
 		return string(buff)
 	}
 
@@ -245,30 +244,12 @@ func parsePE(filename string, cfg config) {
 	}
 
 	// Dump all results to disk in JSON format.
-	// b, _ := json.Marshal(pe)
 	// f, err := os.Create("out.json")
 	// if err != nil {
 	// 	return
 	// }
 	// defer f.Close()
-	// f.WriteString(prettyPrint(b))
-
-	// Calculate the PE authentihash.
-	pe.Authentihash()
-
-	// Calculate the PE checksum.
-	pe.Checksum()
-
-	// Get file type.
-	if pe.IsEXE() {
-		log.Debug("File is Exe")
-	}
-	if pe.IsDLL() {
-		log.Debug("File is DLL")
-	}
-	if pe.IsDriver() {
-		log.Debug("File is Driver")
-	}
+	// f.WriteString(prettyPrint(pe))
 
 	if cfg.wantDOSHeader {
 		DOSHeader := pe.DOSHeader
@@ -546,11 +527,12 @@ func parsePE(filename string, cfg config) {
 		fmt.Printf("\nRESOURCES\n**********\n")
 		printRsrcDir(pe.Resources)
 
-		r, err := pe.ParseVersionResources()
-		if err == nil {
-			fmt.Print(r)
+		versionInfo, err := pe.ParseVersionResources()
+		if err != nil {
+			log.Errorf("failed to parse version resources: %v", err)
+		} else {
+			fmt.Printf("\nVersion Info: %v", prettyPrint(versionInfo))
 		}
-		fmt.Print()
 	}
 
 	if cfg.wantException && pe.FileInfo.HasException {
@@ -601,6 +583,9 @@ func parsePE(filename string, cfg config) {
 		fmt.Fprintf(w, "Signature Algorithm:\t %s\n", cert.Info.SignatureAlgorithm.String())
 		fmt.Fprintf(w, "PublicKey Algorithm:\t %s\n", cert.Info.PublicKeyAlgorithm.String())
 		w.Flush()
+
+		// Calculate the PE authentihash.
+		pe.Authentihash()
 	}
 
 	if cfg.wantReloc && pe.FileInfo.HasReloc {
@@ -698,7 +683,6 @@ func parsePE(filename string, cfg config) {
 							fpoData.Reserved, fpoData.FrameType, fpoData.FrameType.String())
 					}
 				}
-
 			}
 		}
 
@@ -880,6 +864,20 @@ func parsePE(filename string, cfg config) {
 			}
 		}
 	}
+
+	// Get file type.
+	if pe.IsEXE() {
+		log.Debug("File is Exe")
+	}
+	if pe.IsDLL() {
+		log.Debug("File is DLL")
+	}
+	if pe.IsDriver() {
+		log.Debug("File is Driver")
+	}
+
+	// Calculate the PE checksum.
+	pe.Checksum()
 
 	fmt.Print("\n")
 }
