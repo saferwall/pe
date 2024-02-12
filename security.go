@@ -23,6 +23,7 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"syscall"
 	"time"
 
 	"go.mozilla.org/pkcs7"
@@ -488,6 +489,7 @@ func loadSystemRoots() (*x509.CertPool, error) {
 	// Use certutil to download all the root certs.
 	if needSync {
 		cmd := exec.Command("certutil", "-syncWithWU", dir)
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		out, err := cmd.Output()
 		if err != nil {
 			return roots, err
