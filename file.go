@@ -27,7 +27,7 @@ type File struct {
 	TLS          TLSDirectory                `json:"tls,omitempty"`
 	LoadConfig   LoadConfig                  `json:"load_config,omitempty"`
 	Exceptions   []Exception                 `json:"exceptions,omitempty"`
-	Certificates Certificate                 `json:"certificates,omitempty"`
+	Certificates CertificateSection          `json:"certificates,omitempty"`
 	DelayImports []DelayImport               `json:"delay_imports,omitempty"`
 	BoundImports []BoundImportDescriptorData `json:"bound_imports,omitempty"`
 	GlobalPtr    uint32                      `json:"global_ptr,omitempty"`

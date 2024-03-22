@@ -575,14 +575,18 @@ func parsePE(filename string, cfg config) {
 		w.Flush()
 		fmt.Print("\n   ---Raw Certificate dump---\n")
 		hexDump(cert.Raw)
-		fmt.Print("\n---Certificate ---\n\n")
-		fmt.Fprintf(w, "Issuer Name:\t %s\n", cert.Info.Issuer)
-		fmt.Fprintf(w, "Subject Name:\t %s\n", cert.Info.Subject)
-		fmt.Fprintf(w, "Serial Number:\t %x\n", cert.Info.SerialNumber)
-		fmt.Fprintf(w, "Validity From:\t %s to %s\n", cert.Info.NotBefore.String(), cert.Info.NotAfter.String())
-		fmt.Fprintf(w, "Signature Algorithm:\t %s\n", cert.Info.SignatureAlgorithm.String())
-		fmt.Fprintf(w, "PublicKey Algorithm:\t %s\n", cert.Info.PublicKeyAlgorithm.String())
-		w.Flush()
+		for _, cert := range cert.Certificates {
+			fmt.Print("\n---Certificate ---\n\n")
+			fmt.Fprintf(w, "Issuer Name:\t %s\n", cert.Info.Issuer)
+			fmt.Fprintf(w, "Subject Name:\t %s\n", cert.Info.Subject)
+			fmt.Fprintf(w, "Serial Number:\t %x\n", cert.Info.SerialNumber)
+			fmt.Fprintf(w, "Validity From:\t %s to %s\n", cert.Info.NotBefore.String(), cert.Info.NotAfter.String())
+			fmt.Fprintf(w, "Signature Algorithm:\t %s\n", cert.Info.SignatureAlgorithm.String())
+			fmt.Fprintf(w, "PublicKey Algorithm:\t %s\n", cert.Info.PublicKeyAlgorithm.String())
+			fmt.Fprintf(w, "Certificate valid:\t %v\n", cert.Verified)
+			fmt.Fprintf(w, "Signature valid:\t %v\n", cert.SignatureValid)
+			w.Flush()
+		}
 
 		// Calculate the PE authentihash.
 		pe.Authentihash()
