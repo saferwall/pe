@@ -19,13 +19,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"reflect"
 	"runtime"
 	"sort"
 	"strings"
 	"time"
 
-	"go.mozilla.org/pkcs7"
+	"github.com/secDre4mer/pkcs7"
 )
 
 // The options for the WIN_CERTIFICATE Revision member include
@@ -66,13 +65,18 @@ var (
 		`invalid certificate header in security directory`)
 )
 
+type CertificateSection struct {
+	Header WinCertificate `json:"header"`
+	Raw    []byte         `json:"-"`
+
+	Certificates []Certificate
+}
+
 // Certificate directory.
 type Certificate struct {
-	Header           WinCertificate      `json:"header"`
 	Content          pkcs7.PKCS7         `json:"-"`
 	SignatureContent AuthenticodeContent `json:"-"`
 	SignatureValid   bool                `json:"signature_valid"`
-	Raw              []byte              `json:"-"`
 	Info             CertInfo            `json:"info"`
 	Verified         bool                `json:"verified"`
 }
@@ -309,101 +313,69 @@ func (pe *File) AuthentihashExt(hashers ...hash.Hash) [][]byte {
 // bind an Authenticode-signed file to the identity of a software publisher.
 // This data are not loaded into memory as part of the image file.
 func (pe *File) parseSecurityDirectory(rva, size uint32) error {
-
-	var pkcs *pkcs7.PKCS7
-	var certValid bool
-	certInfo := CertInfo{}
-	certHeader := WinCertificate{}
+	var certHeader WinCertificate
 	certSize := uint32(binary.Size(certHeader))
 	signatureContent := AuthenticodeContent{}
-	var signatureValid bool
-	var certContent []byte
 
 	// The virtual address value from the Certificate Table entry in the
 	// Optional Header Data Directory is a file offset to the first attribute
 	// certificate entry.
 	fileOffset := rva
 
-	// PE file can be dual signed by applying multiple signatures, which is
-	// strongly recommended when using deprecated hashing algorithms such as MD5.
+	err := pe.structUnpack(&certHeader, fileOffset, certSize)
+	if err != nil {
+		return ErrOutsideBoundary
+	}
+
+	if certHeader.Length > size {
+		return ErrOutsideBoundary
+	}
+
+	if fileOffset+certHeader.Length > pe.size {
+		return ErrOutsideBoundary
+	}
+
+	if certHeader.Length == 0 {
+		return ErrSecurityDataDirInvalid
+	}
+
+	pe.HasCertificate = true
+	pe.Certificates.Header = certHeader
+	pe.Certificates.Raw = pe.data[fileOffset+certSize : fileOffset+certHeader.Length]
+
+	certContent := pe.Certificates.Raw
 	for {
-		err := pe.structUnpack(&certHeader, fileOffset, certSize)
+		pkcs, err := pkcs7.Parse(certContent)
 		if err != nil {
-			return ErrOutsideBoundary
-		}
-
-		if fileOffset+certHeader.Length > pe.size {
-			return ErrOutsideBoundary
-		}
-
-		if certHeader.Length == 0 {
-			return ErrSecurityDataDirInvalid
-		}
-
-		certContent = pe.data[fileOffset+certSize : fileOffset+certHeader.Length]
-		pkcs, err = pkcs7.Parse(certContent)
-		if err != nil {
-			pe.Certificates = Certificate{Header: certHeader, Raw: certContent}
-			pe.HasCertificate = true
 			return err
 		}
-
 		// The pkcs7.PKCS7 structure contains many fields that we are not
 		// interested to, so create another structure, similar to _CERT_INFO
 		// structure which contains only the important information.
-		serialNumber := pkcs.Signers[0].IssuerAndSerialNumber.SerialNumber
-		for _, cert := range pkcs.Certificates {
-			if !reflect.DeepEqual(cert.SerialNumber, serialNumber) {
-				continue
-			}
-
-			certInfo.SerialNumber = hex.EncodeToString(cert.SerialNumber.Bytes())
-			certInfo.PublicKeyAlgorithm = cert.PublicKeyAlgorithm
-			certInfo.SignatureAlgorithm = cert.SignatureAlgorithm
-
-			certInfo.NotAfter = cert.NotAfter
-			certInfo.NotBefore = cert.NotBefore
-
-			// Issuer infos
-			if len(cert.Issuer.Country) > 0 {
-				certInfo.Issuer = cert.Issuer.Country[0]
-			}
-
-			if len(cert.Issuer.Province) > 0 {
-				certInfo.Issuer += ", " + cert.Issuer.Province[0]
-			}
-
-			if len(cert.Issuer.Locality) > 0 {
-				certInfo.Issuer += ", " + cert.Issuer.Locality[0]
-			}
-
-			certInfo.Issuer += ", " + cert.Issuer.CommonName
-
-			// Subject infos
-			if len(cert.Subject.Country) > 0 {
-				certInfo.Subject = cert.Subject.Country[0]
-			}
-
-			if len(cert.Subject.Province) > 0 {
-				certInfo.Subject += ", " + cert.Subject.Province[0]
-			}
-
-			if len(cert.Subject.Locality) > 0 {
-				certInfo.Subject += ", " + cert.Subject.Locality[0]
-			}
-
-			if len(cert.Subject.Organization) > 0 {
-				certInfo.Subject += ", " + cert.Subject.Organization[0]
-			}
-
-			certInfo.Subject += ", " + cert.Subject.CommonName
-
-			break
+		var signerCertificate = pkcs.GetOnlySigner()
+		if signerCertificate == nil {
+			return errors.New("could not find signer certificate")
 		}
+
+		var certInfo CertInfo
+
+		certInfo.SerialNumber = hex.EncodeToString(signerCertificate.SerialNumber.Bytes())
+		certInfo.PublicKeyAlgorithm = signerCertificate.PublicKeyAlgorithm
+		certInfo.SignatureAlgorithm = signerCertificate.SignatureAlgorithm
+
+		certInfo.NotAfter = signerCertificate.NotAfter
+		certInfo.NotBefore = signerCertificate.NotBefore
+
+		// Issuer infos
+		certInfo.Issuer = formatPkixName(signerCertificate.Issuer)
+
+		// Subject infos
+		certInfo.Subject = formatPkixName(signerCertificate.Subject)
 
 		// Let's mark the file as signed, then we verify if the signature is valid.
 		pe.IsSigned = true
 
+		var certValid bool
 		// Let's load the system root certs.
 		if !pe.opts.DisableCertValidation {
 			var certPool *x509.CertPool
@@ -425,6 +397,7 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 			}
 		}
 
+		var signatureValid bool
 		signatureContent, err = parseAuthenticodeContent(pkcs.Content)
 		if err != nil {
 			pe.logger.Errorf("could not parse authenticode content: %v", err)
@@ -434,24 +407,28 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 			signatureValid = bytes.Equal(authentihash, signatureContent.HashResult)
 		}
 
-		// Subsequent entries are accessed by advancing that entry's dwLength
-		// bytes, rounded up to an 8-byte multiple, from the start of the
-		// current attribute certificate entry.
-		nextOffset := certHeader.Length + fileOffset
-		nextOffset = ((nextOffset + 8 - 1) / 8) * 8
+		pe.Certificates.Certificates = append(pe.Certificates.Certificates, Certificate{
+			Content:          *pkcs,
+			SignatureContent: signatureContent,
+			SignatureValid:   signatureValid,
+			Info:             certInfo,
+			Verified:         certValid,
+		})
 
-		// Check if we walked the entire table.
-		if nextOffset == fileOffset+size {
-			break
+		// Subsequent certificates are an (unsigned) attribute of the PKCS#7
+		var newCert asn1.RawValue
+		nestedSignatureOid := asn1.ObjectIdentifier{1, 3, 6, 1, 4, 1, 311, 2, 4, 1}
+		err = pkcs.UnmarshalUnsignedAttribute(nestedSignatureOid, &newCert)
+		if err != nil {
+			var attributeNotFound pkcs7.AttributeNotFoundError
+			if errors.As(err, &attributeNotFound) {
+				break // No further nested certificates
+			}
+			return err
 		}
-
-		fileOffset = nextOffset
+		certContent = newCert.FullBytes
 	}
 
-	pe.Certificates = Certificate{Header: certHeader, Content: *pkcs,
-		Raw: certContent, Info: certInfo, Verified: certValid,
-		SignatureContent: signatureContent, SignatureValid: signatureValid}
-	pe.HasCertificate = true
 	return nil
 }
 
@@ -584,4 +561,27 @@ func parseAuthenticodeContent(content []byte) (AuthenticodeContent, error) {
 		HashFunction: hashFunction,
 		HashResult:   authenticodeContent.MessageDigest.Digest,
 	}, nil
+}
+
+func formatPkixName(name pkix.Name) string {
+	var formattedName string
+	if len(name.Country) > 0 {
+		formattedName = name.Country[0]
+	}
+
+	if len(name.Province) > 0 {
+		formattedName += ", " + name.Province[0]
+	}
+
+	if len(name.Locality) > 0 {
+		formattedName += ", " + name.Locality[0]
+	}
+
+	if len(name.Organization) > 0 {
+		formattedName += ", " + name.Organization[0]
+	}
+
+	formattedName += ", " + name.CommonName
+
+	return formattedName
 }

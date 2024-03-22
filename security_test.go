@@ -7,6 +7,7 @@ package pe
 import (
 	"crypto/x509"
 	"fmt"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"testing"
@@ -14,11 +15,9 @@ import (
 )
 
 type TestSecurityEntry struct {
-	Header         WinCertificate
-	Info           CertInfo
-	Verified       bool
-	SignatureValid bool
-	err            error
+	Header       WinCertificate
+	Certificates []Certificate
+	err          error
 }
 
 func TestParseSecurityDirectory(t *testing.T) {
@@ -35,18 +34,35 @@ func TestParseSecurityDirectory(t *testing.T) {
 					Revision:        0x200,
 					CertificateType: 0x2,
 				},
-				Info: CertInfo{
-					Issuer:             "GB, Greater Manchester, Salford, COMODO RSA Code Signing CA",
-					Subject:            "GB, Cambridgeshire, Cambridge, Simon Tatham, Simon Tatham",
-					NotBefore:          time.Date(2018, time.November, 13, 00, 00, 0, 0, time.UTC),
-					NotAfter:           time.Date(2021, time.November, 8, 23, 59, 59, 0, time.UTC),
-					SerialNumber:       "7c1118cbbadc95da3752c46e47a27438",
-					PublicKeyAlgorithm: x509.RSA,
-					SignatureAlgorithm: x509.SHA256WithRSA,
+				Certificates: []Certificate{
+					{
+						Info: CertInfo{
+							Issuer:             "GB, Greater Manchester, Salford, COMODO CA Limited, COMODO RSA Code Signing CA",
+							Subject:            "GB, Cambridgeshire, Cambridge, Simon Tatham, Simon Tatham",
+							NotBefore:          time.Date(2018, time.November, 13, 00, 00, 0, 0, time.UTC),
+							NotAfter:           time.Date(2021, time.November, 8, 23, 59, 59, 0, time.UTC),
+							SerialNumber:       "7c1118cbbadc95da3752c46e47a27438",
+							PublicKeyAlgorithm: x509.RSA,
+							SignatureAlgorithm: x509.SHA256WithRSA,
+						},
+						Verified:       true,
+						SignatureValid: true,
+					},
+					{
+						Info: CertInfo{
+							Issuer:             "GB, Greater Manchester, Salford, COMODO CA Limited, COMODO RSA Code Signing CA",
+							Subject:            "GB, Cambridgeshire, Cambridge, Simon Tatham, Simon Tatham",
+							NotBefore:          time.Date(2018, time.November, 13, 00, 00, 0, 0, time.UTC),
+							NotAfter:           time.Date(2021, time.November, 8, 23, 59, 59, 0, time.UTC),
+							SerialNumber:       "7c1118cbbadc95da3752c46e47a27438",
+							PublicKeyAlgorithm: x509.RSA,
+							SignatureAlgorithm: x509.SHA256WithRSA,
+						},
+						Verified:       true,
+						SignatureValid: true,
+					},
 				},
-				Verified:       true,
-				SignatureValid: true,
-				err:            nil,
+				err: nil,
 			},
 		},
 		{
@@ -57,18 +73,35 @@ func TestParseSecurityDirectory(t *testing.T) {
 					Revision:        0x200,
 					CertificateType: 0x2,
 				},
-				Info: CertInfo{
-					Issuer:             "GB, Greater Manchester, Salford, COMODO RSA Code Signing CA",
-					Subject:            "GB, Cambridgeshire, Cambridge, Simon Tatham, Simon Tatham",
-					NotBefore:          time.Date(2018, time.November, 13, 00, 00, 0, 0, time.UTC),
-					NotAfter:           time.Date(2021, time.November, 8, 23, 59, 59, 0, time.UTC),
-					SerialNumber:       "7c1118cbbadc95da3752c46e47a27438",
-					PublicKeyAlgorithm: x509.RSA,
-					SignatureAlgorithm: x509.SHA256WithRSA,
+				Certificates: []Certificate{
+					{
+						Info: CertInfo{
+							Issuer:             "GB, Greater Manchester, Salford, COMODO CA Limited, COMODO RSA Code Signing CA",
+							Subject:            "GB, Cambridgeshire, Cambridge, Simon Tatham, Simon Tatham",
+							NotBefore:          time.Date(2018, time.November, 13, 00, 00, 0, 0, time.UTC),
+							NotAfter:           time.Date(2021, time.November, 8, 23, 59, 59, 0, time.UTC),
+							SerialNumber:       "7c1118cbbadc95da3752c46e47a27438",
+							PublicKeyAlgorithm: x509.RSA,
+							SignatureAlgorithm: x509.SHA256WithRSA,
+						},
+						Verified:       true,
+						SignatureValid: false,
+					},
+					{
+						Info: CertInfo{
+							Issuer:             "GB, Greater Manchester, Salford, COMODO CA Limited, COMODO RSA Code Signing CA",
+							Subject:            "GB, Cambridgeshire, Cambridge, Simon Tatham, Simon Tatham",
+							NotBefore:          time.Date(2018, time.November, 13, 00, 00, 0, 0, time.UTC),
+							NotAfter:           time.Date(2021, time.November, 8, 23, 59, 59, 0, time.UTC),
+							SerialNumber:       "7c1118cbbadc95da3752c46e47a27438",
+							PublicKeyAlgorithm: x509.RSA,
+							SignatureAlgorithm: x509.SHA256WithRSA,
+						},
+						Verified:       true,
+						SignatureValid: false,
+					},
 				},
-				Verified:       true,
-				SignatureValid: false,
-				err:            nil,
+				err: nil,
 			},
 		},
 		{
@@ -79,21 +112,37 @@ func TestParseSecurityDirectory(t *testing.T) {
 					Revision:        0x200,
 					CertificateType: 0x2,
 				},
-				Info: CertInfo{
-					Issuer:             "US, VeriSign Class 3 Code Signing 2010 CA",
-					Subject:            "US, California, Mountain View, Symantec Corporation, Symantec Corporation",
-					NotBefore:          time.Date(2016, time.December, 16, 00, 00, 0, 0, time.UTC),
-					NotAfter:           time.Date(2017, time.December, 17, 23, 59, 59, 0, time.UTC),
-					SerialNumber:       "0ebfea68d677b3e26cab41c33f3e69de",
-					PublicKeyAlgorithm: x509.RSA,
-					SignatureAlgorithm: x509.SHA1WithRSA,
+				Certificates: []Certificate{
+					{
+						Info: CertInfo{
+							Issuer:             "US, VeriSign, Inc., VeriSign Class 3 Code Signing 2010 CA",
+							Subject:            "US, California, Mountain View, Symantec Corporation, Symantec Corporation",
+							NotBefore:          time.Date(2016, time.December, 16, 00, 00, 0, 0, time.UTC),
+							NotAfter:           time.Date(2017, time.December, 17, 23, 59, 59, 0, time.UTC),
+							SerialNumber:       "0ebfea68d677b3e26cab41c33f3e69de",
+							PublicKeyAlgorithm: x509.RSA,
+							SignatureAlgorithm: x509.SHA1WithRSA,
+						},
+						Verified:       false,
+						SignatureValid: false,
+					},
+					{
+						Info: CertInfo{
+							Issuer:             "US, Symantec Corporation, Symantec Class 3 SHA256 Code Signing CA - G2",
+							Subject:            "US, California, Mountain View, Symantec Corporation, Symantec Corporation",
+							NotBefore:          time.Date(2017, time.March, 15, 00, 00, 0, 0, time.UTC),
+							NotAfter:           time.Date(2018, time.April, 13, 23, 59, 59, 0, time.UTC),
+							SerialNumber:       "2e6be6bd11a8676e6c57909e9b0d5f57",
+							PublicKeyAlgorithm: x509.RSA,
+							SignatureAlgorithm: x509.SHA256WithRSA,
+						},
+						Verified:       false,
+						SignatureValid: false,
+					},
 				},
-				Verified:       false,
-				SignatureValid: false,
-				err:            nil,
+				err: nil,
 			},
 		},
-
 		{
 			getAbsoluteFilePath("test/00121dae38f26a33da2990987db58738c5a5966930126a42f606a3b40e014624"),
 			TestSecurityEntry{
@@ -103,7 +152,7 @@ func TestParseSecurityDirectory(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.in, func(t *testing.T) {
+		t.Run(filepath.Base(tt.in), func(t *testing.T) {
 			ops := Options{Fast: true}
 			file, err := New(tt.in, &ops)
 			if err != nil {
@@ -138,16 +187,22 @@ func TestParseSecurityDirectory(t *testing.T) {
 				if !reflect.DeepEqual(got.Header, tt.out.Header) {
 					t.Fatalf("certificate header assertion failed, got %v, want %v", got.Header, tt.out.Header)
 				}
-				if !reflect.DeepEqual(got.Info, tt.out.Info) {
-					t.Fatalf("certificate info assertion failed, got %v, want %v", got.Info, tt.out.Info)
+			}
+			if len(got.Certificates) != len(tt.out.Certificates) {
+				t.Fatalf("certificate count assertion failed, got %d, want %d", len(got.Certificates), len(tt.out.Certificates))
+			}
+			for i, cert := range got.Certificates {
+				expected := tt.out.Certificates[i]
+				if !reflect.DeepEqual(cert.Info, expected.Info) {
+					t.Fatalf("certificate info %d assertion failed, got %v, want %v", i, cert.Info, expected.Info)
 				}
-			}
-			if tt.out.SignatureValid != got.SignatureValid {
-				t.Fatalf("signature verification failed, got %v, want %v", got.SignatureValid, tt.out.SignatureValid)
-			}
-			if runtime.GOOS == "linux" {
-				if tt.out.Verified != got.Verified {
-					t.Fatalf("certificate verification failed, got %v, want %v", got.Verified, tt.out.Verified)
+				if expected.SignatureValid != cert.SignatureValid {
+					t.Fatalf("signature verification %d failed, cert %v, want %v", i, cert.SignatureValid, expected.SignatureValid)
+				}
+				if runtime.GOOS == "linux" {
+					if expected.Verified != cert.Verified {
+						t.Fatalf("certificate verification %d failed, cert %v, want %v", i, cert.Verified, expected.Verified)
+					}
 				}
 			}
 		})
