@@ -361,7 +361,6 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 
 		certInfo.SerialNumber = hex.EncodeToString(signerCertificate.SerialNumber.Bytes())
 		certInfo.PublicKeyAlgorithm = signerCertificate.PublicKeyAlgorithm
-		certInfo.SignatureAlgorithm = signerCertificate.SignatureAlgorithm
 
 		certInfo.NotAfter = signerCertificate.NotAfter
 		certInfo.NotBefore = signerCertificate.NotBefore
@@ -406,6 +405,8 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 			authentihash := pe.AuthentihashExt(signatureContent.HashFunction.New())[0]
 			signatureValid = bytes.Equal(authentihash, signatureContent.HashResult)
 		}
+
+		certInfo.SignatureAlgorithm = signatureContent.Algorithm
 
 		pe.Certificates.Certificates = append(pe.Certificates.Certificates, Certificate{
 			Content:          *pkcs,
@@ -519,26 +520,35 @@ type DigestInfo struct {
 }
 
 // Translation of algorithm identifier to hash algorithm, copied from pkcs7.getHashForOID
-func parseHashAlgorithm(identifier pkix.AlgorithmIdentifier) (crypto.Hash, error) {
+func parseHashAlgorithm(identifier pkix.AlgorithmIdentifier) (crypto.Hash, x509.SignatureAlgorithm, error) {
 	oid := identifier.Algorithm
 	switch {
-	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA1), oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA1),
-		oid.Equal(pkcs7.OIDDigestAlgorithmDSA), oid.Equal(pkcs7.OIDDigestAlgorithmDSASHA1),
-		oid.Equal(pkcs7.OIDEncryptionAlgorithmRSA):
-		return crypto.SHA1, nil
-	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA256), oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA256):
-		return crypto.SHA256, nil
-	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA384), oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA384):
-		return crypto.SHA384, nil
-	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA512), oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA512):
-		return crypto.SHA512, nil
+	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA1), oid.Equal(pkcs7.OIDEncryptionAlgorithmRSA):
+		return crypto.SHA1, x509.SHA1WithRSA, nil
+	case oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA1):
+		return crypto.SHA1, x509.ECDSAWithSHA1, nil
+	case oid.Equal(pkcs7.OIDDigestAlgorithmDSA), oid.Equal(pkcs7.OIDDigestAlgorithmDSASHA1):
+		return crypto.SHA1, x509.DSAWithSHA1, nil
+	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA256):
+		return crypto.SHA256, x509.SHA256WithRSA, nil
+	case oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA256):
+		return crypto.SHA256, x509.ECDSAWithSHA256, nil
+	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA384):
+		return crypto.SHA384, x509.SHA256WithRSA, nil
+	case oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA384):
+		return crypto.SHA384, x509.ECDSAWithSHA384, nil
+	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA512):
+		return crypto.SHA512, x509.ECDSAWithSHA512, nil
+	case oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA512):
+		return crypto.SHA512, x509.ECDSAWithSHA512, nil
 	}
-	return crypto.Hash(0), pkcs7.ErrUnsupportedAlgorithm
+	return 0, 0, pkcs7.ErrUnsupportedAlgorithm
 }
 
 // AuthenticodeContent provides a simplified view on SpcIndirectDataContent, which specifies the ASN.1 encoded values of
 // the authenticode signature content.
 type AuthenticodeContent struct {
+	Algorithm    x509.SignatureAlgorithm
 	HashFunction crypto.Hash
 	HashResult   []byte
 }
@@ -553,11 +563,12 @@ func parseAuthenticodeContent(content []byte) (AuthenticodeContent, error) {
 	if err != nil {
 		return AuthenticodeContent{}, err
 	}
-	hashFunction, err := parseHashAlgorithm(authenticodeContent.MessageDigest.DigestAlgorithm)
+	hashFunction, algorithmId, err := parseHashAlgorithm(authenticodeContent.MessageDigest.DigestAlgorithm)
 	if err != nil {
 		return AuthenticodeContent{}, err
 	}
 	return AuthenticodeContent{
+		Algorithm:    algorithmId,
 		HashFunction: hashFunction,
 		HashResult:   authenticodeContent.MessageDigest.Digest,
 	}, nil
