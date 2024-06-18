@@ -176,7 +176,7 @@ func NewBytes(data []byte, opts *Options) (*File, error) {
 	}
 
 	var logger log.Logger
-	if opts.Logger == nil {
+	if file.opts.Logger == nil {
 		logger = log.NewStdLogger(os.Stdout)
 		file.logger = log.NewHelper(log.NewFilter(logger,
 			log.FilterLevel(log.LevelError)))
