@@ -280,7 +280,7 @@ func (pe *File) parseString(rva uint32, e ResourceDirectoryEntry) (string, strin
 		return "", "", 0, err
 	}
 	valueOffset := alignDword(uint32(2*(len(key)+1))+offset+StringLength, e.Data.Struct.OffsetToData)
-	b, err = pe.ReadBytesAtOffset(valueOffset, uint32(s.Length))
+	b, err = pe.ReadBytesAtOffset(valueOffset, uint32(2*(s.ValueLength+1)))
 	if err != nil {
 		return "", "", 0, err
 	}
