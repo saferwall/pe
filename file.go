@@ -144,12 +144,12 @@ func New(name string, opts *Options) (*File, error) {
 	}
 
 	var logger log.Logger
-	if opts.Logger == nil {
+	if file.opts.Logger == nil {
 		logger = log.NewStdLogger(os.Stdout)
 		file.logger = log.NewHelper(log.NewFilter(logger,
 			log.FilterLevel(log.LevelError)))
 	} else {
-		file.logger = log.NewHelper(opts.Logger)
+		file.logger = log.NewHelper(file.opts.Logger)
 	}
 
 	file.data = data
@@ -176,7 +176,7 @@ func NewBytes(data []byte, opts *Options) (*File, error) {
 	}
 
 	var logger log.Logger
-	if opts.Logger == nil {
+	if file.opts.Logger == nil {
 		logger = log.NewStdLogger(os.Stdout)
 		file.logger = log.NewHelper(log.NewFilter(logger,
 			log.FilterLevel(log.LevelError)))
