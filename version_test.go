@@ -43,6 +43,11 @@ var peVersionResourceTests = []struct {
 		nil,
 		map[string]string{"Assembly Version": "7.3.4.500", "Comments": "PowerShell on Windows top-level project", "CompanyName": "Microsoft Corporation", "FileDescription": "pwsh", "FileVersion": "7.3.4.500", "InternalName": "pwsh.dll", "LegalCopyright": "(c) Microsoft Corporation.", "OriginalFilename": "pwsh.dll", "ProductName": "PowerShell", "ProductVersion": "7.3.4 SHA: b59f05d5a1b2fceca231f75c53c203a02edf6203"},
 	},
+	{
+		getAbsoluteFilePath("test/YourPhone.Exp.WinRT.dll"),
+		nil,
+		map[string]string{"CompanyName": "Microsoft Corporation", "FileDescription": "", "FileVersion": "1.24052.124.0", "OriginalFilename": "YourPhone.Exp.WinRT.dll", "LegalCopyright": "Â© Microsoft Corporation.  All rights reserved.", "InternalName": "YourPhone.Exp.WinRT", "ProductName": "Microsoft Phone Link", "ProductVersion": "1.24052.124.0"},
+	},
 }
 
 func TestParseVersionResources(t *testing.T) {
