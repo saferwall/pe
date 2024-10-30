@@ -386,7 +386,9 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 
 			// Verify the signature. This will also verify the chain of trust of the
 			// the end-entity signer cert to one of the root in the trust store.
-			if err == nil {
+			if err != nil {
+				pe.logger.Errorf("failed to loadSystemRoots: %v", err)
+			} else {
 				err = pkcs.VerifyWithChain(certPool)
 				if err == nil {
 					certValid = true
