@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"testing"
 	"time"
 )
@@ -199,11 +198,10 @@ func TestParseSecurityDirectory(t *testing.T) {
 				if expected.SignatureValid != cert.SignatureValid {
 					t.Fatalf("signature verification %d failed, cert %v, want %v", i, cert.SignatureValid, expected.SignatureValid)
 				}
-				if runtime.GOOS == "linux" {
-					if expected.Verified != cert.Verified {
-						t.Fatalf("certificate verification %d failed, cert %v, want %v", i, cert.Verified, expected.Verified)
-					}
+				if expected.Verified != cert.Verified {
+					t.Fatalf("certificate verification %d failed, cert %v, want %v", i, cert.Verified, expected.Verified)
 				}
+
 			}
 		})
 	}

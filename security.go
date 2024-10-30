@@ -467,11 +467,11 @@ func loadSystemRoots() (*x509.CertPool, error) {
 	if needSync {
 		cmd := exec.Command("certutil", "-syncWithWU", dir)
 		hideWindow(cmd)
-		out, err := cmd.Output()
+		err := cmd.Run()
 		if err != nil {
 			return roots, err
 		}
-		if !strings.Contains(string(out), "command completed successfully") {
+		if cmd.ProcessState.ExitCode() != 0 {
 			return roots, err
 		}
 	}
