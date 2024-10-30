@@ -701,7 +701,7 @@ func parsePE(filename string, cfg config) {
 			fmt.Printf("\n\t------[ %s ]------\n\n", bndImp.Name)
 			fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", bndImp.Struct.TimeDateStamp,
 				humanizeTimestamp(bndImp.Struct.TimeDateStamp))
-			fmt.Fprintf(w, "Offset Module  Name:\t 0x%x\n", bndImp.Struct.OffsetModuleName)
+			fmt.Fprintf(w, "Offset Module Name:\t 0x%x\n", bndImp.Struct.OffsetModuleName)
 			fmt.Fprintf(w, "# Module Forwarder Refs:\t 0x%x\n", bndImp.Struct.NumberOfModuleForwarderRefs)
 			fmt.Fprintf(w, "\n")
 			if len(bndImp.ForwardedRefs) > 0 {

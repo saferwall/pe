@@ -19,6 +19,7 @@
     - [Iterating over sections](#iterating-over-sections)
   - [Roadmap](#roadmap)
   - [Fuzz Testing](#fuzz-testing)
+  - [Projects Using This Library](#projects-using-this-library)
   - [References](#references)
 
 ## Features
@@ -86,45 +87,45 @@ Afterwards, a call to the `Parse()` method will give you access to all the diffe
 
 ```go
 type File struct {
-	DOSHeader    ImageDOSHeader
-	RichHeader   RichHeader
-	NtHeader     ImageNtHeader
-	COFF         COFF
-	Sections     []Section
-	Imports      []Import
-	Export       Export
-	Debugs       []DebugEntry
-	Relocations  []Relocation
-	Resources    ResourceDirectory
-	TLS          TLSDirectory
-	LoadConfig   LoadConfig
-	Exceptions   []Exception
-	Certificates Certificate
-	DelayImports []DelayImport
-	BoundImports []BoundImportDescriptorData
-	GlobalPtr    uint32
-	CLR          CLRData
-	IAT          []IATEntry
+	DOSHeader    ImageDOSHeader              `json:"dos_header,omitempty"`
+	RichHeader   RichHeader                  `json:"rich_header,omitempty"`
+	NtHeader     ImageNtHeader               `json:"nt_header,omitempty"`
+	COFF         COFF                        `json:"coff,omitempty"`
+	Sections     []Section                   `json:"sections,omitempty"`
+	Imports      []Import                    `json:"imports,omitempty"`
+	Export       Export                      `json:"export,omitempty"`
+	Debugs       []DebugEntry                `json:"debugs,omitempty"`
+	Relocations  []Relocation                `json:"relocations,omitempty"`
+	Resources    ResourceDirectory           `json:"resources,omitempty"`
+	TLS          TLSDirectory                `json:"tls,omitempty"`
+	LoadConfig   LoadConfig                  `json:"load_config,omitempty"`
+	Exceptions   []Exception                 `json:"exceptions,omitempty"`
+	Certificates CertificateSection          `json:"certificates,omitempty"`
+	DelayImports []DelayImport               `json:"delay_imports,omitempty"`
+	BoundImports []BoundImportDescriptorData `json:"bound_imports,omitempty"`
+	GlobalPtr    uint32                      `json:"global_ptr,omitempty"`
+	CLR          CLRData                     `json:"clr,omitempty"`
+	IAT          []IATEntry                  `json:"iat,omitempty"`
+	Anomalies    []string                    `json:"anomalies,omitempty"`
 	Header       []byte
 	data         mmap.MMap
-	closer       io.Closer
-	Is64         bool
-	Is32         bool
-	Anomalies    []string
-	size         uint32
-	f            *os.File
-	opts         *Options
+	FileInfo
+	size          uint32
+	OverlayOffset int64
+	f             *os.File
+	opts          *Options
+	logger        *log.Helper
 }
 ```
 
 ### PE Header
 
-As mentionned before, all members of the struct are directly (no getters) accessible, additionally, the fields types has been preserved as the spec defines them, that means if you need to show the prettified version of an `int` type, you have to call the corresponding helper function.
+As mentioned before, all members of the struct are directly (no getters) accessible, additionally, the fields types has been preserved as the spec defines them, that means if you need to show the prettified version of an `int` type, you have to call the corresponding helper function.
 
 ```go
 fmt.Printf("Magic is: 0x%x\n", pe.DOSHeader.Magic)
 fmt.Printf("Signature is: 0x%x\n", pe.NtHeader.Signature)
-fmt.Printf("Machine is: 0x%x, Meaning: %s\n", pe.NtHeader.FileHeader.Machine, pe.PrettyMachineType())
+fmt.Printf("Machine is: 0x%x, Meaning: %s\n", pe.NtHeader.FileHeader.Machine, pe.NtHeader.FileHeader.Machine.String())
 ```
 
 Output:
