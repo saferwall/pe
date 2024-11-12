@@ -315,66 +315,103 @@ func (pe *File) ParseVersionResources() (map[string]string, error) {
 		directory := e.Directory.Entries[0].Directory
 
 		for _, e := range directory.Entries {
-			ver, err := pe.parseVersionInfo(e)
+			m, err := pe.parseVersionEntry(e, vers)
 			if err != nil {
-				return vers, err
-			}
-			ff, err := pe.parseFixedFileInfo(e)
-			if err != nil {
-				return vers, err
-			}
-
-			offset := ff.GetStringFileInfoOffset(e)
-
-			for {
-				f, n, err := pe.parseStringFileInfo(offset, e)
-				if err != nil || f.Length == 0 {
-					break
-				}
-
-				switch n {
-				case StringFileInfoString:
-					tableOffset := f.GetStringTableOffset(offset)
-					for {
-						table, err := pe.parseStringTable(tableOffset, e)
-						if err != nil {
-							break
-						}
-						stringOffset := table.GetStringOffset(tableOffset, e)
-						for stringOffset < tableOffset+uint32(table.Length) {
-							k, v, l, err := pe.parseString(stringOffset, e)
-							if err != nil {
-								break
-							}
-							vers[k] = v
-							if l == 0 {
-								stringOffset = tableOffset + uint32(table.Length)
-							} else {
-								stringOffset = stringOffset + uint32(l)
-							}
-						}
-						// handle potential infinite loops
-						if uint32(table.Length)+tableOffset > tableOffset {
-							break
-						}
-						if tableOffset > uint32(f.Length) {
-							break
-						}
-					}
-				case VarFileInfoString:
-					break
-				default:
-					break
-				}
-
-				offset += uint32(f.Length)
-
-				// StringFileInfo/VarFileinfo structs consumed?
-				if offset >= uint32(ver.Length) {
-					break
-				}
+				return m, err
 			}
 		}
 	}
 	return vers, nil
+}
+
+func (pe *File) parseVersionEntry(e ResourceDirectoryEntry, vers map[string]string) (map[string]string, error) {
+	ver, err := pe.parseVersionInfo(e)
+	if err != nil {
+		return vers, err
+	}
+	ff, err := pe.parseFixedFileInfo(e)
+	if err != nil {
+		return vers, err
+	}
+
+	offset := ff.GetStringFileInfoOffset(e)
+
+	for {
+		f, n, err := pe.parseStringFileInfo(offset, e)
+		if err != nil || f.Length == 0 {
+			break
+		}
+
+		switch n {
+		case StringFileInfoString:
+			tableOffset := f.GetStringTableOffset(offset)
+			for {
+				table, err := pe.parseStringTable(tableOffset, e)
+				if err != nil {
+					break
+				}
+				stringOffset := table.GetStringOffset(tableOffset, e)
+				for stringOffset < tableOffset+uint32(table.Length) {
+					k, v, l, err := pe.parseString(stringOffset, e)
+					if err != nil {
+						break
+					}
+					vers[k] = v
+					if l == 0 {
+						stringOffset = tableOffset + uint32(table.Length)
+					} else {
+						stringOffset = stringOffset + uint32(l)
+					}
+				}
+				// handle potential infinite loops
+				if uint32(table.Length)+tableOffset > tableOffset {
+					break
+				}
+				if tableOffset > uint32(f.Length) {
+					break
+				}
+			}
+		case VarFileInfoString:
+			break
+		default:
+			break
+		}
+
+		offset += uint32(f.Length)
+
+		// StringFileInfo/VarFileinfo structs consumed?
+		if offset >= uint32(ver.Length) {
+			break
+		}
+	}
+	return nil, nil
+}
+
+// ParseVersionResourcesForEntries parses file version strings from the version resource
+// directory. This directory contains several structures starting with VS_VERSION_INFO
+// with references to children StringFileInfo structures. In addition, StringFileInfo
+// contains the StringTable structure with String entries describing the name and value
+// of each file version strings.
+func (pe *File) ParseVersionResourcesForEntries() ([]map[string]string, error) {
+	var allVersions []map[string]string
+	if pe.opts.OmitResourceDirectory {
+		return allVersions, nil
+	}
+	for _, e := range pe.Resources.Entries {
+		if e.ID != VersionResourceType {
+			continue
+		}
+
+		directory := e.Directory.Entries[0].Directory
+
+		for _, e := range directory.Entries {
+			vers := make(map[string]string)
+			allVersions = append(allVersions, vers)
+			_, err := pe.parseVersionEntry(e, vers)
+			if err != nil {
+				return allVersions, err
+			}
+		}
+	}
+	return allVersions, nil
 }
