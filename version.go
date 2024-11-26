@@ -372,9 +372,7 @@ func (pe *File) parseVersionEntry(e ResourceDirectoryEntry, vers map[string]stri
 				}
 			}
 		case VarFileInfoString:
-			break
 		default:
-			break
 		}
 
 		offset += uint32(f.Length)

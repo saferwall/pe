@@ -565,12 +565,12 @@ func parseAuthenticodeContent(content []byte) (AuthenticodeContent, error) {
 	if err != nil {
 		return AuthenticodeContent{}, err
 	}
-	hashFunction, algorithmId, err := parseHashAlgorithm(authenticodeContent.MessageDigest.DigestAlgorithm)
+	hashFunction, algorithmID, err := parseHashAlgorithm(authenticodeContent.MessageDigest.DigestAlgorithm)
 	if err != nil {
 		return AuthenticodeContent{}, err
 	}
 	return AuthenticodeContent{
-		Algorithm:    algorithmId,
+		Algorithm:    algorithmID,
 		HashFunction: hashFunction,
 		HashResult:   authenticodeContent.MessageDigest.Digest,
 	}, nil
