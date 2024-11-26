@@ -116,12 +116,16 @@ type Options struct {
 
 // New instantiates a file instance with options given a file name.
 func New(name string, opts *Options) (*File, error) {
-
 	f, err := os.Open(name)
 	if err != nil {
 		return nil, err
 	}
 
+	return NewFile(f, opts)
+}
+
+// NewFile instantiates a file instance with options given a file handle.
+func NewFile(f *os.File, opts *Options) (*File, error) {
 	// Memory map the file instead of using read/write.
 	data, err := mmap.Map(f, mmap.RDONLY, 0)
 	if err != nil {
