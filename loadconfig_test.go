@@ -25,7 +25,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 			},
 		},
 		{
-			in: getAbsoluteFilePath("test/00da1a2a9d9ebf447508bf6550f05f466f8eabb4ed6c4f2a524c0769b2d75bc1"),
+			in: getAbsoluteFilePath("test/00da1a2a9d9ebf447508bf6550f05f466f8eabb4ed6c4f2a524c0769b2d75bc1.7z"),
 			out: ImageLoadConfigDirectory32{
 				Size:                        0x5c,
 				SecurityCookie:              0x43D668,
@@ -38,7 +38,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 			},
 		},
 		{
-			in: getAbsoluteFilePath("test/3a081c7fe475ec68ed155c76d30cfddc4d41f7a09169810682d1c75421e98eaa"),
+			in: getAbsoluteFilePath("test/3a081c7fe475ec68ed155c76d30cfddc4d41f7a09169810682d1c75421e98eaa.7z"),
 			out: ImageLoadConfigDirectory32{
 				Size:                        0xa0,
 				SecurityCookie:              0x417008,

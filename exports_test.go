@@ -69,7 +69,7 @@ func TestExportDirectory(t *testing.T) {
 		},
 		// {
 		// 	// TODO: ThreadSanitizer failed to allocate 0x000048000000 (1207959552) in Github CI
-		// 	getAbsoluteFilePath("test/0b1d3d3664915577ab9a32188d29bbf3542b86c7b9ce333e245496c3018819f1"),
+		// 	getAbsoluteFilePath("test/0b1d3d3664915577ab9a32188d29bbf3542b86c7b9ce333e245496c3018819f1.7z"),
 		// 	TestExport{
 		// 		entryCount: 7728638,
 		// 		entryIndex: 0,
