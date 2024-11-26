@@ -854,15 +854,17 @@ func parsePE(filename string, cfg config) {
 			switch table {
 			case peparser.Module:
 				fmt.Print("\n\t[Modules]\n\t---------\n")
-				modTableRow := modTable.Content.(peparser.ModuleTableRow)
-				modName := pe.GetStringFromData(modTableRow.Name, pe.CLR.MetadataStreams["#Strings"])
-				Mvid := pe.GetStringFromData(modTableRow.Mvid, pe.CLR.MetadataStreams["#GUID"])
-				MvidStr := hex.EncodeToString(Mvid)
-				fmt.Fprintf(w, "Generation:\t 0x%x\n", modTableRow.Generation)
-				fmt.Fprintf(w, "Name:\t 0x%x (%s)\n", modTableRow.Name, string(modName))
-				fmt.Fprintf(w, "Mvid:\t 0x%x (%s)\n", modTableRow.Mvid, MvidStr)
-				fmt.Fprintf(w, "EncID:\t 0x%x\n", modTableRow.EncID)
-				fmt.Fprintf(w, "EncBaseID:\t 0x%x\n", modTableRow.EncBaseID)
+				modTableRows := modTable.Content.([]peparser.ModuleTableRow)
+				for _, modTableRow := range modTableRows {
+					modName := pe.GetStringFromData(modTableRow.Name, pe.CLR.MetadataStreams["#Strings"])
+					Mvid := pe.GetStringFromData(modTableRow.Mvid, pe.CLR.MetadataStreams["#GUID"])
+					MvidStr := hex.EncodeToString(Mvid)
+					fmt.Fprintf(w, "Generation:\t 0x%x\n", modTableRow.Generation)
+					fmt.Fprintf(w, "Name:\t 0x%x (%s)\n", modTableRow.Name, string(modName))
+					fmt.Fprintf(w, "Mvid:\t 0x%x (%s)\n", modTableRow.Mvid, MvidStr)
+					fmt.Fprintf(w, "EncID:\t 0x%x\n", modTableRow.EncID)
+					fmt.Fprintf(w, "EncBaseID:\t 0x%x\n", modTableRow.EncBaseID)
+				}
 				w.Flush()
 
 			}
