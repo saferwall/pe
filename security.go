@@ -386,7 +386,9 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 
 			// Verify the signature. This will also verify the chain of trust of the
 			// the end-entity signer cert to one of the root in the trust store.
-			if err == nil {
+			if err != nil {
+				pe.logger.Errorf("failed to loadSystemRoots: %v", err)
+			} else {
 				err = pkcs.VerifyWithChain(certPool)
 				if err == nil {
 					certValid = true
@@ -467,11 +469,11 @@ func loadSystemRoots() (*x509.CertPool, error) {
 	if needSync {
 		cmd := exec.Command("certutil", "-syncWithWU", dir)
 		hideWindow(cmd)
-		out, err := cmd.Output()
+		err := cmd.Run()
 		if err != nil {
 			return roots, err
 		}
-		if !strings.Contains(string(out), "command completed successfully") {
+		if cmd.ProcessState.ExitCode() != 0 {
 			return roots, err
 		}
 	}
@@ -563,12 +565,12 @@ func parseAuthenticodeContent(content []byte) (AuthenticodeContent, error) {
 	if err != nil {
 		return AuthenticodeContent{}, err
 	}
-	hashFunction, algorithmId, err := parseHashAlgorithm(authenticodeContent.MessageDigest.DigestAlgorithm)
+	hashFunction, algorithmID, err := parseHashAlgorithm(authenticodeContent.MessageDigest.DigestAlgorithm)
 	if err != nil {
 		return AuthenticodeContent{}, err
 	}
 	return AuthenticodeContent{
-		Algorithm:    algorithmId,
+		Algorithm:    algorithmID,
 		HashFunction: hashFunction,
 		HashResult:   authenticodeContent.MessageDigest.Digest,
 	}, nil

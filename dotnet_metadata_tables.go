@@ -1195,7 +1195,7 @@ type AssemblyRefProcessorTableRow struct {
 
 // AssemblyRefOS 0x25
 type AssemblyRefOSTableRow struct {
-	OSPlatformId   uint32 `json:"os_platform_id"`   // a 4-byte constant
+	OSPlatformID   uint32 `json:"os_platform_id"`   // a 4-byte constant
 	OSMajorVersion uint32 `json:"os_major_version"` // a 4-byte constant
 	OSMinorVersion uint32 `json:"os_minor_version"` // a 4-byte constan)
 	AssemblyRef    uint32 `json:"assembly_ref"`     // an index into the AssemblyRef table

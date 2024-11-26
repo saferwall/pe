@@ -204,6 +204,7 @@ func TestParseSecurityDirectory(t *testing.T) {
 						t.Fatalf("certificate verification %d failed, cert %v, want %v", i, cert.Verified, expected.Verified)
 					}
 				}
+
 			}
 		})
 	}

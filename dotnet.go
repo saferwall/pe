@@ -724,10 +724,13 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 			table.Content, n, err = pe.parseMetadataMethodSpecTable(offset)
 		case GenericParamConstraint: // 0x2c
 			table.Content, n, err = pe.parseMetadataGenericParamConstraintTable(offset)
-
 		default:
 			pe.logger.Warnf("unhandled metadata table %d %s offset 0x%x cols %d",
 				tableIndex, MetadataTableIndexToString(tableIndex), offset, table.CountCols)
+		}
+		if err != nil {
+			pe.logger.Warnf("parsing metadata table %s failed with %v",
+				MetadataTableIndexToString(tableIndex), err)
 		}
 		offset += n
 
