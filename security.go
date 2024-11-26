@@ -16,12 +16,7 @@ import (
 	"fmt"
 	"hash"
 	"io"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/secDre4mer/pkcs7"
@@ -377,24 +372,13 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 		var certValid bool
 		// Let's load the system root certs.
 		if !pe.opts.DisableCertValidation {
-			var certPool *x509.CertPool
-			if runtime.GOOS == "windows" {
-				certPool, err = loadSystemRoots()
-			} else {
-				certPool, err = x509.SystemCertPool()
-			}
-
 			// Verify the signature. This will also verify the chain of trust of the
 			// the end-entity signer cert to one of the root in the trust store.
-			if err != nil {
-				pe.logger.Errorf("failed to loadSystemRoots: %v", err)
+			err = pkcs.Verify()
+			if err == nil {
+				certValid = true
 			} else {
-				err = pkcs.VerifyWithChain(certPool)
-				if err == nil {
-					certValid = true
-				} else {
-					certValid = false
-				}
+				certValid = false
 			}
 		}
 
@@ -433,72 +417,6 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 	}
 
 	return nil
-}
-
-// loadSystemsRoots manually downloads all the trusted root certificates
-// in Windows by spawning certutil then adding root certs individually
-// to the cert pool. Initially, when running in windows, go SystemCertPool()
-// used to enumerate all the certificate in the Windows store using
-// (CertEnumCertificatesInStore). Unfortunately, Windows does not ship
-// with all of its root certificates installed. Instead, it downloads them
-// on-demand. As a consequence, this behavior leads to a non-deterministic
-// results. Go team then disabled the loading Windows root certs.
-func loadSystemRoots() (*x509.CertPool, error) {
-
-	needSync := true
-	roots := x509.NewCertPool()
-
-	// Create a temporary dir in the OS temp folder
-	// if it does not exists.
-	dir := filepath.Join(os.TempDir(), "certs")
-	info, err := os.Stat(dir)
-	if os.IsNotExist(err) {
-		if err = os.Mkdir(dir, 0755); err != nil {
-			return roots, err
-		}
-	} else {
-		now := time.Now()
-		modTime := info.ModTime()
-		diff := now.Sub(modTime).Hours()
-		if diff < 24 {
-			needSync = false
-		}
-	}
-
-	// Use certutil to download all the root certs.
-	if needSync {
-		cmd := exec.Command("certutil", "-syncWithWU", dir)
-		hideWindow(cmd)
-		err := cmd.Run()
-		if err != nil {
-			return roots, err
-		}
-		if cmd.ProcessState.ExitCode() != 0 {
-			return roots, err
-		}
-	}
-
-	files, err := os.ReadDir(dir)
-	if err != nil {
-		return roots, err
-	}
-
-	for _, f := range files {
-		if !strings.HasSuffix(f.Name(), ".crt") {
-			continue
-		}
-		certPath := filepath.Join(dir, f.Name())
-		certData, err := os.ReadFile(certPath)
-		if err != nil {
-			return roots, err
-		}
-
-		if crt, err := x509.ParseCertificate(certData); err == nil {
-			roots.AddCert(crt)
-		}
-	}
-
-	return roots, nil
 }
 
 type SpcIndirectDataContent struct {
