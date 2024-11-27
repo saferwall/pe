@@ -6,9 +6,9 @@ package pe
 
 import (
 	"errors"
+	"github.com/edsrzf/mmap-go"
 	"os"
 
-	"github.com/edsrzf/mmap-go"
 	"github.com/saferwall/pe/log"
 )
 
@@ -112,6 +112,9 @@ type Options struct {
 
 	// OmitCLRHeaderDirectory determines if CLR header directory parsing is skipped, by default (false).
 	OmitCLRHeaderDirectory bool
+
+	// OmitCLRMetadata determines if CLR metadata parsing is skipped, by default (false).
+	OmitCLRMetadata bool
 }
 
 // New instantiates a file instance with options given a file name.
