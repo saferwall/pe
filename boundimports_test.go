@@ -50,7 +50,7 @@ func TestBoundImportDirectory(t *testing.T) {
 		},
 		{
 			// fake bound imports directory
-			getAbsoluteFilePath("test/0044e1870806c048a7558082d4482d1650dcd3ea73152ed2218a554983130721"),
+			getAbsoluteFilePath("test/0044e1870806c048a7558082d4482d1650dcd3ea73152ed2218a554983130721.7z"),
 			TestBoundImportEntry{
 				errOutOfBounds: ErrOutsideBoundary,
 			},

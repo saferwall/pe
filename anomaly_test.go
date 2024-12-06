@@ -11,17 +11,17 @@ import (
 func TestGetAnomalies(t *testing.T) {
 
 	tests := []struct {
-		in      string
+		in  string
 		out []string
 	}{
 		{
 			getAbsoluteFilePath(
-			"test/050708404553416d103652a7ca1f887ab81f533a019a0eeff0e6bb460a202cde"),
+				"test/050708404553416d103652a7ca1f887ab81f533a019a0eeff0e6bb460a202cde.7z"),
 			[]string{AnoReservedDataDirectoryEntry},
 		},
 		{
 			getAbsoluteFilePath(
-			"test/0585495341e0ffaae1734acb78708ff55cd3612d844672d37226ef63d12652d0"),
+				"test/0585495341e0ffaae1734acb78708ff55cd3612d844672d37226ef63d12652d0.7z"),
 			[]string{AnoAddressOfEntryPointNull, AnoMajorSubsystemVersion},
 		},
 	}

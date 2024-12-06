@@ -61,7 +61,7 @@ func TestDebugDirectoryCodeView(t *testing.T) {
 		{
 			TestDebugIn{
 				index:    0,
-				filepath: getAbsoluteFilePath("test/01008963d32f5cc17b64c31446386ee5b36a7eab6761df87a2989ba9394d8f3d"),
+				filepath: getAbsoluteFilePath("test/01008963d32f5cc17b64c31446386ee5b36a7eab6761df87a2989ba9394d8f3d.7z"),
 			},
 			TestCodeView{
 				debugEntry: DebugEntry{
@@ -436,7 +436,7 @@ func TestDebugDirectoryVCFeature(t *testing.T) {
 		{
 			TestDebugIn{
 				index:    1,
-				filepath: getAbsoluteFilePath("test/00da1a2a9d9ebf447508bf6550f05f466f8eabb4ed6c4f2a524c0769b2d75bc1"),
+				filepath: getAbsoluteFilePath("test/00da1a2a9d9ebf447508bf6550f05f466f8eabb4ed6c4f2a524c0769b2d75bc1.7z"),
 			},
 			TestVCFeature{
 				debugEntry: DebugEntry{

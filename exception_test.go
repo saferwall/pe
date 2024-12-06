@@ -54,7 +54,7 @@ func TestParseExceptionDirectory(t *testing.T) {
 		},
 		{
 			// fake exception directory
-			getAbsoluteFilePath("test/0585495341e0ffaae1734acb78708ff55cd3612d844672d37226ef63d12652d0"),
+			getAbsoluteFilePath("test/0585495341e0ffaae1734acb78708ff55cd3612d844672d37226ef63d12652d0.7z"),
 			TestExceptionEntry{
 				entryCount: 3349,
 				entryIndex: 0,

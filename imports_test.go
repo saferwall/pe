@@ -133,9 +133,9 @@ func TestImpHash(t *testing.T) {
 		out string
 	}{
 		{getAbsoluteFilePath("test/putty.exe"), "2e3215acc61253e5fa73a840384e9720"},
-		{getAbsoluteFilePath("test/01008963d32f5cc17b64c31446386ee5b36a7eab6761df87a2989ba9394d8f3d"), "431cb9bbc479c64cb0d873043f4de547"},
-		{getAbsoluteFilePath("test/0103daa751660333b7ae5f098795df58f07e3031563e042d2eb415bffa71fe7a"), "8b58a51c1fff9c4a944265c1fe0fab74"},
-		{getAbsoluteFilePath("test/0585495341e0ffaae1734acb78708ff55cd3612d844672d37226ef63d12652d0"), "e4290fa6afc89d56616f34ebbd0b1f2c"},
+		{getAbsoluteFilePath("test/01008963d32f5cc17b64c31446386ee5b36a7eab6761df87a2989ba9394d8f3d.7z"), "431cb9bbc479c64cb0d873043f4de547"},
+		{getAbsoluteFilePath("test/0103daa751660333b7ae5f098795df58f07e3031563e042d2eb415bffa71fe7a.7z"), "8b58a51c1fff9c4a944265c1fe0fab74"},
+		{getAbsoluteFilePath("test/0585495341e0ffaae1734acb78708ff55cd3612d844672d37226ef63d12652d0.7z"), "e4290fa6afc89d56616f34ebbd0b1f2c"},
 	} {
 		t.Run(tt.in, func(t *testing.T) {
 			file, err := New(tt.in, &Options{})

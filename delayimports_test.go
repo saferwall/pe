@@ -22,7 +22,7 @@ func TestDelayImportDirectory(t *testing.T) {
 		out TestDelayImportEntry
 	}{
 		{
-			getAbsoluteFilePath("test/000049925c578e5a0883e7d1a8257c1a44feab8f7d9972ace8d0e3fb96612a4c"),
+			getAbsoluteFilePath("test/000049925c578e5a0883e7d1a8257c1a44feab8f7d9972ace8d0e3fb96612a4c.7z"),
 			TestDelayImportEntry{
 				entryCount: 4,
 				entryIndex: 0,
