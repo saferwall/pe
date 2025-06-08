@@ -22,14 +22,14 @@ var (
 	idxResolutionScope     = codedidx{tagbits: 2, idx: []int{Module, ModuleRef, AssemblyRef, TypeRef}}
 	idxMemberRefParent     = codedidx{tagbits: 3, idx: []int{TypeDef, TypeRef, ModuleRef, MethodDef, TypeSpec}}
 	idxHasConstant         = codedidx{tagbits: 2, idx: []int{Field, Param, Property}}
-	idxHasCustomAttributes = codedidx{tagbits: 5, idx: []int{Field, TypeRef, TypeDef, Param, InterfaceImpl, MemberRef, Module, Property, Event, StandAloneSig, ModuleRef, TypeSpec, Assembly, AssemblyRef, FileMD, ExportedType, ManifestResource}}
+	idxHasCustomAttributes = codedidx{tagbits: 5, idx: []int{MethodDef, Field, TypeRef, TypeDef, Param, InterfaceImpl, MemberRef, Module, DeclSecurity, Property, Event, StandAloneSig, ModuleRef, TypeSpec, Assembly, AssemblyRef, FileMD, ExportedType, ManifestResource, GenericParam, GenericParamConstraint, MethodSpec}}
 	idxCustomAttributeType = codedidx{tagbits: 3, idx: []int{MethodDef, MemberRef}}
 	idxHasFieldMarshall    = codedidx{tagbits: 1, idx: []int{Field, Param}}
 	idxHasDeclSecurity     = codedidx{tagbits: 2, idx: []int{TypeDef, MethodDef, Assembly}}
 	idxHasSemantics        = codedidx{tagbits: 1, idx: []int{Event, Property}}
 	idxMethodDefOrRef      = codedidx{tagbits: 1, idx: []int{MethodDef, MemberRef}}
 	idxMemberForwarded     = codedidx{tagbits: 1, idx: []int{Field, MethodDef}}
-	idxImplementation      = codedidx{tagbits: 2, idx: []int{AssemblyRef, ExportedType}}
+	idxImplementation      = codedidx{tagbits: 2, idx: []int{FileMD, AssemblyRef, ExportedType}}
 	idxTypeOrMethodDef     = codedidx{tagbits: 1, idx: []int{TypeDef, MethodDef}}
 
 	idxField        = codedidx{tagbits: 0, idx: []int{Field}}
@@ -68,7 +68,7 @@ func (pe *File) getCodedIndexSize(tagbits uint32, idx ...int) uint32 {
 			}
 		}
 	}
-	if maxColumnCount > maxIndex16 {
+	if maxColumnCount >= maxIndex16 {
 		return 4
 	}
 	return 2
