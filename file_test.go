@@ -79,7 +79,7 @@ func TestChecksum(t *testing.T) {
 		{getAbsoluteFilePath("test/putty.exe"),
 			0x00122C22},
 		// file is not DWORD aligned and needs paddings.
-		{getAbsoluteFilePath("test/010001e68577ef704792448ff474d22c6545167231982447c568e55041169ef0"),
+		{getAbsoluteFilePath("test/010001e68577ef704792448ff474d22c6545167231982447c568e55041169ef0.7z"),
 			0x0006D558},
 	}
 

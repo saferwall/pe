@@ -28,7 +28,7 @@ func TestParseTLSDirectory(t *testing.T) {
 			},
 		},
 		{
-			getAbsoluteFilePath("test/3a081c7fe475ec68ed155c76d30cfddc4d41f7a09169810682d1c75421e98eaa"),
+			getAbsoluteFilePath("test/3a081c7fe475ec68ed155c76d30cfddc4d41f7a09169810682d1c75421e98eaa.7z"),
 			TLSDirectory{
 				Struct: ImageTLSDirectory32{
 					StartAddressOfRawData: 0x004157B8,

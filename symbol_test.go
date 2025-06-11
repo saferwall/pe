@@ -44,7 +44,7 @@ var symbolTests = []struct {
 
 	{
 		getAbsoluteFilePath(
-			"test/0103daa751660333b7ae5f098795df58f07e3031563e042d2eb415bffa71fe7a",
+			"test/0103daa751660333b7ae5f098795df58f07e3031563e042d2eb415bffa71fe7a.7z",
 		),
 		TestCOFFSymbol{
 			errTooManySymbols: nil,
@@ -67,7 +67,7 @@ var symbolTests = []struct {
 
 	{
 		getAbsoluteFilePath(
-			"test/0000e876c5b712b6b7b3ce97f757ddd918fb3dbdc5a3938e850716fbd841309f",
+			"test/0000e876c5b712b6b7b3ce97f757ddd918fb3dbdc5a3938e850716fbd841309f.7z",
 		),
 		TestCOFFSymbol{
 			errTooManySymbols: errCOFFSymbolsTooHigh,

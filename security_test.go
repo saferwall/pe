@@ -105,7 +105,7 @@ func TestParseSecurityDirectory(t *testing.T) {
 			},
 		},
 		{
-			getAbsoluteFilePath("test/579fd8a0385482fb4c789561a30b09f25671e86422f40ef5cca2036b28f99648"),
+			getAbsoluteFilePath("test/579fd8a0385482fb4c789561a30b09f25671e86422f40ef5cca2036b28f99648.7z"),
 			TestSecurityEntry{
 				Header: WinCertificate{
 					Length:          0x3488,
@@ -144,7 +144,7 @@ func TestParseSecurityDirectory(t *testing.T) {
 			},
 		},
 		{
-			getAbsoluteFilePath("test/00121dae38f26a33da2990987db58738c5a5966930126a42f606a3b40e014624"),
+			getAbsoluteFilePath("test/00121dae38f26a33da2990987db58738c5a5966930126a42f606a3b40e014624.7z"),
 			TestSecurityEntry{
 				err: ErrSecurityDataDirInvalid,
 			},
@@ -226,7 +226,7 @@ func TestAuthentihash(t *testing.T) {
 			"595e4eb556587a1363ff297df9f354a377963ecac0bed19230992b9601426aae"},
 		{getAbsoluteFilePath("test/mfc40u.dll"),
 			"5c8acdf9b2c7854c6b8e22e973d2fbae9c68fc22513d24c68c8e8010b1663e67"},
-		{getAbsoluteFilePath("test/000057fd78f66e64e15f5070364c824a8923b6216bd8bcf6368857fb9674c483"),
+		{getAbsoluteFilePath("test/000057fd78f66e64e15f5070364c824a8923b6216bd8bcf6368857fb9674c483.7z"),
 			""},
 	}
 
