@@ -1201,13 +1201,6 @@ type AssemblyRefOSTableRow struct {
 	AssemblyRef    uint32 `json:"assembly_ref"`     // an index into the AssemblyRef table
 }
 
-// File 0x26
-type FileTableRow struct {
-	Flags     uint32 `json:"flags"`      // a 4-byte bitmask of type FileAttributes, §II.23.1.6
-	Name      uint32 `json:"name"`       // an index into the String heap
-	HashValue uint32 `json:"hash_value"` // an index into the Blob heap
-}
-
 // ExportedType 0x27
 type ExportedTypeTableRow struct {
 	Flags          uint32 `json:"flags"`          // a 4-byte bitmask of type TypeAttributes, §II.23.1.15
@@ -1428,6 +1421,43 @@ func (pe *File) parseMetadataGenericParamConstraintTable(off uint32) ([]GenericP
 		n += indexSize
 
 		if indexSize, err = pe.readFromMetadataStream(idxTypeDefOrRef, off, &rows[i].Constraint); err != nil {
+			return rows, n, err
+		}
+		off += indexSize
+		n += indexSize
+	}
+	return rows, n, nil
+}
+
+// File 0x26
+type FileTableRow struct {
+	Flags     uint32 `json:"flags"`      // a 4-byte bitmask of type FileAttributes, §II.23.1.6
+	Name      uint32 `json:"name"`       // an index into the String heap
+	HashValue uint32 `json:"hash_value"` // an index into the Blob heap
+}
+
+// File 0x26
+func (pe *File) parseMetadataFileTable(off uint32) ([]FileTableRow, uint32, error) {
+	var err error
+	var indexSize uint32
+	var n uint32
+
+	rowCount := int(pe.CLR.MetadataTables[FileMD].CountCols)
+	rows := make([]FileTableRow, rowCount)
+	for i := 0; i < rowCount; i++ {
+		if rows[i].Flags, err = pe.ReadUint32(off); err != nil {
+			return rows, n, err
+		}
+		off += 4
+		n += 4
+
+		if indexSize, err = pe.readFromMetadataStream(idxString, off, &rows[i].Name); err != nil {
+			return rows, n, err
+		}
+		off += indexSize
+		n += indexSize
+
+		if indexSize, err = pe.readFromMetadataStream(idxBlob, off, &rows[i].HashValue); err != nil {
 			return rows, n, err
 		}
 		off += indexSize
