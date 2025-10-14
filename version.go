@@ -311,6 +311,9 @@ func (pe *File) ParseVersionResources() (map[string]string, error) {
 		if e.ID != VersionResourceType {
 			continue
 		}
+		if len(e.Directory.Entries) == 0 {
+			continue
+		}
 
 		directory := e.Directory.Entries[0].Directory
 
