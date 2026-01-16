@@ -6,8 +6,9 @@ package pe
 
 import (
 	"errors"
-	"github.com/edsrzf/mmap-go"
 	"os"
+
+	"github.com/edsrzf/mmap-go"
 
 	"github.com/saferwall/pe/log"
 )
@@ -196,15 +197,21 @@ func NewBytes(data []byte, opts *Options) (*File, error) {
 	return &file, nil
 }
 
-// Close closes the File.
 func (pe *File) Close() error {
-	if pe.data != nil {
-		_ = pe.data.Unmap()
-	}
+	_ = pe.Unmap()
 
 	if pe.f != nil {
 		return pe.f.Close()
 	}
+	return nil
+}
+
+// Close memory mapped file
+func (pe *File) Unmap() error {
+	if pe.data != nil {
+		return pe.data.Unmap()
+	}
+
 	return nil
 }
 
