@@ -6,6 +6,7 @@ package pe
 
 import (
 	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -99,6 +100,42 @@ func TestChecksum(t *testing.T) {
 				t.Errorf("Checksum(%s) got %v, want %v", tt.in, got, tt.out)
 			}
 
+		})
+	}
+}
+
+func TestCanParseWithHandleAndClose(t *testing.T) {
+	for _, tt := range peTests {
+		t.Run(tt.in, func(t *testing.T) {
+			file, err := os.Open(tt.in)
+			if err != nil {
+				t.Fatalf("Open file(%s) failed", tt.in)
+			}
+			pefile, err := NewFile(file, &Options{})
+			if err != nil {
+				t.Fatalf("NewFile (%s) failed", tt.in)
+			}
+			err = pefile.Parse()
+			if err != nil {
+				t.Fatalf("Parse (%s) failed", tt.in)
+			}
+			err = pefile.Unmap()
+			if err != nil {
+				t.Fatalf("Unmap (%s) failed", tt.in)
+			}
+			const len = 2
+			header := [len]byte{}
+			n, err := file.ReadAt(header[:], 0)
+			if err != nil {
+				t.Fatalf("Failed to read after unmap (%s)", tt.in)
+			}
+			if n != len {
+				t.Fatalf("Failed to read data (%s)", tt.in)
+			}
+			err = file.Close()
+			if err != nil {
+				t.Fatalf("Failed to close file (%s)", tt.in)
+			}
 		})
 	}
 }
