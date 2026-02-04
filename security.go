@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/secDre4mer/pkcs7"
+	"github.com/smallstep/pkcs7"
 )
 
 // The options for the WIN_CERTIFICATE Revision member include
