@@ -463,6 +463,34 @@ func parsePE(filename string, cfg config) {
 		}
 	}
 
+	if cfg.wantExport && pe.FileInfo.HasExport {
+		fmt.Printf("\nEXPORTS\n********\n\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		expDir := pe.Export.Struct
+		fmt.Fprintf(w, "Characteristics:\t 0x%x\n", expDir.Characteristics)
+		fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", expDir.TimeDateStamp,
+			humanizeTimestamp(expDir.TimeDateStamp))
+		fmt.Fprintf(w, "Major Version:\t 0x%x\n", expDir.MajorVersion)
+		fmt.Fprintf(w, "Minor Version:\t 0x%x\n", expDir.MinorVersion)
+		fmt.Fprintf(w, "Name:\t 0x%x\n", expDir.Name)
+		fmt.Fprintf(w, "Base:\t 0x%x\n", expDir.Base)
+		fmt.Fprintf(w, "Number Of Functions:\t 0x%x\n", expDir.NumberOfFunctions)
+		fmt.Fprintf(w, "Number Of Names:\t 0x%x\n", expDir.NumberOfNames)
+		fmt.Fprintf(w, "Address Of Functions:\t 0x%x\n", expDir.AddressOfFunctions)
+		fmt.Fprintf(w, "Address Of Names:\t 0x%x\n", expDir.AddressOfNames)
+		fmt.Fprintf(w, "Address Of Name Ordinals:\t 0x%x\n", expDir.AddressOfNameOrdinals)
+		w.Flush()
+
+		fmt.Printf("\n  DLL Name: %s\n\n", pe.Export.Name)
+		w = tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		fmt.Fprintln(w, "Ordinal\tFunctionRVA\tNameOrdinal\tNameRVA\tName\tForwarder\t")
+		for _, fn := range pe.Export.Functions {
+			fmt.Fprintf(w, "0x%x\t0x%x\t0x%x\t0x%x\t%s\t%s\t\n",
+				fn.Ordinal, fn.FunctionRVA, fn.NameOrdinal, fn.NameRVA, fn.Name, fn.Forwarder)
+		}
+		w.Flush()
+	}
+
 	if cfg.wantResource && pe.FileInfo.HasResource {
 		var printRsrcDir func(rsrcDir peparser.ResourceDirectory)
 		padding := 0
@@ -774,6 +802,43 @@ func parsePE(filename string, cfg config) {
 			}
 			fmt.Fprintf(w, "  %s\t : 0x%v\n", sentenceCase(typeOfS.Field(i).Name),
 				v.Field(i).Interface())
+		}
+		w.Flush()
+	}
+
+	if cfg.wantDelayImp && pe.FileInfo.HasDelayImp {
+		fmt.Printf("\nDELAY IMPORTS\n**************\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		for _, imp := range pe.DelayImports {
+			desc := imp.Descriptor
+			fmt.Printf("\n\t------[ %s ]------\n\n", imp.Name)
+			fmt.Fprintf(w, "Attributes:\t 0x%x\n", desc.Attributes)
+			fmt.Fprintf(w, "Name:\t 0x%x\n", desc.Name)
+			fmt.Fprintf(w, "Module Handle RVA:\t 0x%x\n", desc.ModuleHandleRVA)
+			fmt.Fprintf(w, "Import Address Table RVA:\t 0x%x\n", desc.ImportAddressTableRVA)
+			fmt.Fprintf(w, "Import Name Table RVA:\t 0x%x\n", desc.ImportNameTableRVA)
+			fmt.Fprintf(w, "Bound Import Address Table RVA:\t 0x%x\n", desc.BoundImportAddressTableRVA)
+			fmt.Fprintf(w, "Unload Information Table RVA:\t 0x%x\n", desc.UnloadInformationTableRVA)
+			fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", desc.TimeDateStamp,
+				humanizeTimestamp(desc.TimeDateStamp))
+			fmt.Fprintf(w, "\n")
+			fmt.Fprintln(w, "Name\tThunkRVA\tThunkValue\tOriginalThunkRVA\tOriginalThunkValue\tHint\t")
+			for _, fn := range imp.Functions {
+				fmt.Fprintf(w, "%s\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t\n",
+					fn.Name, fn.ThunkRVA, fn.ThunkValue,
+					fn.OriginalThunkRVA, fn.OriginalThunkValue, fn.Hint)
+			}
+			w.Flush()
+		}
+	}
+
+	if cfg.wantIAT && pe.FileInfo.HasIAT {
+		fmt.Printf("\nIAT\n****\n\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		fmt.Fprintln(w, "Index\tRVA\tValue\tMeaning\t")
+		for _, entry := range pe.IAT {
+			fmt.Fprintf(w, "0x%x\t0x%x\t%v\t%s\t\n",
+				entry.Index, entry.Rva, entry.Value, entry.Meaning)
 		}
 		w.Flush()
 	}
