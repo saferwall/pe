@@ -791,6 +791,10 @@ func (pe *File) parseLoadConfigDirectory(rva, size uint32) error {
 	}
 
 	if pe.Is32 {
+		maxSize := uint32(binary.Size(ImageLoadConfigDirectory32{}))
+		if structSize > maxSize {
+			return ErrOutsideBoundary
+		}
 		loadCfg32 := ImageLoadConfigDirectory32{}
 		imgLoadConfigDirectory := make([]byte, binary.Size(loadCfg32))
 		copy(imgLoadConfigDirectory, pe.data[fileOffset:fileOffset+structSize])
@@ -798,6 +802,10 @@ func (pe *File) parseLoadConfigDirectory(rva, size uint32) error {
 		err = binary.Read(buf, binary.LittleEndian, &loadCfg32)
 		loadCfg = loadCfg32
 	} else {
+		maxSize := uint32(binary.Size(ImageLoadConfigDirectory64{}))
+		if structSize > maxSize {
+			return ErrOutsideBoundary
+		}
 		loadCfg64 := ImageLoadConfigDirectory64{}
 		imgLoadConfigDirectory := make([]byte, binary.Size(loadCfg64))
 		copy(imgLoadConfigDirectory, pe.data[fileOffset:fileOffset+structSize])
