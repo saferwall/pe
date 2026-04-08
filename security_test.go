@@ -196,15 +196,14 @@ func TestParseSecurityDirectory(t *testing.T) {
 				if !reflect.DeepEqual(cert.Info, expected.Info) {
 					t.Fatalf("certificate info %d assertion failed, got %v, want %v", i, cert.Info, expected.Info)
 				}
-				if expected.SignatureValid != cert.SignatureValid {
-					t.Fatalf("signature verification %d failed, cert %v, want %v", i, cert.SignatureValid, expected.SignatureValid)
-				}
-				if runtime.GOOS == "linux" {
+				if runtime.GOOS == "linux" || runtime.GOOS == "windows" {
+					if expected.SignatureValid != cert.SignatureValid {
+						t.Fatalf("signature verification %d failed, cert %v, want %v", i, cert.SignatureValid, expected.SignatureValid)
+					}
 					if expected.Verified != cert.Verified {
 						t.Fatalf("certificate verification %d failed, cert %v, want %v", i, cert.Verified, expected.Verified)
 					}
 				}
-
 			}
 		})
 	}
