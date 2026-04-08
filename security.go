@@ -65,20 +65,48 @@ var (
 		`invalid certificate header in security directory`)
 )
 
+// CertificateSection represents the security directory of a PE file, which
+// contains Authenticode signatures used to verify the integrity and origin of
+// the binary. The raw PKCS#7 data is parsed into one or more certificates,
+// including any nested counter-signatures.
 type CertificateSection struct {
+	// Header is the WIN_CERTIFICATE structure at the start of the security
+	// directory, specifying the length, revision, and type of the certificate.
 	Header WinCertificate `json:"header"`
-	Raw    []byte         `json:"-"`
 
-	Certificates []Certificate
+	// Raw contains the raw PKCS#7 signed data bytes (excluding the
+	// WIN_CERTIFICATE header). This field is excluded from JSON output.
+	Raw []byte `json:"-"`
+
+	// Certificates holds the parsed certificate chain. The first entry is the
+	// primary Authenticode signature; subsequent entries are nested
+	// counter-signatures extracted from unsigned PKCS#7 attributes.
+	Certificates []Certificate `json:"certificates,omitempty"`
 }
 
-// Certificate directory.
+// Certificate represents a parsed Authenticode signature extracted from the
+// PE security directory. It pairs the full PKCS#7 content with validation
+// results: whether the signature hash matches the PE image (SignatureValid)
+// and whether the signing certificate chains to a trusted root (Verified).
 type Certificate struct {
-	Content          pkcs7.PKCS7         `json:"-"`
+	// Content is the full parsed PKCS#7 structure. Excluded from JSON output.
+	Content pkcs7.PKCS7 `json:"-"`
+
+	// SignatureContent holds the parsed Authenticode digest algorithm and hash
+	// from the SpcIndirectDataContent. Excluded from JSON output.
 	SignatureContent AuthenticodeContent `json:"-"`
-	SignatureValid   bool                `json:"signature_valid"`
-	Info             CertInfo            `json:"info"`
-	Verified         bool                `json:"verified"`
+
+	// SignatureValid is true when the Authenticode hash in the signature
+	// matches the computed authentihash of the PE image.
+	SignatureValid bool `json:"signature_valid"`
+
+	// Info contains the human-readable certificate metadata (issuer, subject,
+	// validity period, serial number, and algorithms).
+	Info CertInfo `json:"info"`
+
+	// Verified is true when the signing certificate chains to a trusted root
+	// in the system certificate store.
+	Verified bool `json:"verified"`
 }
 
 // WinCertificate encapsulates a signature used in verifying executable files.
@@ -409,7 +437,6 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 		}
 
 		certInfo.SignatureAlgorithm = signatureContent.Algorithm
-
 		pe.Certificates.Certificates = append(pe.Certificates.Certificates, Certificate{
 			Content:          *pkcs,
 			SignatureContent: signatureContent,
@@ -536,11 +563,11 @@ func parseHashAlgorithm(identifier pkix.AlgorithmIdentifier) (crypto.Hash, x509.
 	case oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA256):
 		return crypto.SHA256, x509.ECDSAWithSHA256, nil
 	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA384):
-		return crypto.SHA384, x509.SHA256WithRSA, nil
+		return crypto.SHA384, x509.SHA384WithRSA, nil
 	case oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA384):
 		return crypto.SHA384, x509.ECDSAWithSHA384, nil
 	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA512):
-		return crypto.SHA512, x509.ECDSAWithSHA512, nil
+		return crypto.SHA512, x509.SHA512WithRSA, nil
 	case oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA512):
 		return crypto.SHA512, x509.ECDSAWithSHA512, nil
 	}
@@ -595,6 +622,5 @@ func formatPkixName(name pkix.Name) string {
 	}
 
 	formattedName += ", " + name.CommonName
-
 	return formattedName
 }
