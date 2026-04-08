@@ -1,5 +1,5 @@
-github.com/ayoubfaouzi/pkcs7 v0.2.2 h1:TDxAqfoE0Am130tiwmBnIOU8pjfof5+0MW8u7vEZcM0=
-github.com/ayoubfaouzi/pkcs7 v0.2.2/go.mod h1:u1EPWZOeIdVRo6C0/FVjB91Nsletw+8vZeAaAmeyJvQ=
+github.com/ayoubfaouzi/pkcs7 v0.2.3 h1:XGCYHteXgclHnNlPdCF8aFyoUKwP9VhLQp+VX+hBZ3U=
+github.com/ayoubfaouzi/pkcs7 v0.2.3/go.mod h1:u1EPWZOeIdVRo6C0/FVjB91Nsletw+8vZeAaAmeyJvQ=
 github.com/edsrzf/mmap-go v1.1.0 h1:6EUwBLQ/Mcr1EYLE4Tn1VdW1A4ckqCQWZBw8Hr0kjpQ=
 github.com/edsrzf/mmap-go v1.1.0/go.mod h1:19H/e8pUPLicwkyNgOykDXkJ9F0MHE+Z52B8EIth78Q=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
