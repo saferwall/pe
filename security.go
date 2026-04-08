@@ -63,6 +63,7 @@ var (
 	// header in the security directory is invalid.
 	ErrSecurityDataDirInvalid = errors.New(
 		`invalid certificate header in security directory`)
+
 )
 
 // CertificateSection represents the security directory of a PE file, which
@@ -554,6 +555,8 @@ type DigestInfo struct {
 func parseHashAlgorithm(identifier pkix.AlgorithmIdentifier) (crypto.Hash, x509.SignatureAlgorithm, error) {
 	oid := identifier.Algorithm
 	switch {
+	case oid.Equal(pkcs7.OIDDigestAlgorithmMD5):
+		return crypto.MD5, x509.MD5WithRSA, nil
 	case oid.Equal(pkcs7.OIDDigestAlgorithmSHA1), oid.Equal(pkcs7.OIDEncryptionAlgorithmRSA):
 		return crypto.SHA1, x509.SHA1WithRSA, nil
 	case oid.Equal(pkcs7.OIDDigestAlgorithmECDSASHA1):
