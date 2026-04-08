@@ -135,9 +135,9 @@ const (
 	// Valid only for object files.
 	ImageSectionAlign8192Bytes = 0x00E00000
 
-	// ImageSectionLnkMRelocOvfl indicates the section contains extended
+	// ImageSectionLnkNRelocOvfl indicates the section contains extended
 	// relocations.
-	ImageSectionLnkMRelocOvfl = 0x01000000
+	ImageSectionLnkNRelocOvfl = 0x01000000
 
 	// ImageSectionMemDiscardable indicates the section can be discarded as needed.
 	ImageSectionMemDiscardable = 0x02000000
@@ -547,7 +547,7 @@ func (section *Section) PrettySectionFlags() []string {
 		ImageSectionAlign2048Bytes:       "Align2048Bytes",
 		ImageSectionAlign4096Bytes:       "Align4096Bytes",
 		ImageSectionAlign8192Bytes:       "Align8192Bytes",
-		ImageSectionLnkMRelocOvfl:        "ExtendedReloc",
+		ImageSectionLnkNRelocOvfl:        "ExtendedReloc",
 		ImageSectionMemDiscardable:       "Discardable",
 		ImageSectionMemNotCached:         "NotCached",
 		ImageSectionMemNotPaged:          "NotPaged",
