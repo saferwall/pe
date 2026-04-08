@@ -363,7 +363,7 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 		return ErrOutsideBoundary
 	}
 
-	if certHeader.Length == 0 {
+	if certHeader.Length < certSize {
 		return ErrSecurityDataDirInvalid
 	}
 
@@ -604,23 +604,21 @@ func parseAuthenticodeContent(content []byte) (AuthenticodeContent, error) {
 }
 
 func formatPkixName(name pkix.Name) string {
-	var formattedName string
+	var parts []string
 	if len(name.Country) > 0 {
-		formattedName = name.Country[0]
+		parts = append(parts, name.Country[0])
 	}
-
 	if len(name.Province) > 0 {
-		formattedName += ", " + name.Province[0]
+		parts = append(parts, name.Province[0])
 	}
-
 	if len(name.Locality) > 0 {
-		formattedName += ", " + name.Locality[0]
+		parts = append(parts, name.Locality[0])
 	}
-
 	if len(name.Organization) > 0 {
-		formattedName += ", " + name.Organization[0]
+		parts = append(parts, name.Organization[0])
 	}
-
-	formattedName += ", " + name.CommonName
-	return formattedName
+	if name.CommonName != "" {
+		parts = append(parts, name.CommonName)
+	}
+	return strings.Join(parts, ", ")
 }
