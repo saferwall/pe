@@ -56,7 +56,10 @@ func main() {
 	dumpDelayedImport := dumpCmd.Bool("delay", false, "Dump delay import descriptor")
 	dumpCLR := dumpCmd.Bool("clr", false, "Dump CLR")
 
-	verCmd := flag.NewFlagSet("version", flag.ExitOnError)
+	dumpCmd.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: pedumper dump [flags] <file-or-directory>\n\nFlags:\n")
+		dumpCmd.PrintDefaults()
+	}
 
 	if len(os.Args) < 2 {
 		showHelp()
@@ -65,28 +68,40 @@ func main() {
 	switch os.Args[1] {
 
 	case "dump":
-		dumpCmd.Parse(os.Args[3:])
+		dumpCmd.Parse(os.Args[2:])
+
+		args := dumpCmd.Args()
+		if len(args) == 0 {
+			fmt.Fprintf(os.Stderr, "Error: missing file or directory path\n\n")
+			dumpCmd.Usage()
+			os.Exit(1)
+		}
+		filePath := args[0]
+
+		// If no flags are specified, dump everything.
+		noFlagsSet := true
+		dumpCmd.Visit(func(f *flag.Flag) { noFlagsSet = false })
 
 		cfg := config{
-			wantDOSHeader:   *dumpDOSHdr,
-			wantRichHeader:  *dumpRichHdr,
-			wantNTHeader:    *dumpNTHdr,
-			wantCOFF:        *dumpCOFF,
-			wantDataDirs:    *dumpDirs,
-			wantSections:    *dumpSections,
-			wantExport:      *dumpExport,
-			wantImport:      *dumpImport,
-			wantResource:    *dumpResource,
-			wantException:   *dumpException,
-			wantCertificate: *dumpCertificate,
-			wantReloc:       *dumpReloc,
-			wantDebug:       *dumpDebug,
-			wantTLS:         *dumpTLS,
-			wantLoadCfg:     *dumpLoadCfg,
-			wantBoundImp:    *dumpBoundImport,
-			wantIAT:         *dumpIAT,
-			wantDelayImp:    *dumpDelayedImport,
-			wantCLR:         *dumpCLR,
+			wantDOSHeader:   *dumpDOSHdr || noFlagsSet,
+			wantRichHeader:  *dumpRichHdr || noFlagsSet,
+			wantNTHeader:    *dumpNTHdr || noFlagsSet,
+			wantCOFF:        *dumpCOFF || noFlagsSet,
+			wantDataDirs:    *dumpDirs || noFlagsSet,
+			wantSections:    *dumpSections || noFlagsSet,
+			wantExport:      *dumpExport || noFlagsSet,
+			wantImport:      *dumpImport || noFlagsSet,
+			wantResource:    *dumpResource || noFlagsSet,
+			wantException:   *dumpException || noFlagsSet,
+			wantCertificate: *dumpCertificate || noFlagsSet,
+			wantReloc:       *dumpReloc || noFlagsSet,
+			wantDebug:       *dumpDebug || noFlagsSet,
+			wantTLS:         *dumpTLS || noFlagsSet,
+			wantLoadCfg:     *dumpLoadCfg || noFlagsSet,
+			wantBoundImp:    *dumpBoundImport || noFlagsSet,
+			wantIAT:         *dumpIAT || noFlagsSet,
+			wantDelayImp:    *dumpDelayedImport || noFlagsSet,
+			wantCLR:         *dumpCLR || noFlagsSet,
 		}
 
 		// Start as many workers you want, default to cpu count -1.
@@ -95,18 +110,17 @@ func main() {
 			go loopFilesWorker(cfg)
 		}
 
-		if !isDirectory(os.Args[2]) {
+		if !isDirectory(filePath) {
 			// Input path in a single file.
-			parsePE(os.Args[2], cfg)
+			parsePE(filePath, cfg)
 		} else {
 			// Input path in a directory.
-			LoopDirsFiles(os.Args[2])
+			LoopDirsFiles(filePath)
 			wg.Wait()
 		}
 
 	case "version":
-		verCmd.Parse(os.Args[2:])
-		fmt.Println("You are using version 1.3.0")
+		fmt.Println("You are using version 1.6.0")
 	default:
 		showHelp()
 	}
@@ -119,10 +133,17 @@ func showHelp() {
 ╠═╝║╣   ├─┘├─┤├┬┘└─┐├┤ ├┬┘
 ╩  ╚═╝  ┴  ┴ ┴┴└─└─┘└─┘┴└─
 
-	A PE-Parser built for speed and malware-analysis in mind.
-	Brought to you by Saferwall (c) 2018 MIT
+A PE-Parser built for speed and malware-analysis in mind.
+Brought to you by Saferwall (c) 2018 MIT
+
+Usage: pedumper <command> [options]
+
+Commands:
+  dump [flags] <file-or-directory>    Parse and dump PE file information
+  version                             Show version information
+
+Run 'pedumper dump -help' for dump flags.
 `)
-	fmt.Println("\nAvailable sub-commands 'dump' or 'version' subcommands")
 
 	os.Exit(1)
 }

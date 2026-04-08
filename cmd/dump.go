@@ -463,6 +463,34 @@ func parsePE(filename string, cfg config) {
 		}
 	}
 
+	if cfg.wantExport && pe.FileInfo.HasExport {
+		fmt.Printf("\nEXPORTS\n********\n\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		expDir := pe.Export.Struct
+		fmt.Fprintf(w, "Characteristics:\t 0x%x\n", expDir.Characteristics)
+		fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", expDir.TimeDateStamp,
+			humanizeTimestamp(expDir.TimeDateStamp))
+		fmt.Fprintf(w, "Major Version:\t 0x%x\n", expDir.MajorVersion)
+		fmt.Fprintf(w, "Minor Version:\t 0x%x\n", expDir.MinorVersion)
+		fmt.Fprintf(w, "Name:\t 0x%x\n", expDir.Name)
+		fmt.Fprintf(w, "Base:\t 0x%x\n", expDir.Base)
+		fmt.Fprintf(w, "Number Of Functions:\t 0x%x\n", expDir.NumberOfFunctions)
+		fmt.Fprintf(w, "Number Of Names:\t 0x%x\n", expDir.NumberOfNames)
+		fmt.Fprintf(w, "Address Of Functions:\t 0x%x\n", expDir.AddressOfFunctions)
+		fmt.Fprintf(w, "Address Of Names:\t 0x%x\n", expDir.AddressOfNames)
+		fmt.Fprintf(w, "Address Of Name Ordinals:\t 0x%x\n", expDir.AddressOfNameOrdinals)
+		w.Flush()
+
+		fmt.Printf("\n  DLL Name: %s\n\n", pe.Export.Name)
+		w = tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		fmt.Fprintln(w, "Ordinal\tFunctionRVA\tNameOrdinal\tNameRVA\tName\tForwarder\t")
+		for _, fn := range pe.Export.Functions {
+			fmt.Fprintf(w, "0x%x\t0x%x\t0x%x\t0x%x\t%s\t%s\t\n",
+				fn.Ordinal, fn.FunctionRVA, fn.NameOrdinal, fn.NameRVA, fn.Name, fn.Forwarder)
+		}
+		w.Flush()
+	}
+
 	if cfg.wantResource && pe.FileInfo.HasResource {
 		var printRsrcDir func(rsrcDir peparser.ResourceDirectory)
 		padding := 0
