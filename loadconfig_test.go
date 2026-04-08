@@ -160,6 +160,7 @@ func TestLoadConfigDirectory(t *testing.T) {
 				GuardEHContinuationCount:       0x46,
 			},
 		},
+
 	}
 
 	for _, tt := range tests {
@@ -1013,5 +1014,29 @@ func TestLoadConfigDirectoryVolatileMetadata(t *testing.T) {
 					infoRangeEntry, tt.out.infoRangeEntry)
 			}
 		})
+	}
+}
+
+func TestLoadConfigDirectoryCorruptSize(t *testing.T) {
+	// This PE has a LoadConfig Size field (0xb50087) that far exceeds the
+	// maximum valid struct size. parseLoadConfigDirectory should return an
+	// error instead of panicking.
+	path := getAbsoluteFilePath("test/03f18017c215ad67f4d043cd733d6f762edbf99f9f7e0ed89166536f80544d96")
+	ops := Options{Fast: true}
+	file, err := New(path, &ops)
+	if err != nil {
+		t.Fatalf("New(%s) failed, reason: %v", path, err)
+	}
+
+	err = file.Parse()
+	if err != nil {
+		t.Fatalf("Parse(%s) failed, reason: %v", path, err)
+	}
+
+	oh32 := file.NtHeader.OptionalHeader.(ImageOptionalHeader32)
+	dirEntry := oh32.DataDirectory[ImageDirectoryEntryLoadConfig]
+	err = file.parseLoadConfigDirectory(dirEntry.VirtualAddress, dirEntry.Size)
+	if err == nil {
+		t.Fatalf("parseLoadConfigDirectory should have failed for corrupt LoadConfig size")
 	}
 }
