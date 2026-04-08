@@ -806,6 +806,43 @@ func parsePE(filename string, cfg config) {
 		w.Flush()
 	}
 
+	if cfg.wantDelayImp && pe.FileInfo.HasDelayImp {
+		fmt.Printf("\nDELAY IMPORTS\n**************\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		for _, imp := range pe.DelayImports {
+			desc := imp.Descriptor
+			fmt.Printf("\n\t------[ %s ]------\n\n", imp.Name)
+			fmt.Fprintf(w, "Attributes:\t 0x%x\n", desc.Attributes)
+			fmt.Fprintf(w, "Name:\t 0x%x\n", desc.Name)
+			fmt.Fprintf(w, "Module Handle RVA:\t 0x%x\n", desc.ModuleHandleRVA)
+			fmt.Fprintf(w, "Import Address Table RVA:\t 0x%x\n", desc.ImportAddressTableRVA)
+			fmt.Fprintf(w, "Import Name Table RVA:\t 0x%x\n", desc.ImportNameTableRVA)
+			fmt.Fprintf(w, "Bound Import Address Table RVA:\t 0x%x\n", desc.BoundImportAddressTableRVA)
+			fmt.Fprintf(w, "Unload Information Table RVA:\t 0x%x\n", desc.UnloadInformationTableRVA)
+			fmt.Fprintf(w, "TimeDateStamp:\t 0x%x (%s)\n", desc.TimeDateStamp,
+				humanizeTimestamp(desc.TimeDateStamp))
+			fmt.Fprintf(w, "\n")
+			fmt.Fprintln(w, "Name\tThunkRVA\tThunkValue\tOriginalThunkRVA\tOriginalThunkValue\tHint\t")
+			for _, fn := range imp.Functions {
+				fmt.Fprintf(w, "%s\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t\n",
+					fn.Name, fn.ThunkRVA, fn.ThunkValue,
+					fn.OriginalThunkRVA, fn.OriginalThunkValue, fn.Hint)
+			}
+			w.Flush()
+		}
+	}
+
+	if cfg.wantIAT && pe.FileInfo.HasIAT {
+		fmt.Printf("\nIAT\n****\n\n")
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', tabwriter.AlignRight)
+		fmt.Fprintln(w, "Index\tRVA\tValue\tMeaning\t")
+		for _, entry := range pe.IAT {
+			fmt.Fprintf(w, "0x%x\t0x%x\t%v\t%s\t\n",
+				entry.Index, entry.Rva, entry.Value, entry.Meaning)
+		}
+		w.Flush()
+	}
+
 	if cfg.wantCLR && pe.FileInfo.HasCLR {
 		fmt.Printf("\nCLR\n****\n")
 
