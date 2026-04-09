@@ -367,7 +367,6 @@ type ImageCORVTableFixup struct {
 
 // MetadataHeader consists of a storage signature and a storage header.
 type MetadataHeader struct {
-
 	// The storage signature, which must be 4-byte aligned:
 	// ”Magic” signature for physical metadata, currently 0x424A5342, or, read
 	// as characters, BSJB—the initials of four “founding fathers” Brian Harry,
@@ -482,7 +481,6 @@ type CLRData struct {
 }
 
 func (pe *File) parseMetadataStream(off, size uint32) (MetadataTableStreamHeader, error) {
-
 	mdTableStreamHdr := MetadataTableStreamHeader{}
 	if size == 0 {
 		return mdTableStreamHdr, nil
@@ -609,10 +607,17 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 			mdStreamHdrSize = sh.Size
 		}
 
-		// Save the stream into a map <string> []byte.
 		rva = clrHeader.MetaData.VirtualAddress + sh.Offset
 		start := pe.GetOffsetFromRva(rva)
-		pe.CLR.MetadataStreams[sh.Name] = pe.data[start : start+sh.Size]
+
+		// Some malformed/Corrupt PEs has invalid sizes on sh.
+		mdStreamBytes := make([]byte, 0)
+		if start+sh.Size <= uint32(len(pe.data)) {
+			mdStreamBytes = pe.data[start : start+sh.Size]
+		}
+
+		// Save the stream into a map <string> []byte.
+		pe.CLR.MetadataStreams[sh.Name] = mdStreamBytes
 		pe.CLR.MetadataStreamHeaders = append(pe.CLR.MetadataStreamHeaders, sh)
 	}
 

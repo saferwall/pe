@@ -12,7 +12,6 @@ import (
 )
 
 func TestClrDirectoryHeaders(t *testing.T) {
-
 	type TestClrHeaders struct {
 		clrHeader            ImageCOR20Header
 		mdHeader             MetadataHeader
@@ -143,7 +142,6 @@ func TestClrDirectoryHeaders(t *testing.T) {
 }
 
 func TestClrDirectoryMetadataTables(t *testing.T) {
-
 	type TestClrMetadataTable struct {
 		tableKind int
 		table     MetadataTable
@@ -841,7 +839,6 @@ func TestClrDirectoryMetadataTables(t *testing.T) {
 }
 
 func TestClrDirectorCOMImageFlagsType(t *testing.T) {
-
 	tests := []struct {
 		in  int
 		out []string
@@ -860,6 +857,46 @@ func TestClrDirectorCOMImageFlagsType(t *testing.T) {
 			if !reflect.DeepEqual(got, tt.out) {
 				t.Errorf("CLR header flags assertion failed, got %v, want %v",
 					got, tt.out)
+			}
+		})
+	}
+}
+
+func TestClrDirectoryMalformed(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+	}{
+		{
+			name: "malformed_dotnet_binary",
+			in:   getAbsoluteFilePath("test/04521ac8297cabd58e62e86039f6874a06753362dac4edc56bbf6d4655bb67bd"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			file, err := New(tt.in, &Options{})
+			if err != nil {
+				t.Fatalf("New(%s) failed, reason: %v", tt.in, err)
+			}
+
+			// Should not panic, and should continue parsing past the
+			// malformed metadata stream.
+			err = file.Parse()
+			if err != nil {
+				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
+			}
+
+			// Verify that streams with out-of-bounds sizes get
+			// an empty byte slice instead of causing a panic.
+			for _, name := range []string{"#Strings", "#US", "#GUID", "#Blob"} {
+				data, ok := file.CLR.MetadataStreams[name]
+				if !ok {
+					t.Errorf("expected stream %q to be present", name)
+				}
+				if len(data) != 0 {
+					t.Errorf("expected stream %q to be empty, got len=%d", name, len(data))
+				}
 			}
 		})
 	}
