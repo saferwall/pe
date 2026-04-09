@@ -13,7 +13,6 @@ type TestDOSHeader struct {
 }
 
 func TestParseDOSHeader(t *testing.T) {
-
 	tests := []struct {
 		in  string
 		out TestDOSHeader
@@ -70,7 +69,6 @@ func TestParseDOSHeader(t *testing.T) {
 }
 
 func TestParseDOSHeaderNonMZ(t *testing.T) {
-
 	tests := []struct {
 		in  string
 		out error
