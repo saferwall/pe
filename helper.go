@@ -144,7 +144,7 @@ func IsValidFunctionName(functionName string) bool {
 	numerals := "0123456789"
 	special := "_?@$()<>"
 	charset := alphabet + numerals + special
-	for _, c := range charset {
+	for _, c := range functionName {
 		if !strings.Contains(charset, string(c)) {
 			return false
 		}
@@ -159,7 +159,7 @@ func IsPrintable(s string) bool {
 	whitespace := " \t\n\r\v\f"
 	special := "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 	charset := alphabet + numerals + special + whitespace
-	for _, c := range charset {
+	for _, c := range s {
 		if !strings.Contains(charset, string(c)) {
 			return false
 		}
