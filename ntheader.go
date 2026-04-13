@@ -33,7 +33,7 @@ type ImageNtHeader struct {
 	// executable files. It is represented with IMAGE_FILE_HEADER structure.
 	FileHeader ImageFileHeader `json:"file_header"`
 
-	// OptionalHeader is of type *OptionalHeader32 or *OptionalHeader64.
+	// OptionalHeader is of type ImageOptionalHeader32 or ImageOptionalHeader64.
 	OptionalHeader interface{} `json:"optional_header"`
 }
 
