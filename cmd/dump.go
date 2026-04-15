@@ -656,14 +656,15 @@ func parsePE(filename string, cfg config) {
 				if err != nil {
 					continue
 				}
-				if debugSignature == peparser.CVSignatureRSDS {
+				switch debugSignature {
+				case peparser.CVSignatureRSDS:
 					pdb := debug.Info.(peparser.CVInfoPDB70)
 					fmt.Fprintf(w, "CV Signature:\t 0x%x (%s)\n", pdb.CVSignature,
 						pdb.CVSignature.String())
 					fmt.Fprintf(w, "Signature:\t %s\n", pdb.Signature.String())
 					fmt.Fprintf(w, "Age:\t 0x%x\n", pdb.Age)
 					fmt.Fprintf(w, "PDB FileName:\t %s\n", pdb.PDBFileName)
-				} else if debugSignature == peparser.CVSignatureNB10 {
+				case peparser.CVSignatureNB10:
 					pdb := debug.Info.(peparser.CVInfoPDB20)
 					fmt.Fprintf(w, "CV Header Signature:\t 0x%x (%s)\n",
 						pdb.CVHeader.Signature, pdb.CVHeader.Signature.String())
@@ -672,7 +673,6 @@ func parsePE(filename string, cfg config) {
 						humanizeTimestamp(pdb.Signature))
 					fmt.Fprintf(w, "Age:\t 0x%x\n", pdb.Age)
 					fmt.Fprintf(w, "PDBFileName:\t %s\n", pdb.PDBFileName)
-
 				}
 			case peparser.ImageDebugTypePOGO:
 				pogo := debug.Info.(peparser.POGO)
@@ -759,7 +759,7 @@ func parsePE(filename string, cfg config) {
 			fmt.Fprintf(w, "Characteristics:\t 0x%x (%s)\n", imgTLSDirectory64.Characteristics,
 				imgTLSDirectory64.Characteristics.String())
 			fmt.Fprintf(w, "Callbacks:\n")
-			if len(tls.Callbacks.([]uint64)) > 0 {
+			if tls.Callbacks != nil && len(tls.Callbacks.([]uint64)) > 0 {
 				for _, callback := range tls.Callbacks.([]uint64) {
 					fmt.Fprintf(w, "0x%x\t\n", callback)
 				}
@@ -774,7 +774,7 @@ func parsePE(filename string, cfg config) {
 			fmt.Fprintf(w, "Characteristics:\t 0x%x (%s)\n", imgTLSDirectory32.Characteristics,
 				imgTLSDirectory32.Characteristics.String())
 			fmt.Fprintf(w, "Callbacks:\n")
-			if len(tls.Callbacks.([]uint32)) > 0 {
+			if tls.Callbacks != nil && len(tls.Callbacks.([]uint32)) > 0 {
 				for _, callback := range tls.Callbacks.([]uint32) {
 					fmt.Fprintf(w, "0x%x\t\n", callback)
 				}
