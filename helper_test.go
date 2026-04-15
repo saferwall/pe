@@ -9,7 +9,6 @@ import (
 )
 
 func TestIsEXE(t *testing.T) {
-
 	tests := []struct {
 		in  string
 		out bool
@@ -63,13 +62,11 @@ func TestIsDLL(t *testing.T) {
 			if got != tt.out {
 				t.Errorf("IsDLL(%s) got %v, want %v", tt.in, got, tt.out)
 			}
-
 		})
 	}
 }
 
 func TestIsDriver(t *testing.T) {
-
 	tests := []struct {
 		in  string
 		out bool
@@ -88,12 +85,10 @@ func TestIsDriver(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Parse(%s) failed, reason: %v", tt.in, err)
 			}
-
 			got := file.IsDriver()
 			if got != tt.out {
 				t.Errorf("IsDriver(%s) got %v, want %v", tt.in, got, tt.out)
 			}
-
 		})
 	}
 }
