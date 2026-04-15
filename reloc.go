@@ -135,10 +135,15 @@ type Relocation struct {
 
 func (pe *File) parseRelocations(dataRVA, rva, size uint32) ([]ImageBaseRelocationEntry, error) {
 	var relocEntries []ImageBaseRelocationEntry
-
 	relocEntriesCount := size / 2
 	if relocEntriesCount > pe.opts.MaxRelocEntriesCount {
 		pe.Anomalies = append(pe.Anomalies, AnoAddressOfDataBeyondLimits)
+		// Defense-in-depth: cap the iteration. A block with a genuinely huge
+		// (but still smaller than SizeOfImage) SizeOfBlock would otherwise
+		// have us decoding tens of thousands of meaningless WORDs as fake
+		// entries — see MaxDefaultRelocEntriesCount above for the reference
+		// malware sample that motivated this cap.
+		relocEntriesCount = pe.opts.MaxRelocEntriesCount
 	}
 
 	offset := pe.GetOffsetFromRva(dataRVA)
@@ -176,6 +181,37 @@ func (pe *File) parseRelocDirectory(rva, size uint32) error {
 			return err
 		}
 
+		// Implicit end-of-table on a {VirtualAddress=0, SizeOfBlock=0} block.
+		//
+		// The PE/COFF spec does not define this sentinel — it states only that
+		// the data-directory Size field bounds the table (see "The .reloc
+		// Section (Image Only)" in the PE Format spec). In practice though,
+		// many real binaries declare BaseReloc.Size larger than the actual
+		// reloc data: e.g. when the .reloc section's VirtualSize exceeds its
+		// RawSize, or when the linker rounds the directory to a section/page
+		// boundary, the slack is zero-filled. Walking into that slack reads
+		// {0, 0} — and continuing would (a) loop forever (zero size advances
+		// rva by 0) and (b) make parseRelocations underflow on
+		// SizeOfBlock - relocSize and synthesise millions of phantom entries
+		// from whatever bytes happen to sit past the real reloc data.
+		//
+		// The Windows loader and every major PE parser (pefile, LIEF, ...)
+		// treat {0, 0} as table termination for the same reasons; we follow
+		// suit. The MaxRelocEntriesCount cap in parseRelocations remains as
+		// the spec-strict backstop for blocks with a non-zero but bogus size.
+		if baseReloc.SizeOfBlock == 0 {
+			break
+		}
+
+		// Per the spec, Block Size is "the total number of bytes in the base
+		// relocation block, including the Page RVA and Block Size fields"
+		// — so the minimum legitimate value is the 8-byte header alone (zero
+		// entries). Anything smaller is malformed and would underflow the
+		// SizeOfBlock - relocSize calculation passed to parseRelocations.
+		if baseReloc.SizeOfBlock < relocSize {
+			return ErrInvalidBasicRelocSizeOfBloc
+		}
+
 		// VirtualAddress must lie within the Image.
 		if baseReloc.VirtualAddress > sizeOfImage {
 			return ErrInvalidBaseRelocVA
@@ -198,9 +234,6 @@ func (pe *File) parseRelocDirectory(rva, size uint32) error {
 			Entries: relocEntries,
 		})
 
-		if baseReloc.SizeOfBlock == 0 {
-			break
-		}
 		rva += baseReloc.SizeOfBlock
 	}
 

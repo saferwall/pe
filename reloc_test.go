@@ -9,7 +9,6 @@ import (
 )
 
 func TestParseRelocDirectoryData(t *testing.T) {
-
 	type TestRelocData struct {
 		imgBaseRelocation ImageBaseRelocation
 		relocEntriesCount int
@@ -77,8 +76,80 @@ func TestParseRelocDirectoryData(t *testing.T) {
 	}
 }
 
-func TestParseRelocDirectoryEntry(t *testing.T) {
+// TestParseRelocDirectoryZeroSizeOfBlock exercises the end-of-table sentinel
+// (VirtualAddress=0, SizeOfBlock=0). Before the fix, the sentinel was handed
+// to parseRelocations unchanged; SizeOfBlock - relocSize underflowed (uint32)
+// and the parser synthesised millions of phantom entries from bytes past the
+// real reloc table, ballooning the marshalled output to ~154 MB.
+//
+// The sample below is a real PE with 14 legitimate relocation blocks followed
+// by the {0,0} sentinel. We assert that:
+//   - the sentinel block is NOT appended to pe.Relocations
+//   - the total number of parsed entries stays bounded (3558 real entries)
+//   - the last real block matches the expected header
+func TestParseRelocDirectoryZeroSizeOfBlock(t *testing.T) {
+	in := getAbsoluteFilePath(
+		"test/05df99cc2e77a59aa3443cae13325af553271bddaeedff3c08bf4f6995bbc62d")
 
+	ops := Options{Fast: true}
+	file, err := New(in, &ops)
+	if err != nil {
+		t.Fatalf("New(%s) failed, reason: %v", in, err)
+	}
+	if err := file.Parse(); err != nil {
+		t.Fatalf("Parse(%s) failed, reason: %v", in, err)
+	}
+
+	var va, size uint32
+	switch file.Is64 {
+	case true:
+		dirEntry := file.NtHeader.OptionalHeader.(ImageOptionalHeader64).
+			DataDirectory[ImageDirectoryEntryBaseReloc]
+		va, size = dirEntry.VirtualAddress, dirEntry.Size
+	case false:
+		dirEntry := file.NtHeader.OptionalHeader.(ImageOptionalHeader32).
+			DataDirectory[ImageDirectoryEntryBaseReloc]
+		va, size = dirEntry.VirtualAddress, dirEntry.Size
+	}
+
+	if err := file.parseRelocDirectory(va, size); err != nil {
+		t.Fatalf("parseRelocDirectory(%s) failed, reason: %v", in, err)
+	}
+
+	// Exactly 14 real blocks — the {0,0} sentinel must not be appended.
+	if got, want := len(file.Relocations), 14; got != want {
+		t.Fatalf("relocation block count: got %d, want %d", got, want)
+	}
+
+	// No block should carry a zero SizeOfBlock — if one does, the sentinel
+	// slipped through.
+	for i, r := range file.Relocations {
+		if r.Data.SizeOfBlock == 0 {
+			t.Errorf("block %d has SizeOfBlock=0 (sentinel leaked into result)", i)
+		}
+	}
+
+	// Total entries across all blocks must be bounded (pre-fix: 4,270,384).
+	total := 0
+	for _, r := range file.Relocations {
+		total += len(r.Entries)
+	}
+	if total != 3558 {
+		t.Errorf("total relocation entries: got %d, want 3558", total)
+	}
+
+	// The last legitimate block.
+	last := file.Relocations[13]
+	wantLast := ImageBaseRelocation{VirtualAddress: 0x466000, SizeOfBlock: 20}
+	if last.Data != wantLast {
+		t.Errorf("last block header: got %+v, want %+v", last.Data, wantLast)
+	}
+	if len(last.Entries) != 6 {
+		t.Errorf("last block entry count: got %d, want 6", len(last.Entries))
+	}
+}
+
+func TestParseRelocDirectoryEntry(t *testing.T) {
 	type TestRelocEntry struct {
 		imgBaseRelocationEntry ImageBaseRelocationEntry
 		relocEntriesCount      int
@@ -170,7 +241,6 @@ func TestParseRelocDirectoryEntry(t *testing.T) {
 				t.Errorf("pretty reloc type assertion failed, got %v, want %v", relocType,
 					tt.out.relocTypeMeaning)
 			}
-
 		})
 	}
 }

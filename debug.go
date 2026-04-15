@@ -423,7 +423,6 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 				offset = debugDir.PointerToRawData + 4
 				c := uint32(0)
 				for c < debugDir.SizeOfData-4 {
-
 					pogoEntry := ImagePGOItem{}
 					pogoEntry.RVA, err = pe.ReadUint32(offset)
 					if err != nil {
