@@ -135,10 +135,12 @@ type Relocation struct {
 
 func (pe *File) parseRelocations(dataRVA, rva, size uint32) ([]ImageBaseRelocationEntry, error) {
 	var relocEntries []ImageBaseRelocationEntry
-
 	relocEntriesCount := size / 2
 	if relocEntriesCount > pe.opts.MaxRelocEntriesCount {
 		pe.Anomalies = append(pe.Anomalies, AnoAddressOfDataBeyondLimits)
+		// Cap iteration so a malformed/corrupted PE cannot drive us into
+		// allocating millions of phantom entries from arbitrary bytes.
+		relocEntriesCount = pe.opts.MaxRelocEntriesCount
 	}
 
 	offset := pe.GetOffsetFromRva(dataRVA)
@@ -176,6 +178,20 @@ func (pe *File) parseRelocDirectory(rva, size uint32) error {
 			return err
 		}
 
+		// End-of-table sentinel: {VirtualAddress=0, SizeOfBlock=0}. Stop here
+		// *before* calling parseRelocations; otherwise we end up synthesising
+		// billions of fake entries out of whatever bytes happen to follow the
+		// real reloc table.
+		if baseReloc.SizeOfBlock == 0 {
+			break
+		}
+
+		// A legitimate block must at least contain the 8-byte header.
+		// Anything smaller is likely malformed/corrupted.
+		if baseReloc.SizeOfBlock < relocSize {
+			return ErrInvalidBasicRelocSizeOfBloc
+		}
+
 		// VirtualAddress must lie within the Image.
 		if baseReloc.VirtualAddress > sizeOfImage {
 			return ErrInvalidBaseRelocVA
@@ -198,9 +214,6 @@ func (pe *File) parseRelocDirectory(rva, size uint32) error {
 			Entries: relocEntries,
 		})
 
-		if baseReloc.SizeOfBlock == 0 {
-			break
-		}
 		rva += baseReloc.SizeOfBlock
 	}
 

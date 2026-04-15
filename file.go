@@ -47,7 +47,6 @@ type File struct {
 
 // Options that influence the PE parsing behaviour.
 type Options struct {
-
 	// Parse only the PE header and do not parse data directories, by default (false).
 	Fast bool
 
