@@ -30,6 +30,10 @@ var (
 )
 
 func loopFilesWorker(cfg config) error {
+	logger := log.NewStdLogger(os.Stdout)
+	logger = log.NewFilter(logger, log.FilterLevel(log.LevelInfo))
+	log := log.NewHelper(logger)
+
 	for path := range jobs {
 		files, err := os.ReadDir(path)
 		if err != nil {
@@ -37,11 +41,17 @@ func loopFilesWorker(cfg config) error {
 			return err
 		}
 
+		isEmpty := true
 		for _, file := range files {
 			if !file.IsDir() {
+				isEmpty = false
 				fullpath := filepath.Join(path, file.Name())
 				parsePE(fullpath, cfg)
 			}
+		}
+
+		if isEmpty {
+			log.Infof("No files found in %s", path)
 		}
 		wg.Done()
 	}
@@ -54,8 +64,8 @@ func LoopDirsFiles(path string) error {
 		return err
 	}
 
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
 		jobs <- path
 	}()
 	for _, file := range files {
@@ -192,6 +202,9 @@ func isDirectory(path string) bool {
 }
 
 func parse(filePath string, cfg config) {
+	logger := log.NewStdLogger(os.Stdout)
+	logger = log.NewFilter(logger, log.FilterLevel(log.LevelInfo))
+	log := log.NewHelper(logger)
 
 	// filePath points to a file.
 	if !isDirectory(filePath) {
@@ -202,11 +215,20 @@ func parse(filePath string, cfg config) {
 		// walk recursively through all files.
 		fileList := []string{}
 		filepath.Walk(filePath, func(path string, f os.FileInfo, err error) error {
-			if !isDirectory(path) {
+			if err != nil {
+				log.Infof("Error accessing %s, reason: %s", path, err)
+				return nil
+			}
+			if !f.IsDir() {
 				fileList = append(fileList, path)
 			}
 			return nil
 		})
+
+		if len(fileList) == 0 {
+			log.Infof("No files found in %s", filePath)
+			return
+		}
 
 		for _, file := range fileList {
 			parsePE(file, cfg)
@@ -222,7 +244,13 @@ func parsePE(filename string, cfg config) {
 
 	log.Infof("parsing filename %s", filename)
 
-	data, _ := os.ReadFile(filename)
+	data, err := os.ReadFile(filename)
+
+	if err != nil {
+		log.Infof("Error while opening file: %s, reason: %s", filename, err)
+		return
+	}
+
 	pe, err := peparser.NewBytes(data, &peparser.Options{
 		Logger:                logger,
 		DisableCertValidation: false,
@@ -230,7 +258,7 @@ func parsePE(filename string, cfg config) {
 	})
 
 	if err != nil {
-		log.Infof("Error while opening file: %s, reason: %s", filename, err)
+		log.Infof("Error initializing the PE parser for %s, reason: %s", filename, err)
 		return
 	}
 	defer pe.Close()
