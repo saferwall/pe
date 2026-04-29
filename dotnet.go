@@ -666,7 +666,7 @@ func (pe *File) parseCLRHeaderDirectory(rva, size uint32) error {
 		}
 
 		// Skip tables that have a unreasonable size
-		if uint64(table.CountCols) * uint64(binary.Size(ModuleTableRow{})) > uint64(len(pe.data)){
+		if uint64(table.CountCols) * 4 > uint64(len(pe.data)){
 			pe.logger.Warnf("Table %s has %d rows, which is not realistic considering PE file's size. Skipping it.", table.Name, table.CountCols)
             continue
 		}
