@@ -20,7 +20,7 @@ var (
 
 	// AnoPETimeStampFuture is reported when the file header timestamp is more
 	// than one day ahead of the current date timestamp.
-	AnoPETimeStampFuture = "file header timestamp set to 0"
+	AnoPETimeStampFuture = "file header timestamp set to the future"
 
 	// NumberOfSections is reported when number of sections is larger or equal than 10.
 	AnoNumberOfSections10Plus = "number of sections is 10+"
@@ -202,8 +202,8 @@ func (pe *File) GetAnomalies() error {
 
 	// This field contains the number of IMAGE_DATA_DIRECTORY entries.
 	//  This field has been 16 since the earliest releases of Windows NT.
-	if (pe.Is64 && oh64.NumberOfRvaAndSizes == 0xA) ||
-		(pe.Is32 && oh32.NumberOfRvaAndSizes == 0xA) {
+	if (pe.Is64 && oh64.NumberOfRvaAndSizes != 16) ||
+		(pe.Is32 && oh32.NumberOfRvaAndSizes != 16) {
 		pe.Anomalies = append(pe.Anomalies, AnoNumberOfRvaAndSizes)
 	}
 
