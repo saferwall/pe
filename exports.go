@@ -81,6 +81,7 @@ type Export struct {
 	Functions []ExportFunction     `json:"functions"`
 	Struct    ImageExportDirectory `json:"struct"`
 	Name      string               `json:"name"`
+	functionsByRVA	map[uint32]int
 }
 
 /*
@@ -313,18 +314,24 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 		exp.Functions = append(exp.Functions, newExport)
 	}
 
+	// Populating the map linking every RVA to its index in the exported functions array.
+	exp.functionsByRVA = make(map[uint32]int, len(exp.Functions))
+	for i, fn := range exp.Functions {
+		if _, ok := exp.functionsByRVA[fn.FunctionRVA]; !ok {
+			exp.functionsByRVA[fn.FunctionRVA] = i
+		}
+	}
 	pe.Export = exp
+
 	pe.HasExport = true
 	return nil
 }
 
 // GetExportFunctionByRVA return an export function given an RVA.
 func (pe *File) GetExportFunctionByRVA(rva uint32) ExportFunction {
-	for _, exp := range pe.Export.Functions {
-		if exp.FunctionRVA == rva {
-			return exp
-		}
-	}
+	if i, ok := pe.Export.functionsByRVA[rva]; ok {
+        return pe.Export.Functions[i]
+    }
 
 	return ExportFunction{}
 }
