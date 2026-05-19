@@ -62,7 +62,11 @@ func (pe *File) ParseRichHeader() error {
 
 	rh := RichHeader{}
 	ntHeaderOffset := pe.DOSHeader.AddressOfNewEXEHeader
-	richSigOffset := bytes.Index(pe.data[:ntHeaderOffset], []byte(RichSignature))
+	dosArea, err := pe.src.slice(0, ntHeaderOffset)
+	if err != nil {
+		return nil
+	}
+	richSigOffset := bytes.Index(dosArea, []byte(RichSignature))
 
 	// For example, .NET executable files do not use the MSVC linker and these
 	// executables do not contain a detectable Rich Header.
@@ -79,7 +83,7 @@ func (pe *File) ParseRichHeader() error {
 	// have been decrypted, but doesn't match the stored key, it can be assumed
 	// the structure had been tampered with. For those that go the extra step to
 	// recalculate the checksum/key, this simple protection mechanism can be bypassed.
-	rh.XORKey = binary.LittleEndian.Uint32(pe.data[richSigOffset+4:])
+	rh.XORKey, _ = pe.ReadUint32(uint32(richSigOffset) + 4)
 
 	// To decrypt the array, start with the DWORD just prior to the `Rich` sequence
 	// and XOR it with the key. Continue the loop backwards, 4 bytes at a time,
@@ -88,7 +92,7 @@ func (pe *File) ParseRichHeader() error {
 	dansSigOffset := -1
 	estimatedBeginDans := richSigOffset - 4 - binary.Size(ImageDOSHeader{})
 	for it := 0; it < estimatedBeginDans; it += 4 {
-		buff := binary.LittleEndian.Uint32(pe.data[richSigOffset-4-it:])
+		buff, _ := pe.ReadUint32(uint32(richSigOffset - 4 - it))
 		res := buff ^ rh.XORKey
 		if res == DansSignature {
 			dansSigOffset = richSigOffset - it - 4
@@ -110,7 +114,7 @@ func (pe *File) ParseRichHeader() error {
 	}
 
 	rh.DansOffset = dansSigOffset
-	rh.Raw = pe.data[dansSigOffset : richSigOffset+8]
+	rh.Raw, _ = pe.src.slice(uint32(dansSigOffset), uint32(richSigOffset+8-dansSigOffset))
 
 	// Reverse the decrypted rich header
 	for i, j := 0, len(decRichHeader)-1; i < j; i, j = i+1, j-1 {
@@ -175,7 +179,8 @@ func (pe *File) RichHeaderChecksum() uint32 {
 		if i >= 0x3C && i < 0x40 {
 			continue
 		}
-		b := uint32(pe.data[i])
+		bv, _ := pe.ReadUint8(uint32(i))
+		b := uint32(bv)
 		checksum += ((b << (i % 32)) | (b>>(32-(i%32)))&0xff)
 		checksum &= 0xFFFFFFFF
 	}

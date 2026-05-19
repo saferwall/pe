@@ -63,7 +63,6 @@ var (
 	// header in the security directory is invalid.
 	ErrSecurityDataDirInvalid = errors.New(
 		`invalid certificate header in security directory`)
-
 )
 
 // CertificateSection represents the security directory of a PE file, which
@@ -316,7 +315,7 @@ func (pe *File) AuthentihashExt(hashers ...hash.Hash) [][]byte {
 	if pe.f != nil {
 		rd = pe.f
 	} else {
-		rd = bytes.NewReader(pe.data)
+		rd = pe.src.readerAt()
 	}
 
 	for _, v := range ranges {
@@ -370,7 +369,7 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 
 	pe.HasCertificate = true
 	pe.Certificates.Header = certHeader
-	pe.Certificates.Raw = pe.data[fileOffset+certSize : fileOffset+certHeader.Length]
+	pe.Certificates.Raw, _ = pe.src.slice(fileOffset+certSize, certHeader.Length-uint32(certSize))
 
 	certContent := pe.Certificates.Raw
 	for {

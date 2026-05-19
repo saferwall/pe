@@ -384,11 +384,13 @@ func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) 
 		advanceBy++
 	case UwOpAllocLarge:
 		if unwindCode.OpInfo == 0 {
-			size := int(binary.LittleEndian.Uint16(pe.data[offset+2:]) * 8)
+			v16, _ := pe.ReadUint16(offset + 2)
+			size := int(v16 * 8)
 			unwindCode.Operand = "Size=" + strconv.Itoa(size)
 			advanceBy += 2
 		} else {
-			size := int(binary.LittleEndian.Uint32(pe.data[offset+2:]) << 16)
+			v32, _ := pe.ReadUint32(offset + 2)
+			size := int(v32 << 16)
 			unwindCode.Operand = "Size=" + strconv.Itoa(size)
 			advanceBy += 3
 		}
@@ -399,26 +401,26 @@ func (pe *File) parseUnwindCode(offset uint32, version uint8) (UnwindCode, int) 
 		unwindCode.Operand = "Register=" + OpInfoRegisters[unwindCode.OpInfo]
 		advanceBy++
 	case UwOpSaveNonVol:
-		fo := binary.LittleEndian.Uint16(pe.data[offset+2:])
+		fo, _ := pe.ReadUint16(offset + 2)
 		unwindCode.FrameOffset = fo * 8
 		unwindCode.Operand = "Register=" + OpInfoRegisters[unwindCode.OpInfo] +
 			", Offset=" + strconv.Itoa(int(unwindCode.FrameOffset))
 		advanceBy += 2
 	case UwOpSaveNonVolFar:
-		fo := binary.LittleEndian.Uint32(pe.data[offset+2:])
-		unwindCode.FrameOffset = uint16(fo * 8)
+		v32, _ := pe.ReadUint32(offset + 2)
+		unwindCode.FrameOffset = uint16(v32 * 8)
 		unwindCode.Operand = "Register=" + OpInfoRegisters[unwindCode.OpInfo] +
 			", Offset=" + strconv.Itoa(int(unwindCode.FrameOffset))
 		advanceBy += 3
 	case UwOpSaveXmm128:
-		fo := binary.LittleEndian.Uint16(pe.data[offset+2:])
+		fo, _ := pe.ReadUint16(offset + 2)
 		unwindCode.FrameOffset = fo * 16
 		unwindCode.Operand = "Register=XMM" + strconv.Itoa(int(unwindCode.OpInfo)) +
 			", Offset=" + strconv.Itoa(int(unwindCode.FrameOffset))
 		advanceBy += 2
 	case UwOpSaveXmm128Far:
-		fo := binary.LittleEndian.Uint32(pe.data[offset+2:])
-		unwindCode.FrameOffset = uint16(fo)
+		v32, _ := pe.ReadUint32(offset + 2)
+		unwindCode.FrameOffset = uint16(v32)
 		unwindCode.Operand = "Register=XMM" + strconv.Itoa(int(unwindCode.OpInfo)) +
 			", Offset=" + strconv.Itoa(int(unwindCode.FrameOffset))
 		advanceBy += 3
@@ -493,7 +495,7 @@ func (pe *File) parseUnwindInfo(unwindInfo uint32) UnwindInfo {
 	if ui.Flags&UnwFlagEHandler != 0 || ui.Flags&UnwFlagUHandler != 0 {
 		if ui.Flags&UnwFlagChainInfo == 0 {
 			handlerOffset := offset + 2*uint32(i)
-			ui.ExceptionHandler = binary.LittleEndian.Uint32(pe.data[handlerOffset:])
+			ui.ExceptionHandler, _ = pe.ReadUint32(handlerOffset)
 		}
 	}
 

@@ -165,7 +165,7 @@ func (pe *File) parseImportDirectory(rva, size uint32) (err error) {
 		// If the array of thunks is somewhere earlier than the import
 		// descriptor we can set a maximum length for the array. Otherwise
 		// just set a maximum length of the size of the file
-		maxLen := uint32(len(pe.data)) - fileOffset
+		maxLen := pe.size - fileOffset
 		if rva > importDesc.OriginalFirstThunk || rva > importDesc.FirstThunk {
 			if rva < importDesc.OriginalFirstThunk {
 				maxLen = rva - importDesc.FirstThunk
@@ -690,7 +690,7 @@ func (pe *File) parseImports64(importDesc interface{}, maxLen uint32) ([]ImportF
 
 				hintNameTableRva := table[idx].ImageThunkData.AddressOfData & addressMask64
 				off := pe.GetOffsetFromRva(uint32(hintNameTableRva))
-				imp.Hint = binary.LittleEndian.Uint16(pe.data[off:])
+				imp.Hint, _ = pe.ReadUint16(off)
 				imp.Name = pe.getStringAtRVA(uint32(table[idx].ImageThunkData.AddressOfData+2),
 					maxImportNameLength)
 				if !IsValidFunctionName(imp.Name) {

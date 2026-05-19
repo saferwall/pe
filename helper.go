@@ -8,11 +8,12 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"golang.org/x/text/encoding/unicode"
 	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"golang.org/x/text/encoding/unicode"
 )
 
 const (
@@ -210,7 +211,7 @@ func (pe *File) GetOffsetFromRva(rva uint32) uint32 {
 	// data lies and return the offset within the file.
 	section := pe.getSectionByRva(rva)
 	if section == nil {
-		if rva < uint32(len(pe.data)) {
+		if rva < pe.size {
 			return rva
 		}
 		return ^uint32(0)
@@ -279,7 +280,11 @@ func (pe *File) getStringAtRVA(rva, maxLen uint32) string {
 		if end > pe.size {
 			end = pe.size
 		}
-		s := pe.GetStringFromData(0, pe.data[rva:end])
+		b, err := pe.src.slice(rva, end-rva)
+		if err != nil {
+			return ""
+		}
+		s := pe.GetStringFromData(0, b)
 		return string(s)
 	}
 	s := pe.GetStringFromData(0, section.Data(rva, maxLen, pe))
@@ -287,29 +292,47 @@ func (pe *File) getStringAtRVA(rva, maxLen uint32) string {
 }
 
 func (pe *File) readUnicodeStringAtRVA(rva uint32, maxLength uint32) string {
-	str := ""
 	offset := pe.GetOffsetFromRva(rva)
-	i := uint32(0)
-	for i = 0; i < maxLength; i += 2 {
-		if offset+i >= pe.size || pe.data[offset+i] == 0 {
+	avail := maxLength
+	if offset >= pe.size {
+		return ""
+	}
+	if offset+avail > pe.size {
+		avail = pe.size - offset
+	}
+	b, err := pe.src.slice(offset, avail)
+	if err != nil {
+		return ""
+	}
+	str := ""
+	for i := uint32(0); i < uint32(len(b)); i += 2 {
+		if b[i] == 0 {
 			break
 		}
-
-		str += string(pe.data[offset+i])
+		str += string(b[i])
 	}
 	return str
 }
 
 func (pe *File) readASCIIStringAtOffset(offset, maxLength uint32) (uint32, string) {
+	if offset >= pe.size {
+		return 0, ""
+	}
+	avail := maxLength
+	if offset+avail > pe.size {
+		avail = pe.size - offset
+	}
+	b, err := pe.src.slice(offset, avail)
+	if err != nil {
+		return 0, ""
+	}
 	str := ""
 	i := uint32(0)
-
-	for i = 0; i < maxLength; i++ {
-		if offset+i >= pe.size || pe.data[offset+i] == 0 {
+	for ; i < uint32(len(b)); i++ {
+		if b[i] == 0 {
 			break
 		}
-
-		str += string(pe.data[offset+i])
+		str += string(b[i])
 	}
 	return i, str
 }
@@ -341,9 +364,11 @@ func (pe *File) getStringAtOffset(offset, size uint32) (string, error) {
 	if offset+size > pe.size {
 		return "", ErrOutsideBoundary
 	}
-
-	str := string(pe.data[offset : offset+size])
-	return strings.Replace(str, "\x00", "", -1), nil
+	b, err := pe.src.slice(offset, size)
+	if err != nil {
+		return "", err
+	}
+	return strings.Replace(string(b), "\x00", "", -1), nil
 }
 
 // GetData returns the data given an RVA regardless of the section where it
@@ -373,8 +398,12 @@ func (pe *File) GetData(rva, length uint32) ([]byte, error) {
 		// MD5: 0008892cdfbc3bda5ce047c565e52295
 		// SHA-1: c7116b9ff950f86af256defb95b5d4859d4752a9
 
-		if rva < uint32(len(pe.data)) {
-			return pe.data[rva:end], nil
+		if rva < pe.size {
+			b, err := pe.src.slice(rva, end-rva)
+			if err != nil {
+				return nil, errors.New("data at RVA can't be fetched. Corrupt header?")
+			}
+			return b, nil
 		}
 
 		return nil, errors.New("data at RVA can't be fetched. Corrupt header?")
@@ -561,13 +590,15 @@ func (pe *File) Checksum() uint32 {
 	// `CheckSum` field position in optional PE headers is always 64 for PE and PE+.
 	checksumOffset := optionalHeaderOffset + 64
 
-	// Verify the data is DWORD-aligned and add padding if needed
+	// Build a DWORD-aligned view without mutating the underlying data.
 	remainder := pe.size % 4
 	dataLen := pe.size
+	rawData, _ := pe.src.slice(0, pe.size)
+	paddedData := rawData
 	if remainder > 0 {
 		dataLen = pe.size + (4 - remainder)
-		paddedBytes := make([]byte, 4-remainder)
-		pe.data = append(pe.data, paddedBytes...)
+		paddedData = make([]byte, dataLen)
+		copy(paddedData, rawData)
 	}
 
 	for i := uint32(0); i < dataLen; i += 4 {
@@ -577,7 +608,7 @@ func (pe *File) Checksum() uint32 {
 		}
 
 		// Read DWORD from file.
-		currentDword = binary.LittleEndian.Uint32(pe.data[i:])
+		currentDword = binary.LittleEndian.Uint32(paddedData[i:])
 
 		// Calculate checksum.
 		checksum = (checksum & 0xffffffff) + uint64(currentDword) + (checksum >> 32)
@@ -601,8 +632,11 @@ func (pe *File) ReadUint64(offset uint32) (uint64, error) {
 	if offset+8 > pe.size {
 		return 0, ErrOutsideBoundary
 	}
-
-	return binary.LittleEndian.Uint64(pe.data[offset:]), nil
+	b, err := pe.src.slice(offset, 8)
+	if err != nil {
+		return 0, err
+	}
+	return binary.LittleEndian.Uint64(b), nil
 }
 
 // ReadUint32 read a uint32 from a buffer.
@@ -610,8 +644,11 @@ func (pe *File) ReadUint32(offset uint32) (uint32, error) {
 	if offset > pe.size-4 {
 		return 0, ErrOutsideBoundary
 	}
-
-	return binary.LittleEndian.Uint32(pe.data[offset:]), nil
+	b, err := pe.src.slice(offset, 4)
+	if err != nil {
+		return 0, err
+	}
+	return binary.LittleEndian.Uint32(b), nil
 }
 
 // ReadUint16 read a uint16 from a buffer.
@@ -619,8 +656,11 @@ func (pe *File) ReadUint16(offset uint32) (uint16, error) {
 	if offset > pe.size-2 {
 		return 0, ErrOutsideBoundary
 	}
-
-	return binary.LittleEndian.Uint16(pe.data[offset:]), nil
+	b, err := pe.src.slice(offset, 2)
+	if err != nil {
+		return 0, err
+	}
+	return binary.LittleEndian.Uint16(b), nil
 }
 
 // ReadUint8 read a uint8 from a buffer.
@@ -628,9 +668,11 @@ func (pe *File) ReadUint8(offset uint32) (uint8, error) {
 	if offset+1 > pe.size {
 		return 0, ErrOutsideBoundary
 	}
-
-	b := pe.data[offset : offset+1][0]
-	return uint8(b), nil
+	b, err := pe.src.slice(offset, 1)
+	if err != nil {
+		return 0, err
+	}
+	return b[0], nil
 }
 
 func (pe *File) structUnpack(iface interface{}, offset, size uint32) (err error) {
@@ -646,8 +688,11 @@ func (pe *File) structUnpack(iface interface{}, offset, size uint32) (err error)
 		return ErrOutsideBoundary
 	}
 
-	buf := bytes.NewReader(pe.data[offset : offset+size])
-	err = binary.Read(buf, binary.LittleEndian, iface)
+	b, err := pe.src.slice(offset, size)
+	if err != nil {
+		return err
+	}
+	err = binary.Read(bytes.NewReader(b), binary.LittleEndian, iface)
 	if err != nil {
 		return err
 	}
@@ -668,7 +713,7 @@ func (pe *File) ReadBytesAtOffset(offset, size uint32) ([]byte, error) {
 		return nil, ErrOutsideBoundary
 	}
 
-	return pe.data[offset : offset+size], nil
+	return pe.src.slice(offset, size)
 }
 
 // DecodeUTF16String decodes the UTF16 string from the byte slice.

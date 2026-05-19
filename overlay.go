@@ -16,7 +16,7 @@ var (
 
 // NewOverlayReader returns a new ReadSeeker reading the PE overlay data.
 func (pe *File) NewOverlayReader() (*io.SectionReader, error) {
-	if pe.data == nil {
+	if pe.f == nil {
 		return nil, errors.New("pe: file reader is nil")
 	}
 	return io.NewSectionReader(pe.f, pe.OverlayOffset, 1<<63-1), nil

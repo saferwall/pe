@@ -119,7 +119,8 @@ func (pe *File) parseBoundImportDirectory(rva, size uint32) (err error) {
 			rva += bndFrwdRefSize
 
 			offset := start + uint32(bndFrwdRef.OffsetModuleName)
-			DllNameBuff := string(pe.GetStringFromData(0, pe.data[offset:offset+MaxStringLength]))
+			dllNameSrc, _ := pe.src.slice(offset, MaxStringLength)
+			DllNameBuff := string(pe.GetStringFromData(0, dllNameSrc))
 			DllName := string(DllNameBuff)
 
 			// OffsetModuleName points to a DLL name. These shouldn't be too long.
@@ -135,7 +136,8 @@ func (pe *File) parseBoundImportDirectory(rva, size uint32) (err error) {
 		}
 
 		offset := start + uint32(bndDesc.OffsetModuleName)
-		DllNameBuff := pe.GetStringFromData(0, pe.data[offset:offset+MaxStringLength])
+		dllNameSrc, _ := pe.src.slice(offset, MaxStringLength)
+		DllNameBuff := pe.GetStringFromData(0, dllNameSrc)
 		DllName := string(DllNameBuff)
 		if DllName != "" && (len(DllName) > 256 || !IsPrintable(DllName)) {
 			break

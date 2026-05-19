@@ -36,7 +36,8 @@ type File struct {
 	IAT          []IATEntry                  `json:"iat,omitempty"`
 	Anomalies    []string                    `json:"anomalies,omitempty"`
 	Header       []byte
-	data         mmap.MMap
+	mmapData     mmap.MMap // kept only for Unmap(); nil for NewBytes/NewFileNoMmap
+	src          peData    // all raw data access goes through this
 	FileInfo
 	size          uint32
 	OverlayOffset int64
@@ -159,8 +160,52 @@ func NewFile(f *os.File, opts *Options) (*File, error) {
 		file.logger = log.NewHelper(file.opts.Logger)
 	}
 
-	file.data = data
-	file.size = uint32(len(file.data))
+	file.mmapData = data
+	file.src = &bufferData{buf: []byte(data)}
+	file.size = file.src.dataSize()
+	file.f = f
+	return &file, nil
+}
+
+// NewFileNoMmap instantiates a file instance from a file handle without
+// memory-mapping it. On Windows, mmap holds an exclusive section object that
+// prevents other processes from opening the file for writing; this constructor
+// avoids that lock entirely by using ReadAt calls instead.
+//
+// Only the data actually requested during parsing is read from disk, so large
+// executables are not loaded into memory in full. Use the Omit* options to
+// further restrict which directories are parsed.
+func NewFileNoMmap(f *os.File, opts *Options) (*File, error) {
+	fi, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+
+	file := File{}
+	if opts != nil {
+		file.opts = opts
+	} else {
+		file.opts = &Options{}
+	}
+
+	if file.opts.MaxCOFFSymbolsCount == 0 {
+		file.opts.MaxCOFFSymbolsCount = MaxDefaultCOFFSymbolsCount
+	}
+	if file.opts.MaxRelocEntriesCount == 0 {
+		file.opts.MaxRelocEntriesCount = MaxDefaultRelocEntriesCount
+	}
+
+	var logger log.Logger
+	if file.opts.Logger == nil {
+		logger = log.NewStdLogger(os.Stdout)
+		file.logger = log.NewHelper(log.NewFilter(logger,
+			log.FilterLevel(log.LevelError)))
+	} else {
+		file.logger = log.NewHelper(file.opts.Logger)
+	}
+
+	file.src = &readerAtData{ra: f, sz: uint32(fi.Size())}
+	file.size = file.src.dataSize()
 	file.f = f
 	return &file, nil
 }
@@ -191,8 +236,8 @@ func NewBytes(data []byte, opts *Options) (*File, error) {
 		file.logger = log.NewHelper(opts.Logger)
 	}
 
-	file.data = data
-	file.size = uint32(len(file.data))
+	file.src = &bufferData{buf: data}
+	file.size = file.src.dataSize()
 	return &file, nil
 }
 
@@ -205,10 +250,10 @@ func (pe *File) Close() error {
 	return nil
 }
 
-// Close memory mapped file
+// Unmap releases the memory-mapped region, if any.
 func (pe *File) Unmap() error {
-	if pe.data != nil {
-		return pe.data.Unmap()
+	if pe.mmapData != nil {
+		return pe.mmapData.Unmap()
 	}
 
 	return nil
@@ -218,7 +263,7 @@ func (pe *File) Unmap() error {
 func (pe *File) Parse() error {
 
 	// check for the smallest PE size.
-	if len(pe.data) < TinyPESize {
+	if pe.size < TinyPESize {
 		return ErrInvalidPESize
 	}
 

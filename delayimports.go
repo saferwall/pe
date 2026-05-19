@@ -89,7 +89,7 @@ func (pe *File) parseDelayImportDirectory(rva, size uint32) error {
 		// If the array of thunks is somewhere earlier than the import
 		// descriptor we can set a maximum length for the array. Otherwise
 		// just set a maximum length of the size of the file
-		maxLen := uint32(len(pe.data)) - fileOffset
+		maxLen := pe.size - fileOffset
 		if rva > importDelayDesc.ImportNameTableRVA ||
 			rva > importDelayDesc.ImportAddressTableRVA {
 			if rva < importDelayDesc.ImportNameTableRVA {
