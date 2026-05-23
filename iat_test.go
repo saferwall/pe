@@ -5,6 +5,7 @@
 package pe
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -102,17 +103,8 @@ func TestIATDirectory(t *testing.T) {
 			}
 
 			entry := got[tt.out.entryIndex]
-			if entry.Index != tt.out.entry.Index {
-				t.Errorf("IAT[%d].Index for %s: got %d, want %d", tt.out.entryIndex, tt.in, entry.Index, tt.out.entry.Index)
-			}
-			if entry.Rva != tt.out.entry.Rva {
-				t.Errorf("IAT[%d].Rva for %s: got 0x%x, want 0x%x", tt.out.entryIndex, tt.in, entry.Rva, tt.out.entry.Rva)
-			}
-			if entry.Value != tt.out.entry.Value {
-				t.Errorf("IAT[%d].Value for %s: got %v, want %v", tt.out.entryIndex, tt.in, entry.Value, tt.out.entry.Value)
-			}
-			if entry.Meaning != tt.out.entry.Meaning {
-				t.Errorf("IAT[%d].Meaning for %s: got %q, want %q", tt.out.entryIndex, tt.in, entry.Meaning, tt.out.entry.Meaning)
+			if !reflect.DeepEqual(entry, tt.out.entry) {
+				t.Errorf("IAT[%d] for %s: got %+v, want %+v", tt.out.entryIndex, tt.in, entry, tt.out.entry)
 			}
 		})
 	}
