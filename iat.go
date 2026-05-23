@@ -26,7 +26,6 @@ type IATEntry struct {
 // This is, partially the reason there's that extra level of indirection in the
 // PE to begin with.
 func (pe *File) parseIATDirectory(rva, size uint32) error {
-
 	var entries []IATEntry
 	var index uint32
 	var err error
@@ -53,7 +52,7 @@ func (pe *File) parseIATDirectory(rva, size uint32) error {
 			rva += 4
 		}
 		ie.Index = index
-		imp, i := pe.GetImportEntryInfoByRVA(rva)
+		imp, i := pe.GetImportEntryInfoByRVA(ie.Rva)
 		if len(imp.Functions) != 0 {
 			ie.Meaning = imp.Name + "!" + imp.Functions[i].Name
 		}
