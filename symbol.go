@@ -299,6 +299,9 @@ func (pe *File) ParseCOFFSymbolTable() error {
 
 	// The symbol table is an array of records, each 18 bytes long.
 	size := uint32(binary.Size(COFFSymbol{}))
+	if pe.size > 0 && size > 0 && symCount > pe.size/size {
+		symCount = pe.size / size
+	}
 	symbols := make([]COFFSymbol, symCount)
 
 	// Each record is either a standard or auxiliary symbol-table record.
@@ -343,6 +346,9 @@ func (pe *File) COFFStringTable() error {
 	// the COFF header and adding the number of symbols multiplied by the size
 	// of a symbol.
 	size := uint32(binary.Size(COFFSymbol{}))
+	if pointerToSymbolTable >= pe.size || (size > 0 && symCount > (pe.size-pointerToSymbolTable)/size) {
+		return errCOFFTableNotPresent
+	}
 	offset := pointerToSymbolTable + (size * symCount)
 
 	// At the beginning of the COFF string table are 4 bytes that contain the

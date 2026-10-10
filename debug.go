@@ -316,7 +316,13 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 	debugDir := ImageDebugDirectory{}
 	errorMsg := fmt.Sprintf("Invalid debug information. Can't read data at RVA: 0x%x", rva)
 	debugDirSize := uint32(binary.Size(debugDir))
+	if debugDirSize == 0 {
+		return errors.New("invalid debug directory size")
+	}
 	debugDirsCount := size / debugDirSize
+	if pe.size > 0 && debugDirsCount > pe.size/debugDirSize {
+		debugDirsCount = pe.size / debugDirSize
+	}
 
 	for i := uint32(0); i < debugDirsCount; i++ {
 		offset := pe.GetOffsetFromRva(rva + debugDirSize*i)
@@ -353,18 +359,16 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 				offset += 4
 
 				// PDB file name.
-				pdbFilenameSize := debugDir.SizeOfData - 24 - 1
-
-				// pdbFileName_size can be negative here, as seen in the malware
-				// sample with MD5 hash: 7c297600870d026c014d42596bb9b5fd
-				// Checking for positive size here to ensure proper parsing.
-				if pdbFilenameSize > 0 {
-					pdbFilename := make([]byte, pdbFilenameSize)
-					err = pe.structUnpack(&pdbFilename, offset, pdbFilenameSize)
-					if err != nil {
-						continue
+				if debugDir.SizeOfData > 24+1 {
+					pdbFilenameSize := debugDir.SizeOfData - 24 - 1
+					if pdbFilenameSize <= pe.size && offset <= pe.size-pdbFilenameSize {
+						pdbFilename := make([]byte, pdbFilenameSize)
+						err = pe.structUnpack(&pdbFilename, offset, pdbFilenameSize)
+						if err != nil {
+							continue
+						}
+						pdb.PDBFileName = string(pdbFilename)
 					}
-					pdb.PDBFileName = string(pdbFilename)
 				}
 
 				// Include these extra information.
@@ -394,14 +398,16 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 				}
 				offset += 16
 
-				pdbFilenameSize := debugDir.SizeOfData - 16 - 1
-				if pdbFilenameSize > 0 {
-					pdbFilename := make([]byte, pdbFilenameSize)
-					err = pe.structUnpack(&pdbFilename, offset, pdbFilenameSize)
-					if err != nil {
-						continue
+				if debugDir.SizeOfData > 16+1 {
+					pdbFilenameSize := debugDir.SizeOfData - 16 - 1
+					if pdbFilenameSize <= pe.size && offset <= pe.size-pdbFilenameSize {
+						pdbFilename := make([]byte, pdbFilenameSize)
+						err = pe.structUnpack(&pdbFilename, offset, pdbFilenameSize)
+						if err != nil {
+							continue
+						}
+						pdb.PDBFileName = string(pdbFilename)
 					}
-					pdb.PDBFileName = string(pdbFilename)
 				}
 
 				// Include these extra information.
@@ -422,7 +428,10 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 				pogo.Signature = POGOType(pogoSignature)
 				offset = debugDir.PointerToRawData + 4
 				c := uint32(0)
-				for c < debugDir.SizeOfData-4 {
+				for debugDir.SizeOfData > 4 && c < debugDir.SizeOfData-4 {
+					if offset > pe.size-8 {
+						break
+					}
 					pogoEntry := ImagePGOItem{}
 					pogoEntry.RVA, err = pe.ReadUint32(offset)
 					if err != nil {
@@ -436,15 +445,29 @@ func (pe *File) parseDebugDirectory(rva, size uint32) error {
 					}
 					offset += 4
 
-					pogoEntry.Name = string(pe.GetStringFromData(0, pe.data[offset:offset+64]))
+					if offset >= pe.size {
+						break
+					}
+					maxNameLen := uint32(64)
+					if offset+maxNameLen > pe.size {
+						maxNameLen = pe.size - offset
+					}
+					pogoEntry.Name = string(pe.GetStringFromData(0, pe.data[offset:offset+maxNameLen]))
 
 					pogo.Entries = append(pogo.Entries, pogoEntry)
-					offset += uint32(len(pogoEntry.Name))
+					nameLen := uint32(len(pogoEntry.Name))
+					if offset > pe.size-nameLen {
+						break
+					}
+					offset += nameLen
 
 					// Make sure offset is aligned to 4 bytes.
 					padding := 4 - (offset % 4)
-					c += 4 + 4 + uint32(len(pogoEntry.Name)) + padding
+					if offset > pe.size-padding {
+						break
+					}
 					offset += padding
+					c += 4 + 4 + nameLen + padding
 				}
 
 				debugEntry.Info = pogo
