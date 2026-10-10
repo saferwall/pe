@@ -443,9 +443,17 @@ func (section *Section) Data(start, length uint32, pe *File) []byte {
 
 	var end uint32
 	if length != 0 {
-		end = offset + length
+		if offset > ^uint32(0)-length {
+			end = pe.size
+		} else {
+			end = offset + length
+		}
 	} else {
-		end = offset + section.Header.SizeOfRawData
+		if offset > ^uint32(0)-section.Header.SizeOfRawData {
+			end = pe.size
+		} else {
+			end = offset + section.Header.SizeOfRawData
+		}
 	}
 
 	// PointerToRawData is not adjusted here as we might want to read any possible
@@ -458,6 +466,10 @@ func (section *Section) Data(start, length uint32, pe *File) []byte {
 
 	if end > pe.size {
 		end = pe.size
+	}
+
+	if offset > end {
+		return nil
 	}
 
 	return pe.data[offset:end]

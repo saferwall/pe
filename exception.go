@@ -527,6 +527,9 @@ func (pe *File) parseExceptionDirectory(rva, size uint32) error {
 
 	entrySize := uint32(binary.Size(ImageRuntimeFunctionEntry{}))
 	entriesCount := size / entrySize
+	if pe.size > 0 && entrySize > 0 && entriesCount > pe.size/entrySize {
+		entriesCount = pe.size / entrySize
+	}
 
 	for i := uint32(0); i < entriesCount; i++ {
 		functionEntry := ImageRuntimeFunctionEntry{}

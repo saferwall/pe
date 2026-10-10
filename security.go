@@ -360,7 +360,7 @@ func (pe *File) parseSecurityDirectory(rva, size uint32) error {
 		return ErrOutsideBoundary
 	}
 
-	if fileOffset+certHeader.Length > pe.size {
+	if fileOffset > pe.size || certHeader.Length > pe.size-fileOffset {
 		return ErrOutsideBoundary
 	}
 

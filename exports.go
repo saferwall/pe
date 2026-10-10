@@ -117,7 +117,11 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 	// We keep track of the bytes left in the file and use it to set a upper
 	// bound in the number of items that can be read from the different arrays.
 	lengthUntilEOF := func(rva uint32) uint32 {
-		return pe.size - pe.GetOffsetFromRva(rva)
+		offset := pe.GetOffsetFromRva(rva)
+		if offset >= pe.size {
+			return 0
+		}
+		return pe.size - offset
 	}
 	var length uint32
 	var addressOfNames []byte
@@ -132,22 +136,31 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 		pe.Anomalies = append(pe.Anomalies, AnoNullAddressOfFunctions)
 	}
 
-	length = min(lengthUntilEOF(exportDir.AddressOfNames),
-		exportDir.NumberOfNames*4)
+	maxNamesDword := exportDir.NumberOfNames
+	if maxNamesDword > ^uint32(0)/4 {
+		maxNamesDword = ^uint32(0) / 4
+	}
+	length = min(lengthUntilEOF(exportDir.AddressOfNames), maxNamesDword*4)
 	addressOfNames, err = pe.GetData(exportDir.AddressOfNames, length)
 	if err != nil {
 		return errors.New(errorMsg)
 	}
 
-	length = min(lengthUntilEOF(exportDir.AddressOfNameOrdinals),
-		exportDir.NumberOfNames*4)
+	maxNamesWord := exportDir.NumberOfNames
+	if maxNamesWord > ^uint32(0)/2 {
+		maxNamesWord = ^uint32(0) / 2
+	}
+	length = min(lengthUntilEOF(exportDir.AddressOfNameOrdinals), maxNamesWord*2)
 	addressOfNameOrdinals, err := pe.GetData(exportDir.AddressOfNameOrdinals, length)
 	if err != nil {
 		return errors.New(errorMsg)
 	}
 
-	length = min(lengthUntilEOF(exportDir.AddressOfFunctions),
-		exportDir.NumberOfFunctions*4)
+	maxFuncsDword := exportDir.NumberOfFunctions
+	if maxFuncsDword > ^uint32(0)/4 {
+		maxFuncsDword = ^uint32(0) / 4
+	}
+	length = min(lengthUntilEOF(exportDir.AddressOfFunctions), maxFuncsDword*4)
 	addressOfFunctions, err := pe.GetData(exportDir.AddressOfFunctions, length)
 	if err != nil {
 		return errors.New(errorMsg)
@@ -169,7 +182,14 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 			uint32(len(section.Data(0, 0, pe)))) - exportDir.AddressOfNames
 	}
 
+	maxPossibleNames := uint32(len(addressOfNames)) / 4
+	if numOrdinals := uint32(len(addressOfNameOrdinals)) / 2; numOrdinals < maxPossibleNames {
+		maxPossibleNames = numOrdinals
+	}
 	numNames := min(exportDir.NumberOfNames, safetyBoundary/4)
+	if numNames > maxPossibleNames {
+		numNames = maxPossibleNames
+	}
 	var symbolAddress uint32
 	for i := uint32(0); i < numNames; i++ {
 
@@ -180,7 +200,14 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 			}
 		}()
 
+		if (i*2)+2 > uint32(len(addressOfNameOrdinals)) || (i*4)+4 > uint32(len(addressOfNames)) {
+			break
+		}
+
 		symbolOrdinal := binary.LittleEndian.Uint16(addressOfNameOrdinals[i*2:])
+		if (uint32(symbolOrdinal)*4)+4 > uint32(len(addressOfFunctions)) {
+			continue
+		}
 		symbolAddress = binary.LittleEndian.Uint32(addressOfFunctions[symbolOrdinal*4:])
 		if symbolAddress == 0 {
 			continue
@@ -266,8 +293,13 @@ func (pe *File) parseExportDirectory(rva, size uint32) error {
 	for _, export := range exp.Functions {
 		ordinals[export.Ordinal] = true
 	}
+	maxPossibleFuncs := uint32(len(addressOfFunctions)) / 4
 	numNames = min(exportDir.NumberOfFunctions, safetyBoundary/4)
+	if numNames > maxPossibleFuncs {
+		numNames = maxPossibleFuncs
+	}
 	for i := uint32(0); i < numNames; i++ {
+		symbolAddress = 0
 		value := i + exportDir.Base
 		if ordinals[value] {
 			continue

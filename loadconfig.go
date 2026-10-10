@@ -886,6 +886,9 @@ func (pe *File) getSEHHandlers() []uint32 {
 		SEHandlerTable := uint32(v.Field(18).Uint())
 		imageBase := pe.NtHeader.OptionalHeader.(ImageOptionalHeader32).ImageBase
 		rva := SEHandlerTable - imageBase
+		if pe.size > 0 && SEHandlerCount > pe.size/4 {
+			SEHandlerCount = pe.size / 4
+		}
 		for i := uint32(0); i < SEHandlerCount; i++ {
 			offset := pe.GetOffsetFromRva(rva + i*4)
 			handler, err := pe.ReadUint32(offset)
@@ -918,6 +921,13 @@ func (pe *File) getControlFlowGuardFunctions() []CFGFunction {
 	n := (GuardFlags & ImageGuardCfFunctionTableSizeMask) >>
 		ImageGuardCfFunctionTableSizeShift
 	GuardCFFunctionCount := v.Field(23).Uint()
+	stride := 4 + uint32(n)
+	if stride == 0 {
+		stride = 4
+	}
+	if pe.size > 0 && GuardCFFunctionCount > uint64(pe.size/stride) {
+		GuardCFFunctionCount = uint64(pe.size / stride)
+	}
 	if GuardCFFunctionCount > 0 {
 		if pe.Is32 {
 			GuardCFFunctionTable := uint32(v.Field(22).Uint())
@@ -996,6 +1006,13 @@ func (pe *File) getControlFlowGuardIAT() []CFGIATEntry {
 	n := (GuardFlags & ImageGuardCfFunctionTableSizeMask) >>
 		ImageGuardCfFunctionTableSizeShift
 	GuardAddressTakenIatEntryCount := v.Field(27).Uint()
+	stride := 4 + uint32(n)
+	if stride == 0 {
+		stride = 4
+	}
+	if pe.size > 0 && GuardAddressTakenIatEntryCount > uint64(pe.size/stride) {
+		GuardAddressTakenIatEntryCount = uint64(pe.size / stride)
+	}
 	if GuardAddressTakenIatEntryCount > 0 {
 		if pe.Is32 {
 			GuardAddressTakenIatEntryTable := uint32(v.Field(26).Uint())
@@ -1059,6 +1076,13 @@ func (pe *File) getLongJumpTargetTable() []uint32 {
 
 	// GuardLongJumpTargetCount is found in index 29 of the struct.
 	GuardLongJumpTargetCount := v.Field(29).Uint()
+	stride := 4 + uint32(n)
+	if stride == 0 {
+		stride = 4
+	}
+	if pe.size > 0 && GuardLongJumpTargetCount > uint64(pe.size/stride) {
+		GuardLongJumpTargetCount = uint64(pe.size / stride)
+	}
 	if GuardLongJumpTargetCount > 0 {
 		if pe.Is32 {
 			GuardLongJumpTargetTable := uint32(v.Field(28).Uint())
@@ -1176,7 +1200,11 @@ func (pe *File) getHybridPE() *HybridPE {
 	*/
 
 	rva = imgCHPEMetaX86.CHPECodeAddressRangeOffset
-	for i := 0; i < int(imgCHPEMetaX86.CHPECodeAddressRangeCount); i++ {
+	chpeRangeCount := int(imgCHPEMetaX86.CHPECodeAddressRangeCount)
+	if pe.size > 0 && chpeRangeCount > int(pe.size/8) {
+		chpeRangeCount = int(pe.size / 8)
+	}
+	for i := 0; i < chpeRangeCount; i++ {
 
 		codeRange := CodeRange{}
 		fileOffset := pe.GetOffsetFromRva(rva)
@@ -1431,6 +1459,13 @@ func (pe *File) getEnclaveConfiguration() *Enclave {
 	ImportListRVA := val.FieldByName("ImportList").Interface().(uint32)
 	NumberOfImports := val.FieldByName("NumberOfImports").Interface().(uint32)
 	ImportEntrySize := val.FieldByName("ImportEntrySize").Interface().(uint32)
+	stride := ImportEntrySize
+	if stride == 0 {
+		stride = uint32(binary.Size(ImageEnclaveImport{}))
+	}
+	if pe.size > 0 && stride > 0 && NumberOfImports > pe.size/stride {
+		NumberOfImports = pe.size / stride
+	}
 
 	offset := pe.GetOffsetFromRva(ImportListRVA)
 	for i := uint32(0); i < NumberOfImports; i++ {
@@ -1482,8 +1517,12 @@ func (pe *File) getVolatileMetadata() *VolatileMetadata {
 
 	if imgVolatileMeta.VolatileAccessTable != 0 &&
 		imgVolatileMeta.VolatileAccessTableSize != 0 {
+		accessSize := imgVolatileMeta.VolatileAccessTableSize
+		if pe.size > 0 && accessSize > pe.size {
+			accessSize = pe.size
+		}
 		offset := pe.GetOffsetFromRva(imgVolatileMeta.VolatileAccessTable)
-		for i := uint32(0); i < imgVolatileMeta.VolatileAccessTableSize/4; i++ {
+		for i := uint32(0); i < accessSize/4; i++ {
 			accessRVA, err := pe.ReadUint32(offset)
 			if err != nil {
 				break
@@ -1495,17 +1534,23 @@ func (pe *File) getVolatileMetadata() *VolatileMetadata {
 	}
 
 	if imgVolatileMeta.VolatileInfoRangeTable != 0 && imgVolatileMeta.VolatileInfoRangeTableSize != 0 {
+		rangeTableSize := imgVolatileMeta.VolatileInfoRangeTableSize
+		if pe.size > 0 && rangeTableSize > pe.size {
+			rangeTableSize = pe.size
+		}
 		offset := pe.GetOffsetFromRva(imgVolatileMeta.VolatileInfoRangeTable)
 		rangeEntrySize := uint32(binary.Size(RangeTableEntry{}))
-		for i := uint32(0); i < imgVolatileMeta.VolatileInfoRangeTableSize/rangeEntrySize; i++ {
-			entry := RangeTableEntry{}
-			err := pe.structUnpack(&entry, offset, rangeEntrySize)
-			if err != nil {
-				break
-			}
+		if rangeEntrySize > 0 {
+			for i := uint32(0); i < rangeTableSize/rangeEntrySize; i++ {
+				entry := RangeTableEntry{}
+				err := pe.structUnpack(&entry, offset, rangeEntrySize)
+				if err != nil {
+					break
+				}
 
-			volatileMeta.InfoRangeTable = append(volatileMeta.InfoRangeTable, entry)
-			offset += rangeEntrySize
+				volatileMeta.InfoRangeTable = append(volatileMeta.InfoRangeTable, entry)
+				offset += rangeEntrySize
+			}
 		}
 	}
 

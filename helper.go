@@ -356,6 +356,9 @@ func (pe *File) GetData(rva, length uint32) ([]byte, error) {
 
 	var end uint32
 	if length > 0 {
+		if rva > ^uint32(0)-length {
+			return nil, ErrOutsideBoundary
+		}
 		end = rva + length
 	} else {
 		end = 0
@@ -363,6 +366,9 @@ func (pe *File) GetData(rva, length uint32) ([]byte, error) {
 
 	if section == nil {
 		if rva < uint32(len(pe.Header)) {
+			if end > uint32(len(pe.Header)) {
+				end = uint32(len(pe.Header))
+			}
 			return pe.Header[rva:end], nil
 		}
 
@@ -374,6 +380,9 @@ func (pe *File) GetData(rva, length uint32) ([]byte, error) {
 		// SHA-1: c7116b9ff950f86af256defb95b5d4859d4752a9
 
 		if rva < uint32(len(pe.data)) {
+			if end > uint32(len(pe.data)) {
+				end = uint32(len(pe.data))
+			}
 			return pe.data[rva:end], nil
 		}
 

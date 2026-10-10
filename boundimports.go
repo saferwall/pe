@@ -108,6 +108,9 @@ func (pe *File) parseBoundImportDirectory(rva, size uint32) (err error) {
 		bndFrwdRef := ImageBoundForwardedRef{}
 		bndFrwdRefSize := uint32(binary.Size(bndFrwdRef))
 		count := min(uint32(bndDesc.NumberOfModuleForwarderRefs), safetyBoundary/bndFrwdRefSize)
+		if pe.size > 0 && bndFrwdRefSize > 0 && count > pe.size/bndFrwdRefSize {
+			count = pe.size / bndFrwdRefSize
+		}
 
 		forwarderRefs := make([]BoundForwardedRefData, 0)
 		for i := uint32(0); i < count; i++ {
@@ -119,7 +122,14 @@ func (pe *File) parseBoundImportDirectory(rva, size uint32) (err error) {
 			rva += bndFrwdRefSize
 
 			offset := start + uint32(bndFrwdRef.OffsetModuleName)
-			DllNameBuff := string(pe.GetStringFromData(0, pe.data[offset:offset+MaxStringLength]))
+			if offset >= pe.size || offset < start {
+				break
+			}
+			maxStr := uint32(MaxStringLength)
+			if offset+maxStr > pe.size || offset+maxStr < offset {
+				maxStr = pe.size - offset
+			}
+			DllNameBuff := string(pe.GetStringFromData(0, pe.data[offset:offset+maxStr]))
 			DllName := string(DllNameBuff)
 
 			// OffsetModuleName points to a DLL name. These shouldn't be too long.
@@ -135,7 +145,14 @@ func (pe *File) parseBoundImportDirectory(rva, size uint32) (err error) {
 		}
 
 		offset := start + uint32(bndDesc.OffsetModuleName)
-		DllNameBuff := pe.GetStringFromData(0, pe.data[offset:offset+MaxStringLength])
+		if offset >= pe.size || offset < start {
+			break
+		}
+		maxStr := uint32(MaxStringLength)
+		if offset+maxStr > pe.size || offset+maxStr < offset {
+			maxStr = pe.size - offset
+		}
+		DllNameBuff := pe.GetStringFromData(0, pe.data[offset:offset+maxStr])
 		DllName := string(DllNameBuff)
 		if DllName != "" && (len(DllName) > 256 || !IsPrintable(DllName)) {
 			break

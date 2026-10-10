@@ -145,6 +145,9 @@ func (pe *File) parseRelocations(dataRVA, rva, size uint32) ([]ImageBaseRelocati
 		// malware sample that motivated this cap.
 		relocEntriesCount = pe.opts.MaxRelocEntriesCount
 	}
+	if pe.size > 0 && relocEntriesCount > pe.size/2 {
+		relocEntriesCount = pe.size / 2
+	}
 
 	offset := pe.GetOffsetFromRva(dataRVA)
 	var err error
@@ -173,6 +176,9 @@ func (pe *File) parseRelocDirectory(rva, size uint32) error {
 
 	relocSize := uint32(binary.Size(ImageBaseRelocation{}))
 	end := rva + size
+	if end < rva {
+		return ErrOutsideBoundary
+	}
 	for rva < end {
 		baseReloc := ImageBaseRelocation{}
 		offset := pe.GetOffsetFromRva(rva)
@@ -199,7 +205,7 @@ func (pe *File) parseRelocDirectory(rva, size uint32) error {
 		// treat {0, 0} as table termination for the same reasons; we follow
 		// suit. The MaxRelocEntriesCount cap in parseRelocations remains as
 		// the spec-strict backstop for blocks with a non-zero but bogus size.
-		if baseReloc.SizeOfBlock == 0 {
+		if baseReloc.SizeOfBlock == 0 || rva+baseReloc.SizeOfBlock < rva {
 			break
 		}
 

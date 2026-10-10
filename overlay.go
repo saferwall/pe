@@ -29,7 +29,12 @@ func (pe *File) Overlay() ([]byte, error) {
 		return nil, err
 	}
 
-	overlay := make([]byte, int64(pe.size)-pe.OverlayOffset)
+	overlayLen := int64(pe.size) - pe.OverlayOffset
+	if overlayLen <= 0 || pe.OverlayOffset < 0 || pe.OverlayOffset >= int64(pe.size) {
+		return nil, ErrNoOverlayFound
+	}
+
+	overlay := make([]byte, overlayLen)
 	n, err := sr.ReadAt(overlay, 0)
 	if n == len(overlay) {
 		pe.HasOverlay = true
@@ -40,5 +45,8 @@ func (pe *File) Overlay() ([]byte, error) {
 }
 
 func (pe *File) OverlayLength() int64 {
+	if pe.OverlayOffset < 0 || pe.OverlayOffset >= int64(pe.size) {
+		return 0
+	}
 	return int64(pe.size) - pe.OverlayOffset
 }
